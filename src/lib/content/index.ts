@@ -26,7 +26,7 @@ export async function getHomeContent(): Promise<HomeContent> {
   return readHomeContent()
 }
 
-export { isVideoAsset } from './schema'
+export { isVideoAsset } from './guards'
 export type {
   HomeContent,
   ImageAsset,

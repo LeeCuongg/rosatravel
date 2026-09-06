@@ -33,3 +33,9 @@ export const stagger = 0.06
 
 /** Quãng dịch chuyển của reveal, đơn vị px. */
 export const distance = 24
+
+/** Độ trễ làm mượt khi buộc animation vào tiến độ scroll — tham số `scrub` của ScrollTrigger. */
+export const scrubSmoothing = 0.6
+
+/** Thời gian nội suy khi gán currentTime cho video scrub, đơn vị giây. */
+export const scrubTweenDuration = 0.2

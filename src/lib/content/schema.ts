@@ -121,7 +121,6 @@ export type Testimonial = z.infer<typeof testimonialSchema>
 export type Tour = z.infer<typeof tourSchema>
 export type HomeContent = z.infer<typeof homeContentSchema>
 
-/** Phân biệt ảnh với video ở phía component mà không cần ép kiểu. */
-export function isVideoAsset(media: MediaAsset): media is VideoAsset {
-  return 'kind' in media && media.kind === 'video'
-}
+// isVideoAsset sống ở './guards' (không phải ở đây) vì nó là giá trị runtime
+// duy nhất mà component client cần từ content layer. Tách riêng để module đó
+// không kéo theo bất cứ import nào khác của schema.ts vào bundle trình duyệt.

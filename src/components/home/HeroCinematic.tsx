@@ -1,9 +1,13 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { isVideoAsset, type HomeContent } from '@/lib/content'
+// Type-only import: bị xoá lúc biên dịch nên không kéo fs.ts vào bundle trình duyệt.
+import type { HomeContent } from '@/lib/content'
+// Giá trị runtime phải lấy từ guards, KHÔNG từ barrel '@/lib/content'.
+import { isVideoAsset } from '@/lib/content/guards'
 import { Media } from '@/components/media/Media'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
+import { scrubSmoothing, scrubTweenDuration } from '@/lib/motion/tokens'
 
 interface HeroCinematicProps {
   hero: HomeContent['hero']
@@ -59,14 +63,16 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
       const trigger = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
+        // '+=180%' và '+=90%' là quãng cuộn, thuộc về bố cục của section này
+        // chứ không phải timing dùng chung — nên để tại chỗ, không đưa vào token.
         end: '+=180%',
         pin: true,
-        scrub: 0.6,
+        scrub: scrubSmoothing,
         onUpdate: (self) => {
           proxy.time = self.progress * videoEl.duration
           gsap.to(videoEl, {
             currentTime: proxy.time,
-            duration: 0.2,
+            duration: scrubTweenDuration,
             overwrite: true,
             ease: 'none',
           })
@@ -80,7 +86,12 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
           yPercent: -40,
           opacity: 0,
           ease: 'none',
-          scrollTrigger: { trigger: section, start: 'top top', end: '+=90%', scrub: 0.6 },
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: '+=90%',
+            scrub: scrubSmoothing,
+          },
         },
       )
 
