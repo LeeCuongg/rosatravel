@@ -1,0 +1,49 @@
+{
+  "slug": "mau-ha-giang",
+  "title": { "vi": "Hà Giang mùa hoa tam giác mạch" },
+  "tagline": { "vi": "Bốn ngày trên cung đường đá" },
+  "summary": { "vi": "Hành trình qua Quản Bạ, Yên Minh, Đồng Văn và Mèo Vạc, đi đúng mùa hoa tam giác mạch nở trên các triền đá tai mèo." },
+  "durationDays": 4,
+  "priceFrom": 6900000,
+  "currency": "VND",
+  "destinations": ["Quản Bạ", "Yên Minh", "Đồng Văn", "Mèo Vạc"],
+  "heroMedia": {
+    "src": "/media/placeholder/hero.avif",
+    "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
+    "width": 2400,
+    "height": 1350,
+    "blurDataURL": "data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="
+  },
+  "gallery": [
+    {
+      "src": "/media/placeholder/gallery-1.avif",
+      "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
+      "width": 1600,
+      "height": 1067,
+      "blurDataURL": "data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="
+    }
+  ],
+  "itinerary": [
+    { "day": 1, "title": { "vi": "Hà Nội – Quản Bạ" }, "description": { "vi": "Khởi hành sớm, dừng ở cổng trời Quản Bạ khi trời còn sương." } },
+    { "day": 2, "title": { "vi": "Quản Bạ – Đồng Văn" }, "description": { "vi": "Qua Yên Minh, dốc Thẩm Mã, dinh thự họ Vương." } },
+    { "day": 3, "title": { "vi": "Đồng Văn – Mèo Vạc" }, "description": { "vi": "Vượt đèo Mã Pí Lèng, xuống bến thuyền sông Nho Quế." } },
+    { "day": 4, "title": { "vi": "Mèo Vạc – Hà Nội" }, "description": { "vi": "Ghé chợ phiên rồi về xuôi." } }
+  ],
+  "inclusions": [
+    { "vi": "Xe đưa đón toàn tuyến" },
+    { "vi": "Khách sạn 3 sao, phòng đôi" },
+    { "vi": "Hướng dẫn viên bản địa" }
+  ],
+  "exclusions": [{ "vi": "Chi phí cá nhân" }, { "vi": "Đồ uống có cồn" }],
+  "seo": {
+    "title": "Tour Hà Giang 4 ngày 3 đêm",
+    "description": "Cung đường đá Hà Giang qua Quản Bạ, Yên Minh, Đồng Văn, Mèo Vạc.",
+    "ogImage": {
+      "src": "/media/placeholder/og.avif",
+      "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
+      "width": 1200,
+      "height": 630,
+      "blurDataURL": "data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="
+    }
+  }
+}
