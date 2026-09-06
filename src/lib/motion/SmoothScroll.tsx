@@ -13,7 +13,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     let cleanup: (() => void) | undefined
 
     // Import động: Lenis và GSAP không nằm trong bundle ban đầu.
-    void (async () => {
+    const setup = async () => {
       const [{ default: Lenis }, { gsap }, { ScrollTrigger }] = await Promise.all([
         import('lenis'),
         import('gsap'),
@@ -36,9 +36,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       cleanup = () => {
         gsap.ticker.remove(raf)
         lenis.destroy()
-        ScrollTrigger.getAll().forEach((t) => t.kill())
+        // Không kill ScrollTrigger ở đây. Component nào tạo trigger thì tự kill
+        // trong cleanup của mình; kill toàn cục sẽ xoá luôn trigger mà component
+        // con vừa tạo lại khi tier đổi, vì thứ tự cleanup parent/child không đảm bảo.
       }
-    })()
+    }
+
+    setup().catch((error) => {
+      console.error('Không khởi tạo được smooth scroll; trang vẫn cuộn bình thường.', error)
+    })
 
     return () => {
       cancelled = true
