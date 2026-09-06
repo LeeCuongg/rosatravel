@@ -31,7 +31,10 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
-  title: 'RosaTravel',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  // Metadata tĩnh không gọi được useTranslations, nên tên thương hiệu buộc phải
+  // viết thẳng ở đây. Nếu đổi tên, nhớ đổi cả messages/vi.json khoá brand.name.
+  title: { default: 'RosaTravel', template: '%s | RosaTravel' },
   description: 'Những hành trình được chọn lọc.',
 }
 

@@ -56,6 +56,27 @@ export default async function TourPage({ params }: { params: Params }) {
       <Gallery images={tour.gallery} locale={locale} />
       <InclusionList inclusions={tour.inclusions} exclusions={tour.exclusions} locale={locale} />
       <TourCta slug={tour.slug} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'TouristTrip',
+            name: tour.title[locale] ?? tour.title.vi,
+            description: tour.summary[locale] ?? tour.summary.vi,
+            touristType: 'Leisure',
+            itinerary: tour.itinerary.map((day) => ({
+              '@type': 'Place',
+              name: day.title[locale] ?? day.title.vi,
+            })),
+            offers: {
+              '@type': 'Offer',
+              price: tour.priceFrom,
+              priceCurrency: tour.currency,
+            },
+          }),
+        }}
+      />
     </main>
   )
 }
