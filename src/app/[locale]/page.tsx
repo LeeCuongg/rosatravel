@@ -4,6 +4,8 @@ import { HeroCinematic } from '@/components/home/HeroCinematic'
 import { WhyUs } from '@/components/home/WhyUs'
 import { TourGrid } from '@/components/home/TourGrid'
 import { JourneyCinematic } from '@/components/home/JourneyCinematic'
+import { Testimonials } from '@/components/home/Testimonials'
+import { FinalCta } from '@/components/home/FinalCta'
 import type { Locale } from '@/i18n/routing'
 
 export default async function HomePage({
@@ -25,6 +27,8 @@ export default async function HomePage({
       <WhyUs items={home.whyUs} locale={locale} />
       <TourGrid tours={featured} locale={locale} />
       <JourneyCinematic journey={home.journey} locale={locale} />
+      <Testimonials items={home.testimonials} locale={locale} />
+      <FinalCta contact={home.contact} />
     </main>
   )
 }
