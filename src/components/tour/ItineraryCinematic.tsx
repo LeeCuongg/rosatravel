@@ -95,7 +95,11 @@ export function ItineraryCinematic({
             </Reveal>
             {day.media && (
               <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-lg">
-                <div data-parallax className="absolute inset-x-0 -top-[8%] h-[116%]">
+                {/* yPercent dịch theo % chiều cao của CHÍNH phần tử này, không
+                    phải của cha. Biên độ thật = 0.08 × 120% = 9.6% chiều cao
+                    cha, nên phần dư mỗi bên (10%) phải lớn hơn con số đó.
+                    Đổi biên độ yPercent thì phải tính lại h: (h-100)/2 >= 0.08h */}
+                <div data-parallax className="absolute inset-x-0 -top-[10%] h-[120%]">
                   <Media
                     media={day.media}
                     locale={locale}
