@@ -1,4 +1,7 @@
 {
+  "brand": {
+    "name": "RosaTravel"
+  },
   "nav": {
     "home": "Trang chủ",
     "tours": "Tour",

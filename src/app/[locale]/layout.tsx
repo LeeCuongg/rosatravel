@@ -6,6 +6,10 @@ import { Be_Vietnam_Pro, Playfair_Display } from 'next/font/google'
 import { routing } from '@/i18n/routing'
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider'
 import { SmoothScroll } from '@/lib/motion/SmoothScroll'
+import { getHomeContent } from '@/lib/content'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { PageTransition } from '@/components/layout/PageTransition'
 import '../globals.css'
 
 const sans = Be_Vietnam_Pro({
@@ -43,13 +47,18 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale)
   const messages = await getMessages()
+  const { contact } = await getHomeContent()
 
   return (
     <html lang={locale} className={`${sans.variable} ${display.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
           <MotionTierProvider>
-            <SmoothScroll>{children}</SmoothScroll>
+            <SmoothScroll>
+              <Header contact={contact} />
+              <PageTransition>{children}</PageTransition>
+              <Footer contact={contact} />
+            </SmoothScroll>
           </MotionTierProvider>
         </NextIntlClientProvider>
       </body>
