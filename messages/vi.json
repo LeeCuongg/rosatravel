@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "tours": "Tour",
+    "contact": "Liên hệ"
+  },
+  "cta": {
+    "viewTour": "Xem chi tiết",
+    "bookNow": "Liên hệ đặt tour",
+    "callUs": "Gọi ngay",
+    "zalo": "Nhắn Zalo",
+    "finalHeadline": "Sẵn sàng lên đường?",
+    "tourHeadline": "Quan tâm hành trình này?",
+    "tourSub": "Để lại số điện thoại, chúng tôi gọi lại trong 24 giờ."
+  },
+  "tour": {
+    "duration": "Thời lượng",
+    "priceFrom": "Giá từ",
+    "destinations": "Điểm đến",
+    "itinerary": "Lịch trình",
+    "gallery": "Hình ảnh",
+    "inclusions": "Bao gồm",
+    "exclusions": "Không bao gồm",
+    "day": "Ngày {n}"
+  },
+  "contact": {
+    "title": "Liên hệ đặt tour",
+    "name": "Họ và tên",
+    "phone": "Số điện thoại",
+    "tour": "Tour quan tâm",
+    "note": "Ghi chú",
+    "submit": "Gửi yêu cầu",
+    "sending": "Đang gửi...",
+    "success": "Đã nhận yêu cầu. Chúng tôi sẽ liên hệ trong 24 giờ.",
+    "error": "Gửi không thành công. Vui lòng gọi trực tiếp cho chúng tôi."
+  },
+  "errors": {
+    "nameRequired": "Vui lòng nhập họ tên",
+    "phoneInvalid": "Số điện thoại không hợp lệ"
+  }
+}

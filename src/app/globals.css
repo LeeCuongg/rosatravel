@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  /* Bảng màu: nền mực đậm cho cảm giác cinematic, kem ấm cho vùng nội dung,
+     đất nung làm điểm nhấn CTA. Chỉnh ở đây là đổi toàn site. */
+  --color-ink-950: #0b0f14;
+  --color-ink-900: #141a21;
+  --color-ink-700: #2b3541;
+  --color-ink-500: #5c6a7a;
+  --color-sand-100: #f7f3ec;
+  --color-sand-200: #ece4d7;
+  --color-sand-400: #c9b99e;
+  --color-clay-500: #b4552f;
+  --color-clay-600: #96421f;
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
+
+  --spacing-section: 7rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  /* Lenis điều khiển scroll; tắt smooth của trình duyệt để hai bên không đánh nhau. */
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--color-ink-950);
+  color: var(--color-sand-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
