@@ -1998,13 +1998,20 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
   // Gọi lại isVideoAsset ở đây (thay vì dùng biến `video`) để TypeScript thu hẹp
   // kiểu về ImageAsset — ternary trên `video` không phải type guard cho hero.media.
   const stillImage = isVideoAsset(hero.media) ? hero.media.poster : hero.media
-  const canScrub = tier === 'full' && video?.scrubbable === true
+  // Pin và reveal tiêu đề chạy ở MỌI hero tier full, kể cả khi chỉ có ảnh tĩnh.
+  // Buộc chung điều kiện với video là sai: nội dung có thể không bao giờ có
+  // video, và khi đó hero sẽ đứng im hoàn toàn — một "cinematic beat" không
+  // chuyển động.
+  const canPin = tier === 'full'
+
+  // Scrub chỉ khi thật sự có video scrub được.
+  const canScrub = canPin && video?.scrubbable === true
 
   useEffect(() => {
-    if (!canScrub) return
+    if (!canPin) return
     const section = sectionRef.current
+    if (!section) return
     const videoEl = videoRef.current
-    if (!section || !videoEl) return
 
     let cancelled = false
     let cleanup: (() => void) | undefined
@@ -2026,8 +2033,11 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
               videoEl.addEventListener('loadedmetadata', () => resolve(), { once: true }),
             )
 
-      await waitForMetadata()
-      if (cancelled) return
+      // Chỉ cần đợi metadata khi thật sự scrub video.
+      if (canScrub && videoEl) {
+        await waitForMetadata()
+        if (cancelled) return
+      }
 
       // Gán currentTime qua một object trung gian để gsap nội suy mượt,
       // thay vì nhảy thẳng theo progress (gây giật khi cuộn nhanh).
@@ -2036,12 +2046,14 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
       const trigger = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
-        // '+=180%' và '+=90%' là quãng cuộn, thuộc về bố cục của section này
-        // chứ không phải timing dùng chung — nên để tại chỗ, không đưa vào token.
-        end: '+=180%',
+        // Quãng cuộn thuộc về bố cục của section này chứ không phải timing dùng
+        // chung — để tại chỗ, không đưa vào token. Có video thì giữ pin lâu hơn
+        // để đủ chỗ tua hết clip; chỉ có ảnh thì một màn hình là vừa đủ cho
+        // reveal tiêu đề, giữ lâu hơn sẽ thành chặn đường người đọc.
+        end: canScrub ? '+=180%' : '+=100%',
         pin: true,
         scrub: scrubSmoothing,
-        onUpdate: (self) => {
+        onUpdate: !canScrub || !videoEl ? undefined : (self) => {
           proxy.time = self.progress * videoEl.duration
           gsap.to(videoEl, {
             currentTime: proxy.time,
@@ -2074,7 +2086,7 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
       cancelled = true
       cleanup?.()
     }
-  }, [canScrub])
+  }, [canPin, canScrub])
 
   return (
     <section ref={sectionRef} className="relative h-svh w-full overflow-hidden">
