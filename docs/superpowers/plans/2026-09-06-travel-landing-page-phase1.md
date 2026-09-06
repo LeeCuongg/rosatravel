@@ -2871,7 +2871,7 @@ export function ItineraryCinematic({
             </Reveal>
             {day.media && (
               <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-lg">
-                <div data-parallax className="absolute inset-x-0 -top-[8%] h-[116%]">
+                <div data-parallax className="absolute inset-x-0 -top-[10%] h-[120%]">
                   <Media
                     media={day.media}
                     locale={locale}
@@ -2890,7 +2890,13 @@ export function ItineraryCinematic({
 }
 ```
 
-Lớp bọc cao `116%` và lệch `-8%` là để ảnh còn dư khi dịch ±8%, không lộ mép trống.
+Lớp bọc cao `120%` lệch `-10%` là để ảnh còn dư khi dịch, không lộ mép trống.
+
+Phần dư phải tính theo `yPercent`, không phải theo trực giác: **`yPercent` dịch theo phần trăm chiều cao của chính phần tử đó, không phải của phần tử cha.** Với lớp bọc cao `h` (tính theo % chiều cao cha), biên độ thật là `0.08h`, còn phần dư mỗi bên là `(h − 100) / 2`. Muốn không hở thì `(h − 100) / 2 ≥ 0.08h`, tức `h ≥ 119.05%`.
+
+Chọn `h = 120%` và lệch `-10%`: phần dư 10% mỗi bên, biên độ thật `0.08 × 120 = 9.6%` — dư 0.4% làm biên an toàn.
+
+Nếu đổi biên độ `yPercent`, phải tính lại `h` theo công thức trên. Hai con số này ràng buộc nhau; sửa một mà quên cái kia sẽ làm lộ mép trống đúng lúc ảnh vào và ra khỏi khung nhìn.
 
 - [ ] **Step 3: Viết trang tour**
 
