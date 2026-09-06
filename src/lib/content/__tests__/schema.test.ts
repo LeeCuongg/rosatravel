@@ -66,7 +66,7 @@ const validTour = {
   durationDays: 4,
   priceFrom: 6900000,
   currency: 'VND' as const,
-  destinations: ['Quản Bạ', 'Yên Minh', 'Đồng Văn', 'Mèo Vạc'],
+  destinations: [{ vi: 'Quản Bạ' }, { vi: 'Yên Minh' }, { vi: 'Đồng Văn' }, { vi: 'Mèo Vạc' }],
   heroMedia: validImage,
   gallery: [validImage],
   // Số ngày phải khớp durationDays: 4 — schema có refine kiểm tra điều này,
@@ -80,8 +80,8 @@ const validTour = {
   inclusions: [{ vi: 'Xe đưa đón' }],
   exclusions: [{ vi: 'Chi phí cá nhân' }],
   seo: {
-    title: 'Tour Hà Giang 4 ngày',
-    description: 'Cung đường đá Hà Giang qua bốn huyện vùng cao.',
+    title: { vi: 'Tour Hà Giang 4 ngày' },
+    description: { vi: 'Cung đường đá Hà Giang qua bốn huyện vùng cao.' },
     ogImage: validImage,
   },
 }
@@ -105,5 +105,15 @@ describe('tourSchema', () => {
 
   it('từ chối giá âm hoặc bằng không', () => {
     expect(() => tourSchema.parse({ ...validTour, priceFrom: 0 })).toThrow()
+  })
+
+  it('từ chối destinations dạng chuỗi thường — phải bọc locale để thêm tiếng Anh sau này', () => {
+    expect(() => tourSchema.parse({ ...validTour, destinations: ['Quản Bạ'] })).toThrow()
+  })
+
+  it('từ chối seo.title dạng chuỗi thường — tiêu đề SEO cũng hướng người đọc', () => {
+    expect(() =>
+      tourSchema.parse({ ...validTour, seo: { ...validTour.seo, title: 'Tour Hà Giang' } }),
+    ).toThrow()
   })
 })

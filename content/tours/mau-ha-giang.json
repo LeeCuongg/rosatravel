@@ -6,7 +6,7 @@
   "durationDays": 4,
   "priceFrom": 6900000,
   "currency": "VND",
-  "destinations": ["Quản Bạ", "Yên Minh", "Đồng Văn", "Mèo Vạc"],
+  "destinations": [{ "vi": "Quản Bạ" }, { "vi": "Yên Minh" }, { "vi": "Đồng Văn" }, { "vi": "Mèo Vạc" }],
   "heroMedia": {
     "src": "/media/placeholder/hero.avif",
     "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
@@ -36,8 +36,8 @@
   ],
   "exclusions": [{ "vi": "Chi phí cá nhân" }, { "vi": "Đồ uống có cồn" }],
   "seo": {
-    "title": "Tour Hà Giang 4 ngày 3 đêm",
-    "description": "Cung đường đá Hà Giang qua Quản Bạ, Yên Minh, Đồng Văn, Mèo Vạc.",
+    "title": { "vi": "Tour Hà Giang 4 ngày 3 đêm" },
+    "description": { "vi": "Cung đường đá Hà Giang qua Quản Bạ, Yên Minh, Đồng Văn, Mèo Vạc." },
     "ogImage": {
       "src": "/media/placeholder/og.avif",
       "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },

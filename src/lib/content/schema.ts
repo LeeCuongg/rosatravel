@@ -58,16 +58,21 @@ export const tourSchema = z
     durationDays: z.number().int().positive(),
     priceFrom: z.number().positive(),
     currency: z.literal('VND'),
-    destinations: z.array(z.string().min(1)).min(1),
+    // Tên điểm đến hiển thị cho người đọc nên cũng bọc locale: bản tiếng Anh
+    // thường bỏ dấu ("Quan Ba") cho khách quốc tế dễ tra cứu.
+    destinations: z.array(localizedTextSchema).min(1),
     heroMedia: mediaAssetSchema,
     gallery: z.array(imageAssetSchema).min(1),
     itinerary: z.array(itineraryDaySchema).min(1),
     inclusions: z.array(localizedTextSchema).min(1),
     exclusions: z.array(localizedTextSchema),
     notes: localizedTextSchema.optional(),
+    // seo.title và seo.description hiện trên tab trình duyệt, kết quả tìm kiếm
+    // và thẻ chia sẻ mạng xã hội — hướng người đọc, nên bọc locale như mọi
+    // trường văn bản khác.
     seo: z.object({
-      title: z.string().min(1),
-      description: z.string().min(1),
+      title: localizedTextSchema,
+      description: localizedTextSchema,
       ogImage: imageAssetSchema,
     }),
   })
