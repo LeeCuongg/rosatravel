@@ -19,7 +19,8 @@ Mọi task đều ngầm bao gồm các ràng buộc dưới đây.
   - Server Component: import hàm và type từ `@/lib/content` như bình thường.
   - Client Component (`'use client'`): chỉ được `import type` từ `@/lib/content` — type bị xoá lúc biên dịch nên không kéo gì vào bundle. **Giá trị runtime như `isVideoAsset` phải lấy từ `@/lib/content/guards`.** Import một giá trị runtime từ barrel vào client sẽ kéo `fs.ts` và `node:fs/promises` vào bundle trình duyệt và làm vỡ build.
 - **Animation:** chỉ animate `transform` và `opacity`. Cấm animate `width`, `height`, `top`, `left`, `margin`, `filter` trong vòng lặp scroll.
-- **Motion token:** mọi duration/easing/stagger lấy từ `src/lib/motion/tokens.ts`. Không hard-code giá trị timing trong component.
+- **Motion token:** mọi duration/easing/stagger lấy từ `src/lib/motion/tokens.ts` (bản JS) hoặc biến `--duration-*` / `--ease-*` trong `globals.css` (bản CSS). Không hard-code giá trị timing trong component.
+  - **`transition-*` trần cũng không được.** Một class như `transition-transform` đứng một mình lấy duration và easing mặc định của Tailwind — nguồn thứ ba, nằm ngoài cả hai bản trên và vô hình tại chỗ gọi. Easing mặc định `cubic-bezier(0.4, 0, 0.2, 1)` **không** khớp `--ease-hover`, nên hover sẽ có cảm giác khác các nút dùng token. Luôn viết kèm: `transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)]`.
 - **Degradation:** mọi animation phải đọc tier từ `useMotionTier()`. Tier `reduced` chỉ fade; tier `lite` không pin, không scrub video.
 - **Vòng đời ScrollTrigger:** component nào tạo trigger thì component đó kill trong cleanup của chính nó. Cấm `ScrollTrigger.getAll().forEach(t => t.kill())` — thứ tự cleanup giữa parent và child không đảm bảo, kill toàn cục sẽ xoá cả trigger mà component khác vừa tạo lại khi tier đổi.
 - **Import động phải bắt lỗi:** mọi `import()` GSAP/Lenis đi kèm `.catch` ghi log tiếng Việt. Chunk tải hỏng (mạng chập chờn, ad-blocker) không được biến thành unhandled promise rejection.
@@ -1836,12 +1837,12 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
           {tb('name')}
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <Link href="/lien-he" className="hover:text-sand-400 transition-colors">
+          <Link href="/lien-he" className="transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:text-sand-400">
             {t('contact')}
           </Link>
           <a
             href={contact.zaloUrl}
-            className="rounded-full bg-clay-500 px-5 py-2 font-medium transition-transform hover:scale-105"
+            className="rounded-full bg-clay-500 px-5 py-2 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
           >
             {tc('zalo')}
           </a>
@@ -2655,19 +2656,19 @@ export function FinalCta({ contact }: { contact: HomeContent['contact'] }) {
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/lien-he"
-            className="rounded-full bg-clay-500 px-8 py-3 font-medium transition-transform hover:scale-105"
+            className="rounded-full bg-clay-500 px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
           >
             {t('bookNow')}
           </Link>
           <a
             href={`tel:${contact.phone}`}
-            className="rounded-full border border-ink-700 px-8 py-3 transition-colors hover:border-sand-400"
+            className="rounded-full border border-ink-700 px-8 py-3 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:border-sand-400"
           >
             {t('callUs')}
           </a>
           <a
             href={contact.zaloUrl}
-            className="rounded-full border border-ink-700 px-8 py-3 transition-colors hover:border-sand-400"
+            className="rounded-full border border-ink-700 px-8 py-3 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:border-sand-400"
           >
             {t('zalo')}
           </a>
@@ -3023,7 +3024,7 @@ export function Gallery({ images, locale }: { images: ImageAsset[]; locale: 'vi'
 }
 ```
 
-Bố cục masonry bằng CSS `columns` chứ không dùng thư viện masonry JS: ảnh tour có tỉ lệ khác nhau, và `columns` cho kết quả tương đương mà không tốn một dòng JavaScript nào. Trễ reveal dùng `index % 3` để cột nào cũng bắt đầu sớm, không để ảnh cuối chờ quá lâu.
+Bố cục masonry bằng CSS `columns` chứ không dùng thư viện masonry JS: ảnh tour có tỉ lệ khác nhau, và `columns` cho kết quả tương đương mà không tốn một dòng JavaScript nào. Trễ reveal dùng `index % 3` để **chặn trần độ trễ ở `2 × stagger`** dù gallery có bao nhiêu ảnh — không để ảnh cuối chờ một chuỗi stagger dài. Lưu ý: CSS `columns` lấp đầy cột một từ trên xuống rồi mới tràn sang cột hai, **không** chia vòng tròn như lưới, nên đừng hiểu `% 3` là "mỗi cột bắt đầu sớm".
 
 - [ ] **Step 2: Viết InclusionList**
 
@@ -3102,7 +3103,7 @@ export function TourCta({ slug }: { slug: string }) {
         {/* ?tour=<slug> được ContactForm đọc để chọn sẵn tour trong dropdown. */}
         <Link
           href={`/lien-he?tour=${slug}`}
-          className="mt-8 inline-block rounded-full bg-clay-500 px-8 py-3 font-medium transition-transform hover:scale-105"
+          className="mt-8 inline-block rounded-full bg-clay-500 px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
         >
           {t('bookNow')}
         </Link>
