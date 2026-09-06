@@ -14,6 +14,9 @@ export function Gallery({ images, locale }: { images: ImageAsset[]; locale: 'vi'
       </h2>
       <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3">
         {images.map((image, index) => (
+          // index % 3 chặn trần độ trễ ở 2 × stagger dù gallery có bao nhiêu ảnh, để ảnh
+          // cuối không phải chờ hết một chuỗi stagger dài. Lưu ý: CSS columns lấp đầy cột
+          // một từ trên xuống rồi mới tràn sang cột hai, KHÔNG chia vòng tròn như lưới.
           <Reveal key={image.src} delay={(index % 3) * stagger} className="mb-4 break-inside-avoid">
             <Media
               media={image}

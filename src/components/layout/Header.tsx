@@ -35,12 +35,15 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
           {tb('name')}
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <Link href="/lien-he" className="hover:text-sand-400 transition-colors">
+          <Link
+            href="/lien-he"
+            className="transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:text-sand-400"
+          >
             {t('contact')}
           </Link>
           <a
             href={contact.zaloUrl}
-            className="rounded-full bg-clay-500 px-5 py-2 font-medium transition-transform hover:scale-105"
+            className="rounded-full bg-clay-500 px-5 py-2 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
           >
             {tc('zalo')}
           </a>
