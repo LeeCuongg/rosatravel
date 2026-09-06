@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { Media } from '@/components/media/Media'
 import { Reveal } from '@/components/motion/Reveal'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
+import { scrubSmoothing, stagger } from '@/lib/motion/tokens'
 import type { HomeContent } from '@/lib/content'
 
 interface JourneyProps {
@@ -36,7 +37,12 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
 
       // Quãng cuộn ngang = phần tràn ra ngoài viewport. Dùng hàm thay vì giá trị
       // cố định để ScrollTrigger tính lại đúng khi đổi kích thước cửa sổ.
-      const overflow = () => track.scrollWidth - window.innerWidth
+      //
+      // Kẹp sàn về 0: hiện tại schema bắt tối thiểu 2 điểm đến và các phần tử
+      // rộng theo vw nên tổng luôn vượt màn hình, nhưng ràng buộc đó nằm ở file
+      // khác. Nếu ai đó thu hẹp vw hoặc hạ mức tối thiểu, quãng cuộn sẽ âm và
+      // pin khoá màn hình mà không có gì di chuyển.
+      const overflow = () => Math.max(0, track.scrollWidth - window.innerWidth)
 
       const tween = gsap.to(track, {
         x: () => -overflow(),
@@ -46,7 +52,7 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
           start: 'top top',
           end: () => `+=${overflow()}`,
           pin: true,
-          scrub: 0.8,
+          scrub: scrubSmoothing,
           invalidateOnRefresh: true,
           anticipatePin: 1,
         },
@@ -82,7 +88,7 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
         </h2>
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
           {journey.stops.map((stop, index) => (
-            <Reveal key={stop.label.vi} delay={index * 0.06}>
+            <Reveal key={stop.label.vi} delay={index * stagger}>
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
                 <Media
                   media={stop.image}
