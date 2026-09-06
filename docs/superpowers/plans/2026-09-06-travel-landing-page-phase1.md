@@ -1413,7 +1413,8 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ### Task 4: Pipeline ảnh
 
 **Files:**
-- Create: `scripts/build-media.ts`, `src/lib/media/loader.ts`, `src/components/media/Media.tsx`
+- Create: `scripts/build-media.ts`, `scripts/build-placeholders.ts`, `src/components/media/Media.tsx`
+- Modify: `src/lib/media/loader.ts` (thay stub Task 1 buộc phải tạo), `next.config.ts`, `package.json`
 - Test: `src/lib/media/__tests__/loader.test.ts`
 
 **Interfaces:**
@@ -1559,12 +1560,27 @@ async function processImage(file: string) {
   const originalWidth = meta.width ?? WIDTHS[WIDTHS.length - 1]
   const originalHeight = meta.height ?? 0
 
+  // Sinh ĐỦ cả bốn mốc, kể cả khi ảnh gốc nhỏ hơn mốc đó.
+  //
+  // Lý do: loader là hàm thuần, không biết ảnh nào có sẵn biến thể nào — nó luôn
+  // ánh xạ bề rộng yêu cầu vào một trong bốn mốc. Bỏ qua một mốc nghĩa là ảnh vỡ
+  // ở đúng breakpoint đó, và lỗi chỉ lộ ra trên màn hình lớn.
+  //
+  // withoutEnlargement giữ cho ảnh không bị phóng to thật: file ở mốc lớn chỉ
+  // chứa đúng kích thước gốc. Tốn thêm chút dung lượng, đổi lấy việc không bao
+  // giờ 404.
   for (const width of WIDTHS) {
-    // Không phóng to ảnh nhỏ hơn mốc — chỉ tổ tốn dung lượng, không thêm chi tiết.
-    if (width > originalWidth && width !== WIDTHS[0]) continue
+    const resize = { width, withoutEnlargement: true } as const
+    await sharp(file).resize(resize).avif({ quality: 60 }).toFile(`${outPath}-${width}.avif`)
+    await sharp(file).resize(resize).webp({ quality: 72 }).toFile(`${outPath}-${width}.webp`)
+  }
 
-    await sharp(file).resize(width).avif({ quality: 60 }).toFile(`${outPath}-${width}.avif`)
-    await sharp(file).resize(width).webp({ quality: 72 }).toFile(`${outPath}-${width}.webp`)
+  const largest = WIDTHS[WIDTHS.length - 1]
+  if (originalWidth < largest) {
+    console.warn(
+      `⚠ ${relative} chỉ rộng ${originalWidth}px, nhỏ hơn mốc lớn nhất ${largest}px.\n` +
+        '  Ảnh vẫn hiển thị được nhưng sẽ mờ trên màn hình lớn — nên thay bằng bản độ phân giải cao hơn.',
+    )
   }
 
   // Blur placeholder: ảnh 16px rất nhẹ, nhúng thẳng vào JSON dưới dạng data URL.
@@ -1607,6 +1623,22 @@ main().catch((error) => {
 ```
 
 Chuỗi `alt` để `TODO` là **có chủ đích**: script không thể tự biết ảnh chụp gì, và alt sai còn tệ hơn alt trống. Người nhập nội dung phải điền. Đây không phải placeholder trong plan mà là output có chủ ý của công cụ.
+
+- [ ] **Step 5b: Đồng bộ breakpoint của next/image với MEDIA_WIDTHS**
+
+Mặc định `next/image` dựng srcset từ `deviceSizes` gồm 640/750/828/1080/1200/1920/2048/3840. Loader gộp tất cả về bốn mốc, nên srcset sẽ có 8 mục trỏ vào chỉ 4 file — thừa và khó đọc khi debug.
+
+Trong `next.config.ts`, thêm vào khối `images`:
+
+```ts
+  images: {
+    loader: 'custom',
+    loaderFile: './src/lib/media/loader.ts',
+    // Khớp đúng MEDIA_WIDTHS trong src/lib/media/loader.ts. Lệch hai danh sách
+    // này sẽ sinh srcset có mục trùng nhau.
+    deviceSizes: [640, 1024, 1600, 2400],
+  },
+```
 
 - [ ] **Step 6: Viết component Media**
 
