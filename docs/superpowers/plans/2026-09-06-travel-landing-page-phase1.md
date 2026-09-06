@@ -1767,16 +1767,25 @@ Tạo `src/components/layout/Header.tsx`:
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { motion, useScroll, useTransform } from 'motion/react'
+import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import type { HomeContent } from '@/lib/content'
 
 export function Header({ contact }: { contact: HomeContent['contact'] }) {
   const t = useTranslations('nav')
   const tc = useTranslations('cta')
+  const tb = useTranslations('brand')
+  const tier = useMotionTier()
   const { scrollY } = useScroll()
 
   // Nền header đậm dần khi rời khỏi hero. Chỉ đổi opacity — không animate
   // backdrop-filter hay background-color, cả hai đều buộc trình duyệt vẽ lại.
-  const overlayOpacity = useTransform(scrollY, [0, 240], [0, 1])
+  // Hook luôn được gọi vô điều kiện; chỉ giá trị dùng mới phụ thuộc tier.
+  const scrolledOpacity = useTransform(scrollY, [0, 240], [0, 1])
+
+  // Tier reduced: cắt hẳn liên kết với scroll, để nền đặc cố định. Hiệu ứng
+  // buộc vào vị trí cuộn vẫn là chuyển động dù chỉ đổi opacity, và ở đây đọc
+  // được chữ quan trọng hơn việc hoà vào ảnh hero.
+  const overlayOpacity = tier === 'reduced' ? 1 : scrolledOpacity
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -1787,7 +1796,7 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
       />
       <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link href="/" className="font-[family-name:var(--font-playfair)] text-xl">
-          {t('home')}
+          {tb('name')}
         </Link>
         <div className="flex items-center gap-6 text-sm">
           <Link href="/lien-he" className="hover:text-sand-400 transition-colors">
@@ -1816,11 +1825,14 @@ import type { HomeContent } from '@/lib/content'
 
 export function Footer({ contact }: { contact: HomeContent['contact'] }) {
   const t = useTranslations('cta')
+  const tb = useTranslations('brand')
 
   return (
     <footer className="border-t border-ink-700 px-6 py-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-ink-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()}</p>
+        <p>
+          © {new Date().getFullYear()} {tb('name')}
+        </p>
         <div className="flex gap-6">
           <a href={`tel:${contact.phone}`} className="hover:text-sand-100">
             {t('callUs')}: {contact.phone}
@@ -3617,7 +3629,9 @@ Trong `src/app/[locale]/layout.tsx`, đổi `metadata` thành:
 ```tsx
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  title: { default: 'Tour du lịch', template: '%s | Tour du lịch' },
+  // Metadata tĩnh không gọi được useTranslations, nên tên thương hiệu buộc phải
+  // viết thẳng ở đây. Nếu đổi tên, nhớ đổi cả messages/vi.json khoá brand.name.
+  title: { default: 'RosaTravel', template: '%s | RosaTravel' },
   description: 'Những hành trình được chọn lọc.',
 }
 ```
