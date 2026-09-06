@@ -15,7 +15,9 @@
 Mọi task đều ngầm bao gồm các ràng buộc dưới đây.
 
 - **Package manager:** `pnpm`. Không dùng npm/yarn trong dự án này.
-- **Content layer:** component **chỉ** được import từ `src/lib/content/index.ts`. Không component nào đọc file, biết đường dẫn, hay biết định dạng lưu trữ.
+- **Content layer:** dữ liệu chỉ đi qua `src/lib/content/index.ts`. Không component nào đọc file, biết đường dẫn, hay biết định dạng lưu trữ.
+  - Server Component: import hàm và type từ `@/lib/content` như bình thường.
+  - Client Component (`'use client'`): chỉ được `import type` từ `@/lib/content` — type bị xoá lúc biên dịch nên không kéo gì vào bundle. **Giá trị runtime như `isVideoAsset` phải lấy từ `@/lib/content/guards`.** Import một giá trị runtime từ barrel vào client sẽ kéo `fs.ts` và `node:fs/promises` vào bundle trình duyệt và làm vỡ build.
 - **Animation:** chỉ animate `transform` và `opacity`. Cấm animate `width`, `height`, `top`, `left`, `margin`, `filter` trong vòng lặp scroll.
 - **Motion token:** mọi duration/easing/stagger lấy từ `src/lib/motion/tokens.ts`. Không hard-code giá trị timing trong component.
 - **Degradation:** mọi animation phải đọc tier từ `useMotionTier()`. Tier `reduced` chỉ fade; tier `lite` không pin, không scrub video.
@@ -65,8 +67,9 @@ src/
     motion/Reveal.tsx                Component reveal dùng chung
   lib/
     content/schema.ts                zod schema — nguồn chân lý về hình dạng dữ liệu
-    content/fs.ts                    Implementation đọc file
-    content/index.ts                 INTERFACE công khai — chỗ duy nhất UI được import
+    content/guards.ts                type guard thuần, 0 phụ thuộc runtime — client dùng được
+    content/fs.ts                    Implementation đọc file (chỉ chạy ở server)
+    content/index.ts                 INTERFACE công khai — chỗ Server Component import
     motion/tokens.ts                 Duration, easing, stagger, distance
     motion/tier.ts                   resolveMotionTier() — hàm thuần, có test
     motion/MotionTierProvider.tsx    Context + hook useMotionTier()
@@ -76,6 +79,19 @@ src/
 ```
 
 Nguyên tắc chia file: mỗi cinematic beat là một file riêng vì mỗi cái có logic ScrollTrigger phức tạp và độc lập. Logic thuần (`tier.ts`, `loader.ts`, `schema.ts`) tách khỏi React để test được bằng Vitest không cần DOM.
+
+`guards.ts` tồn tại vì `isVideoAsset` là **giá trị runtime**, không phải type. Nếu nó chỉ nằm trong barrel `index.ts`, một client component import nó sẽ kéo theo `fs.ts` và `node:fs/promises` vào bundle trình duyệt và làm vỡ build. File này chỉ `import type` từ `schema.ts` nên sau khi biên dịch không còn phụ thuộc gì:
+
+```ts
+import type { MediaAsset, VideoAsset } from './schema'
+
+/** Phân biệt ảnh với video ở phía component mà không cần ép kiểu. */
+export function isVideoAsset(media: MediaAsset): media is VideoAsset {
+  return 'kind' in media && media.kind === 'video'
+}
+```
+
+`index.ts` re-export lại `isVideoAsset` từ đây, để Server Component vẫn chỉ cần biết một cửa duy nhất.
 
 ---
 
@@ -223,6 +239,12 @@ export const stagger = 0.06
 
 /** Quãng dịch chuyển của reveal, đơn vị px. */
 export const distance = 24
+
+/** Độ trễ làm mượt khi buộc animation vào tiến độ scroll — tham số `scrub` của ScrollTrigger. */
+export const scrubSmoothing = 0.6
+
+/** Thời gian nội suy khi gán currentTime cho video scrub, đơn vị giây. */
+export const scrubTweenDuration = 0.2
 ```
 
 - [ ] **Step 7: Chạy test để xác nhận pass**
@@ -1952,9 +1974,13 @@ Tạo `src/components/home/HeroCinematic.tsx`:
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { isVideoAsset, type HomeContent } from '@/lib/content'
+// Type-only import: bị xoá lúc biên dịch nên không kéo fs.ts vào bundle trình duyệt.
+import type { HomeContent } from '@/lib/content'
+// Giá trị runtime phải lấy từ guards, KHÔNG từ barrel '@/lib/content'.
+import { isVideoAsset } from '@/lib/content/guards'
 import { Media } from '@/components/media/Media'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
+import { scrubSmoothing, scrubTweenDuration } from '@/lib/motion/tokens'
 
 interface HeroCinematicProps {
   hero: HomeContent['hero']
@@ -2010,14 +2036,16 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
       const trigger = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
+        // '+=180%' và '+=90%' là quãng cuộn, thuộc về bố cục của section này
+        // chứ không phải timing dùng chung — nên để tại chỗ, không đưa vào token.
         end: '+=180%',
         pin: true,
-        scrub: 0.6,
+        scrub: scrubSmoothing,
         onUpdate: (self) => {
           proxy.time = self.progress * videoEl.duration
           gsap.to(videoEl, {
             currentTime: proxy.time,
-            duration: 0.2,
+            duration: scrubTweenDuration,
             overwrite: true,
             ease: 'none',
           })
@@ -2031,7 +2059,7 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
           yPercent: -40,
           opacity: 0,
           ease: 'none',
-          scrollTrigger: { trigger: section, start: 'top top', end: '+=90%', scrub: 0.6 },
+          scrollTrigger: { trigger: section, start: 'top top', end: '+=90%', scrub: scrubSmoothing },
         },
       )
 
