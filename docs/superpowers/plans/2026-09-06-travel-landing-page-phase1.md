@@ -24,6 +24,7 @@ Mọi task đều ngầm bao gồm các ràng buộc dưới đây.
 - **Ảnh:** hiển thị bằng `next/image` với custom loader. Không bật Vercel Image Optimization.
 - **Video scrub:** ≤ 6 giây, ≤ 3 MB, encode `-g 1`.
 - **Ngưỡng nghiệm thu:** LCP < 2.5s mobile, CLS < 0.1, INP < 200ms, ≥ 55fps khi scroll qua cinematic beat, Lighthouse mobile ≥ 90, bundle JS trang chủ gzip < 200 KB.
+- **Tên thương hiệu: `RosaTravel`.** Viết liền, hai chữ hoa. Dùng ở tiêu đề trang, logo header, bản quyền footer, và template metadata. Lưu trong `messages/vi.json` dưới khoá `brand.name` để đổi ở một chỗ duy nhất.
 - **Không bịa nội dung tour thật.** Dữ liệu mẫu phải đặt tên rõ là mẫu (`content/tours/mau-*.json`).
 - **Commit sau mỗi task.** Message tiếng Việt, prefix `feat:` / `test:` / `chore:` / `fix:`.
 
@@ -1659,13 +1660,25 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 **Files:**
 - Create: `src/components/layout/Header.tsx`, `src/components/layout/Footer.tsx`, `src/components/layout/PageTransition.tsx`
-- Modify: `src/app/[locale]/layout.tsx`
+- Modify: `src/app/[locale]/layout.tsx`, `messages/vi.json`
 
 **Interfaces:**
 - Consumes: `useMotionTier()` (Task 3), `getHomeContent()` (Task 2), `messages/vi.json` (Task 1)
 - Produces: `<Header contact={HomeContent['contact']} />`, `<Footer contact={HomeContent['contact']} />`, `<PageTransition>`
 
-- [ ] **Step 1: Viết Header**
+- [ ] **Step 1: Thêm tên thương hiệu vào messages**
+
+Thêm khoá `brand` vào đầu `messages/vi.json` (giữ nguyên các khoá đã có):
+
+```json
+"brand": {
+  "name": "RosaTravel"
+},
+```
+
+Tên thương hiệu là danh từ riêng, không dịch, nhưng vẫn đặt trong messages để đổi ở một chỗ duy nhất thay vì rải rác trong nhiều component.
+
+- [ ] **Step 2: Viết Header**
 
 Tạo `src/components/layout/Header.tsx`:
 
