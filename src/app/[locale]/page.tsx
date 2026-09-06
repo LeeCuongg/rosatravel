@@ -3,6 +3,7 @@ import { getHomeContent, getTours } from '@/lib/content'
 import { HeroCinematic } from '@/components/home/HeroCinematic'
 import { WhyUs } from '@/components/home/WhyUs'
 import { TourGrid } from '@/components/home/TourGrid'
+import { JourneyCinematic } from '@/components/home/JourneyCinematic'
 import type { Locale } from '@/i18n/routing'
 
 export default async function HomePage({
@@ -23,6 +24,7 @@ export default async function HomePage({
       <HeroCinematic hero={home.hero} locale={locale} />
       <WhyUs items={home.whyUs} locale={locale} />
       <TourGrid tours={featured} locale={locale} />
+      <JourneyCinematic journey={home.journey} locale={locale} />
     </main>
   )
 }
