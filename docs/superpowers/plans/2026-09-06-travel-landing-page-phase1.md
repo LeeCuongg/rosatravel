@@ -602,8 +602,13 @@ const validTour = {
   destinations: ['Quản Bạ', 'Yên Minh', 'Đồng Văn', 'Mèo Vạc'],
   heroMedia: validImage,
   gallery: [validImage],
+  // Số ngày phải khớp durationDays: 4 — schema có refine kiểm tra điều này,
+  // nên fixture "hợp lệ" bắt buộc có đủ 4 ngày.
   itinerary: [
     { day: 1, title: { vi: 'Hà Nội – Quản Bạ' }, description: { vi: 'Khởi hành sớm.' } },
+    { day: 2, title: { vi: 'Quản Bạ – Đồng Văn' }, description: { vi: 'Qua Yên Minh.' } },
+    { day: 3, title: { vi: 'Đồng Văn – Mèo Vạc' }, description: { vi: 'Vượt Mã Pí Lèng.' } },
+    { day: 4, title: { vi: 'Mèo Vạc – Hà Nội' }, description: { vi: 'Về xuôi.' } },
   ],
   inclusions: [{ vi: 'Xe đưa đón' }],
   exclusions: [{ vi: 'Chi phí cá nhân' }],
