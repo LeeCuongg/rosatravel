@@ -2751,7 +2751,7 @@ export function TourHero({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-3 text-sm">
           <div>
             <dt className="text-ink-500">{t('duration')}</dt>
-            <dd className="text-lg">{tour.durationDays} ngày</dd>
+            <dd className="text-lg">{t('durationDays', { n: tour.durationDays })}</dd>
           </div>
           <div>
             <dt className="text-ink-500">{t('priceFrom')}</dt>
@@ -2826,7 +2826,7 @@ export function ItineraryCinematic({
               trigger: el.parentElement,
               start: 'top bottom',
               end: 'bottom top',
-              scrub: 0.5,
+              scrub: scrubSmoothing,
             },
           },
         ),
