@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "media": "tsx scripts/build-media.ts",
-    "video": "tsx scripts/build-video.ts"
+    "video": "tsx scripts/build-video.ts",
+    "placeholders": "tsx scripts/build-placeholders.ts"
   },
   "dependencies": {
     "gsap": "^3.15.0",
