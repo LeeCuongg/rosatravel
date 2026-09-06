@@ -17,6 +17,16 @@
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
 
   --spacing-section: 7rem;
+
+  /* Timing cho animation thuần CSS (hover, transition). PHẢI khớp với
+     src/lib/motion/tokens.ts — file đó là bản dùng cho JS/GSAP/Motion, còn đây
+     là bản dùng cho Tailwind. Đổi một bên thì đổi cả hai. */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+  --duration-slower: 900ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-hover: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 :root {

@@ -1,6 +1,10 @@
 /**
- * Nguồn chân lý duy nhất cho timing của mọi animation trong dự án.
- * Đơn vị giây, dùng chung được cho cả gsap và motion.
+ * Timing cho animation điều khiển bằng JS (gsap, motion). Đơn vị giây.
+ *
+ * Animation thuần CSS (hover, transition trong Tailwind) lấy từ các biến
+ * `--duration-*` / `--ease-*` khai báo trong `src/app/globals.css`. Hai bản này
+ * PHẢI khớp nhau; đổi một bên thì đổi cả hai. Tách làm hai vì Tailwind không
+ * đọc được file TypeScript.
  */
 export const duration = {
   fast: 0.15,

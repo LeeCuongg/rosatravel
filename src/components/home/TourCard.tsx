@@ -16,8 +16,11 @@ export function TourCard({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
           media={cover}
           locale={locale}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-105"
+          // Lưới tối đa max-w-7xl (1280px), 3 cột + khoảng cách => thẻ dừng ở
+          // ~426px. Để 33vw thì trên màn hình 2560px trình duyệt sẽ đòi ~845px
+          // và tải biến thể to vô ích.
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 426px"
+          className="object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-hover)] group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5">
@@ -25,7 +28,8 @@ export function TourCard({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
             {tour.title[locale] ?? tour.title.vi}
           </h3>
           <p className="mt-1 text-sm text-sand-200">
-            {tour.durationDays} ngày · {t('priceFrom')} {formatPrice(tour.priceFrom, locale)}
+            {t('durationDays', { n: tour.durationDays })} · {t('priceFrom')}{' '}
+            {formatPrice(tour.priceFrom, locale)}
           </p>
         </div>
       </div>
