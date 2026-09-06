@@ -1,12 +1,44 @@
-import { readFile, readdir } from 'node:fs/promises'
-import path from 'node:path'
 import type { z } from 'zod'
 import { homeContentSchema, tourSchema, type HomeContent, type Tour } from './schema'
 
-const CONTENT_DIR = path.join(process.cwd(), 'content')
-const TOURS_DIR = path.join(CONTENT_DIR, 'tours')
+/**
+ * Import động cho hai module chỉ tồn tại ở Node.js, kèm chú thích `webpackIgnore`
+ * để bundler bỏ qua việc resolve/dựng chúng — không phải vì file này được dùng
+ * ở trình duyệt, mà vì component 'use client' (HeroCinematic) import một giá trị
+ * khác (isVideoAsset) từ cùng barrel '@/lib/content', nên file này bị kéo theo
+ * vào bundle trình duyệt dù không hàm nào ở đây thực sự chạy ở đó. Import tĩnh
+ * (`import ... from 'node:fs/promises'`) khiến webpack cố dựng module ngay ở
+ * bước "make" — trước khi tree-shaking kịp loại bỏ nhánh không dùng tới — và
+ * gây lỗi build cứng vì `node:` là một scheme mà webpack không xử lý.
+ */
+let nodePromise: Promise<{
+  readFile: typeof import('node:fs/promises').readFile
+  readdir: typeof import('node:fs/promises').readdir
+  path: typeof import('node:path')
+}> | null = null
+
+function loadNode() {
+  if (!nodePromise) {
+    nodePromise = Promise.all([
+      import(/* webpackIgnore: true */ 'node:fs/promises'),
+      import(/* webpackIgnore: true */ 'node:path'),
+    ]).then(([fsPromises, pathModule]) => ({
+      readFile: fsPromises.readFile,
+      readdir: fsPromises.readdir,
+      path: pathModule.default,
+    }))
+  }
+  return nodePromise
+}
+
+async function contentDirs() {
+  const { path } = await loadNode()
+  const CONTENT_DIR = path.join(process.cwd(), 'content')
+  return { CONTENT_DIR, TOURS_DIR: path.join(CONTENT_DIR, 'tours') }
+}
 
 async function readJson(filePath: string): Promise<unknown> {
+  const { readFile } = await loadNode()
   return JSON.parse(await readFile(filePath, 'utf8'))
 }
 
@@ -23,11 +55,15 @@ function parseOrThrow<T>(schema: z.ZodType<T>, data: unknown, source: string): T
 }
 
 export async function readTourSlugs(): Promise<string[]> {
+  const { readdir } = await loadNode()
+  const { TOURS_DIR } = await contentDirs()
   const files = await readdir(TOURS_DIR)
   return files.filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, ''))
 }
 
 export async function readTour(slug: string): Promise<Tour | null> {
+  const { path } = await loadNode()
+  const { TOURS_DIR } = await contentDirs()
   const file = path.join(TOURS_DIR, `${slug}.json`)
   try {
     return parseOrThrow<Tour>(tourSchema, await readJson(file), file)
@@ -44,6 +80,8 @@ export async function readTours(): Promise<Tour[]> {
 }
 
 export async function readHomeContent(): Promise<HomeContent> {
+  const { CONTENT_DIR } = await contentDirs()
+  const { path } = await loadNode()
   const file = path.join(CONTENT_DIR, 'home.json')
   return parseOrThrow<HomeContent>(homeContentSchema, await readJson(file), file)
 }
