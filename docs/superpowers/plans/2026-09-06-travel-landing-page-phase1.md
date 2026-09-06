@@ -1694,7 +1694,26 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 - Consumes: `useMotionTier()` (Task 3), `getHomeContent()` (Task 2), `messages/vi.json` (Task 1)
 - Produces: `<Header contact={HomeContent['contact']} />`, `<Footer contact={HomeContent['contact']} />`, `<PageTransition>`
 
-- [ ] **Step 1: Thêm tên thương hiệu vào messages**
+- [ ] **Step 1: Dọn cảnh báo Vitest còn tồn đọng**
+
+Từ Task 1, mỗi lần `pnpm test` đều in:
+
+```
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'` ...
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1)
+```
+
+Việc này vi phạm ràng buộc "test output phải sạch" và đã bị báo ở cả bốn task đầu.
+
+```bash
+git mv vitest.config.ts vitest.config.mts
+```
+
+Đổi đuôi sang `.mts` thay vì thêm `"type": "module"` vào `package.json`: cách thứ hai đổi cách giải nghĩa module của toàn dự án và có thể lan sang `next.config.ts` lẫn `postcss.config.mjs`, trong khi ở đây chỉ cần một file được nạp dưới dạng ESM.
+
+Chạy `pnpm test` và xác nhận cảnh báo đã biến mất, số test vẫn nguyên.
+
+- [ ] **Step 2: Thêm tên thương hiệu vào messages**
 
 Thêm khoá `brand` vào đầu `messages/vi.json` (giữ nguyên các khoá đã có):
 
@@ -1706,7 +1725,7 @@ Thêm khoá `brand` vào đầu `messages/vi.json` (giữ nguyên các khoá đ�
 
 Tên thương hiệu là danh từ riêng, không dịch, nhưng vẫn đặt trong messages để đổi ở một chỗ duy nhất thay vì rải rác trong nhiều component.
 
-- [ ] **Step 2: Viết Header**
+- [ ] **Step 3: Viết Header**
 
 Tạo `src/components/layout/Header.tsx`:
 
@@ -1755,7 +1774,7 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
 }
 ```
 
-- [ ] **Step 2: Viết Footer**
+- [ ] **Step 4: Viết Footer**
 
 Tạo `src/components/layout/Footer.tsx`:
 
@@ -1784,7 +1803,7 @@ export function Footer({ contact }: { contact: HomeContent['contact'] }) {
 }
 ```
 
-- [ ] **Step 3: Viết PageTransition**
+- [ ] **Step 5: Viết PageTransition**
 
 Tạo `src/components/layout/PageTransition.tsx`:
 
@@ -1821,7 +1840,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
 
 Chỉ fade, không trượt. Page transition có dịch chuyển làm trang cảm giác chậm hơn thực tế, và trên trang bán hàng thì tốc độ quan trọng hơn hiệu ứng.
 
-- [ ] **Step 4: Gắn vào layout**
+- [ ] **Step 6: Gắn vào layout**
 
 Trong `src/app/[locale]/layout.tsx`, thêm import và đọc contact từ content layer:
 
@@ -1848,12 +1867,14 @@ Và đổi phần trong `<SmoothScroll>` thành:
 </SmoothScroll>
 ```
 
-- [ ] **Step 5: Xác minh**
+- [ ] **Step 7: Xác minh**
 
-Run: `pnpm build && pnpm dev`
-Expected: build pass; header trong suốt ở đầu trang, nền đậm dần khi cuộn xuống; footer hiện số điện thoại từ `content/home.json`.
+Run: `pnpm test && pnpm build`
+Expected: test pass với output sạch (không còn cảnh báo Vite); build pass.
 
-- [ ] **Step 6: Commit**
+Kiểm tra thủ công cần con người (agent không mở được dev server): header trong suốt ở đầu trang và nền đậm dần khi cuộn xuống; footer hiện số điện thoại lấy từ `content/home.json`; logo hiển thị `RosaTravel`.
+
+- [ ] **Step 8: Commit**
 
 ```bash
 git add -A
