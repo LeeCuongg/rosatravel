@@ -3,11 +3,14 @@ import type { HomeContent } from '@/lib/content'
 
 export function Footer({ contact }: { contact: HomeContent['contact'] }) {
   const t = useTranslations('cta')
+  const tb = useTranslations('brand')
 
   return (
     <footer className="border-t border-ink-700 px-6 py-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-ink-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()}</p>
+        <p>
+          © {new Date().getFullYear()} {tb('name')}
+        </p>
         <div className="flex gap-6">
           <a href={`tel:${contact.phone}`} className="hover:text-sand-100">
             {t('callUs')}: {contact.phone}

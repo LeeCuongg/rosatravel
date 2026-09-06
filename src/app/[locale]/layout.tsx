@@ -31,7 +31,7 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
-  title: 'Tour du lịch',
+  title: 'RosaTravel',
   description: 'Những hành trình được chọn lọc.',
 }
 

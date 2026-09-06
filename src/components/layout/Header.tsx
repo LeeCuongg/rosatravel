@@ -3,17 +3,25 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { motion, useScroll, useTransform } from 'motion/react'
+import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import type { HomeContent } from '@/lib/content'
 
 export function Header({ contact }: { contact: HomeContent['contact'] }) {
   const t = useTranslations('nav')
   const tc = useTranslations('cta')
   const tb = useTranslations('brand')
+  const tier = useMotionTier()
   const { scrollY } = useScroll()
 
   // Nền header đậm dần khi rời khỏi hero. Chỉ đổi opacity — không animate
   // backdrop-filter hay background-color, cả hai đều buộc trình duyệt vẽ lại.
-  const overlayOpacity = useTransform(scrollY, [0, 240], [0, 1])
+  // Hook luôn được gọi vô điều kiện; chỉ giá trị dùng mới phụ thuộc tier.
+  const scrolledOpacity = useTransform(scrollY, [0, 240], [0, 1])
+
+  // Tier reduced: cắt hẳn liên kết với scroll, để nền đặc cố định. Hiệu ứng
+  // buộc vào vị trí cuộn vẫn là chuyển động dù chỉ đổi opacity, và ở đây đọc
+  // được chữ quan trọng hơn việc hoà vào ảnh hero.
+  const overlayOpacity = tier === 'reduced' ? 1 : scrolledOpacity
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
