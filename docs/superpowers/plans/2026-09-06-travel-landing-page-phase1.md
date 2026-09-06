@@ -3245,7 +3245,31 @@ pnpm video
 
 Expected: sinh 3 file trong `public/media/video/`; log in ra dung lượng bản scrub và cảnh báo nếu vượt 3MB.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Đóng nợ tồn đọng từ Task 6 — promise metadata không settle khi huỷ**
+
+Task 6 để lại một lỗi **chỉ kích hoạt được khi có video thật**, tức là đúng từ task này trở đi. Trong `src/components/home/HeroCinematic.tsx`, hàm `waitForMetadata()` dùng `AbortController` để gỡ listener khi effect bị huỷ, nhưng không hề resolve hay reject promise. Hệ quả: nếu người dùng rời trang trong lúc metadata video chưa tải xong, `await waitForMetadata()` không bao giờ trả về — `setup()` treo vĩnh viễn tại đó, và dòng `if (cancelled) return` ngay sau nó không bao giờ chạy.
+
+Sửa bằng cách buộc promise kết thúc theo tín hiệu abort:
+
+```ts
+      const waitForMetadata = () =>
+        videoEl.readyState >= 1
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => {
+              const signal = metadataAbort.signal
+              if (signal.aborted) return resolve()
+              videoEl.addEventListener('loadedmetadata', () => resolve(), { once: true, signal })
+              // Huỷ effect cũng phải kết thúc promise, nếu không setup() treo mãi
+              // và dòng kiểm tra `cancelled` ngay sau await thành code chết.
+              signal.addEventListener('abort', () => resolve(), { once: true })
+            })
+```
+
+Resolve (không reject) để không sinh unhandled rejection; `if (cancelled) return` ngay sau `await` sẽ lo phần dừng đúng cách.
+
+Kiểm chứng: `pnpm build` và `pnpm lint` vẫn sạch.
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add -A
