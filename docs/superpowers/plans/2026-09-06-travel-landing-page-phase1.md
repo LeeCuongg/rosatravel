@@ -205,8 +205,12 @@ Tạo `src/lib/motion/tokens.ts`:
 
 ```ts
 /**
- * Nguồn chân lý duy nhất cho timing của mọi animation trong dự án.
- * Đơn vị giây, dùng chung được cho cả gsap và motion.
+ * Timing cho animation điều khiển bằng JS (gsap, motion). Đơn vị giây.
+ *
+ * Animation thuần CSS (hover, transition trong Tailwind) lấy từ các biến
+ * `--duration-*` / `--ease-*` khai báo trong `src/app/globals.css`. Hai bản này
+ * PHẢI khớp nhau; đổi một bên thì đổi cả hai. Tách làm hai vì Tailwind không
+ * đọc được file TypeScript.
  */
 export const duration = {
   fast: 0.15,
@@ -278,6 +282,16 @@ Ghi đè `src/app/globals.css`:
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
 
   --spacing-section: 7rem;
+
+  /* Timing cho animation thuần CSS (hover, transition). PHẢI khớp với
+     src/lib/motion/tokens.ts — file đó là bản dùng cho JS/GSAP/Motion, còn đây
+     là bản dùng cho Tailwind. Đổi một bên thì đổi cả hai. */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+  --duration-slower: 900ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-hover: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 :root {
@@ -407,7 +421,8 @@ Tạo `messages/vi.json`:
     "gallery": "Hình ảnh",
     "inclusions": "Bao gồm",
     "exclusions": "Không bao gồm",
-    "day": "Ngày {n}"
+    "day": "Ngày {n}",
+    "durationDays": "{n} ngày"
   },
   "contact": {
     "title": "Liên hệ đặt tour",
@@ -2299,8 +2314,11 @@ export function TourCard({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
           media={cover}
           locale={locale}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-105"
+          // Lưới tối đa max-w-7xl (1280px), 3 cột + khoảng cách => thẻ dừng ở
+          // ~426px. Để 33vw thì trên màn hình 2560px trình duyệt sẽ đòi ~845px
+          // và tải biến thể to vô ích.
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 426px"
+          className="object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-hover)] group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5">
@@ -2308,7 +2326,8 @@ export function TourCard({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
             {tour.title[locale] ?? tour.title.vi}
           </h3>
           <p className="mt-1 text-sm text-sand-200">
-            {tour.durationDays} ngày · {t('priceFrom')} {formatPrice(tour.priceFrom, locale)}
+            {t('durationDays', { n: tour.durationDays })} · {t('priceFrom')}{' '}
+            {formatPrice(tour.priceFrom, locale)}
           </p>
         </div>
       </div>
