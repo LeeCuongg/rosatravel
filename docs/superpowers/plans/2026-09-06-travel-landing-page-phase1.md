@@ -1107,7 +1107,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
   - `@/lib/motion/tier` → `type MotionTier = 'reduced' | 'lite' | 'full'`, `interface DeviceSignals`, `resolveMotionTier(signals: DeviceSignals): MotionTier`, `readDeviceSignals(): DeviceSignals`
   - `@/lib/motion/MotionTierProvider` → `<MotionTierProvider>`, `useMotionTier(): MotionTier`
   - `@/lib/motion/SmoothScroll` → `<SmoothScroll>`
-  - `@/components/motion/Reveal` → `<Reveal delay?: number; as?: React.ElementType; className?: string>`
+  - `@/components/motion/Reveal` → `<Reveal delay?: number; className?: string>` (không có prop `as` — không task nào cần render đa hình, YAGNI)
 
 - [ ] **Step 1: Viết test cho logic phân tầng**
 
