@@ -19,6 +19,8 @@ Mọi task đều ngầm bao gồm các ràng buộc dưới đây.
 - **Animation:** chỉ animate `transform` và `opacity`. Cấm animate `width`, `height`, `top`, `left`, `margin`, `filter` trong vòng lặp scroll.
 - **Motion token:** mọi duration/easing/stagger lấy từ `src/lib/motion/tokens.ts`. Không hard-code giá trị timing trong component.
 - **Degradation:** mọi animation phải đọc tier từ `useMotionTier()`. Tier `reduced` chỉ fade; tier `lite` không pin, không scrub video.
+- **Vòng đời ScrollTrigger:** component nào tạo trigger thì component đó kill trong cleanup của chính nó. Cấm `ScrollTrigger.getAll().forEach(t => t.kill())` — thứ tự cleanup giữa parent và child không đảm bảo, kill toàn cục sẽ xoá cả trigger mà component khác vừa tạo lại khi tier đổi.
+- **Import động phải bắt lỗi:** mọi `import()` GSAP/Lenis đi kèm `.catch` ghi log tiếng Việt. Chunk tải hỏng (mạng chập chờn, ad-blocker) không được biến thành unhandled promise rejection.
 - **i18n:** mọi chuỗi giao diện nằm trong `messages/vi.json`. Mọi trường nội dung hướng người đọc trong content JSON bọc theo locale `{ vi: "..." }`.
 - **Rendering:** trang chủ và trang tour dùng static generation. Không dùng `dynamic = 'force-dynamic'`.
 - **Ảnh:** hiển thị bằng `next/image` với custom loader. Không bật Vercel Image Optimization.
@@ -1276,7 +1278,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     let cleanup: (() => void) | undefined
 
     // Import động: Lenis và GSAP không nằm trong bundle ban đầu.
-    void (async () => {
+    const setup = async () => {
       const [{ default: Lenis }, { gsap }, { ScrollTrigger }] = await Promise.all([
         import('lenis'),
         import('gsap'),
@@ -1299,9 +1301,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       cleanup = () => {
         gsap.ticker.remove(raf)
         lenis.destroy()
-        ScrollTrigger.getAll().forEach((t) => t.kill())
+        // Không kill ScrollTrigger ở đây. Component nào tạo trigger thì tự kill
+        // trong cleanup của mình; kill toàn cục sẽ xoá luôn trigger mà component
+        // con vừa tạo lại khi tier đổi, vì thứ tự cleanup parent/child không đảm bảo.
       }
-    })()
+    }
+
+    setup().catch((error) => {
+      console.error('Không khởi tạo được smooth scroll; trang vẫn cuộn bình thường.', error)
+    })
 
     return () => {
       cancelled = true
