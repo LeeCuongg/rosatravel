@@ -2798,7 +2798,7 @@ export function ItineraryCinematic({
     let cancelled = false
     let cleanup: (() => void) | undefined
 
-    void (async () => {
+    const setup = async () => {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'),
         import('gsap/ScrollTrigger'),
@@ -2832,7 +2832,11 @@ export function ItineraryCinematic({
           tween.kill()
         })
       }
-    })()
+    }
+
+    setup().catch((error) => {
+      console.error('Không tải được GSAP để chạy parallax lịch trình:', error)
+    })
 
     return () => {
       cancelled = true
