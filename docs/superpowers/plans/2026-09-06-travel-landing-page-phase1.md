@@ -3032,6 +3032,7 @@ Tạo `src/components/tour/InclusionList.tsx`:
 ```tsx
 import { useTranslations } from 'next-intl'
 import { Reveal } from '@/components/motion/Reveal'
+import { stagger } from '@/lib/motion/tokens'
 import type { LocalizedText } from '@/lib/content'
 
 export function InclusionList({
@@ -3060,7 +3061,7 @@ export function InclusionList({
           </ul>
         </Reveal>
         {exclusions.length > 0 && (
-          <Reveal delay={0.06}>
+          <Reveal delay={stagger}>
             <h3 className="text-sm uppercase tracking-widest text-ink-500">{t('exclusions')}</h3>
             <ul className="mt-4 space-y-2 text-ink-500">
               {exclusions.map((item) => (
