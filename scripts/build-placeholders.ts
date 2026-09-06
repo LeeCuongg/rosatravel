@@ -15,11 +15,12 @@ async function make(name: string, w: number, h: number) {
   const base = sharp({
     create: { width: w, height: h, channels: 3, background: { r: 20, g: 26, b: 33 } },
   })
+  // Sinh ĐỦ cả bốn mốc, kể cả khi ảnh gốc nhỏ hơn mốc đó — xem lý do trong
+  // scripts/build-media.ts. withoutEnlargement giữ cho ảnh không bị phóng to thật.
   for (const width of WIDTHS) {
-    if (width > w) continue
     await base
       .clone()
-      .resize(width)
+      .resize({ width, withoutEnlargement: true })
       .avif({ quality: 60 })
       .toFile(`public/media/placeholder/${name}-${width}.avif`)
   }

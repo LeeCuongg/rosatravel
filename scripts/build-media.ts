@@ -39,12 +39,27 @@ async function processImage(file: string) {
   const originalWidth = meta.width ?? WIDTHS[WIDTHS.length - 1]
   const originalHeight = meta.height ?? 0
 
+  // Sinh ĐỦ cả bốn mốc, kể cả khi ảnh gốc nhỏ hơn mốc đó.
+  //
+  // Lý do: loader là hàm thuần, không biết ảnh nào có sẵn biến thể nào — nó luôn
+  // ánh xạ bề rộng yêu cầu vào một trong bốn mốc. Bỏ qua một mốc nghĩa là ảnh vỡ
+  // ở đúng breakpoint đó, và lỗi chỉ lộ ra trên màn hình lớn.
+  //
+  // withoutEnlargement giữ cho ảnh không bị phóng to thật: file ở mốc lớn chỉ
+  // chứa đúng kích thước gốc. Tốn thêm chút dung lượng, đổi lấy việc không bao
+  // giờ 404.
   for (const width of WIDTHS) {
-    // Không phóng to ảnh nhỏ hơn mốc — chỉ tổ tốn dung lượng, không thêm chi tiết.
-    if (width > originalWidth && width !== WIDTHS[0]) continue
+    const resize = { width, withoutEnlargement: true } as const
+    await sharp(file).resize(resize).avif({ quality: 60 }).toFile(`${outPath}-${width}.avif`)
+    await sharp(file).resize(resize).webp({ quality: 72 }).toFile(`${outPath}-${width}.webp`)
+  }
 
-    await sharp(file).resize(width).avif({ quality: 60 }).toFile(`${outPath}-${width}.avif`)
-    await sharp(file).resize(width).webp({ quality: 72 }).toFile(`${outPath}-${width}.webp`)
+  const largest = WIDTHS[WIDTHS.length - 1]
+  if (originalWidth < largest) {
+    console.warn(
+      `⚠ ${relative} chỉ rộng ${originalWidth}px, nhỏ hơn mốc lớn nhất ${largest}px.\n` +
+        '  Ảnh vẫn hiển thị được nhưng sẽ mờ trên màn hình lớn — nên thay bằng bản độ phân giải cao hơn.',
+    )
   }
 
   // Blur placeholder: ảnh 16px rất nhẹ, nhúng thẳng vào JSON dưới dạng data URL.
