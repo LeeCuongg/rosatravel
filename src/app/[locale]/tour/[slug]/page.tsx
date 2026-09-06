@@ -4,6 +4,9 @@ import { setRequestLocale } from 'next-intl/server'
 import { getTour, getTourSlugs } from '@/lib/content'
 import { TourHero } from '@/components/tour/TourHero'
 import { ItineraryCinematic } from '@/components/tour/ItineraryCinematic'
+import { Gallery } from '@/components/tour/Gallery'
+import { InclusionList } from '@/components/tour/InclusionList'
+import { TourCta } from '@/components/tour/TourCta'
 import { Reveal } from '@/components/motion/Reveal'
 import { routing, type Locale } from '@/i18n/routing'
 
@@ -50,6 +53,9 @@ export default async function TourPage({ params }: { params: Params }) {
         </Reveal>
       </section>
       <ItineraryCinematic days={tour.itinerary} locale={locale} />
+      <Gallery images={tour.gallery} locale={locale} />
+      <InclusionList inclusions={tour.inclusions} exclusions={tour.exclusions} locale={locale} />
+      <TourCta slug={tour.slug} />
     </main>
   )
 }
