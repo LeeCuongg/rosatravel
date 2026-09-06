@@ -4,6 +4,8 @@ import { getMessages, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { Be_Vietnam_Pro, Playfair_Display } from 'next/font/google'
 import { routing } from '@/i18n/routing'
+import { MotionTierProvider } from '@/lib/motion/MotionTierProvider'
+import { SmoothScroll } from '@/lib/motion/SmoothScroll'
 import '../globals.css'
 
 const sans = Be_Vietnam_Pro({
@@ -45,7 +47,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${sans.variable} ${display.variable}`}>
       <body>
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
+          <MotionTierProvider>
+            <SmoothScroll>{children}</SmoothScroll>
+          </MotionTierProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
