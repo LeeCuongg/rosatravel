@@ -600,7 +600,7 @@ const validTour = {
   durationDays: 4,
   priceFrom: 6900000,
   currency: 'VND' as const,
-  destinations: ['Quản Bạ', 'Yên Minh', 'Đồng Văn', 'Mèo Vạc'],
+  destinations: [{ vi: 'Quản Bạ' }, { vi: 'Yên Minh' }, { vi: 'Đồng Văn' }, { vi: 'Mèo Vạc' }],
   heroMedia: validImage,
   gallery: [validImage],
   // Số ngày phải khớp durationDays: 4 — schema có refine kiểm tra điều này,
@@ -614,8 +614,8 @@ const validTour = {
   inclusions: [{ vi: 'Xe đưa đón' }],
   exclusions: [{ vi: 'Chi phí cá nhân' }],
   seo: {
-    title: 'Tour Hà Giang 4 ngày',
-    description: 'Cung đường đá Hà Giang qua bốn huyện vùng cao.',
+    title: { vi: 'Tour Hà Giang 4 ngày' },
+    description: { vi: 'Cung đường đá Hà Giang qua bốn huyện vùng cao.' },
     ogImage: validImage,
   },
 }
@@ -639,6 +639,16 @@ describe('tourSchema', () => {
 
   it('từ chối giá âm hoặc bằng không', () => {
     expect(() => tourSchema.parse({ ...validTour, priceFrom: 0 })).toThrow()
+  })
+
+  it('từ chối destinations dạng chuỗi thường — phải bọc locale để thêm tiếng Anh sau này', () => {
+    expect(() => tourSchema.parse({ ...validTour, destinations: ['Quản Bạ'] })).toThrow()
+  })
+
+  it('từ chối seo.title dạng chuỗi thường — tiêu đề SEO cũng hướng người đọc', () => {
+    expect(() =>
+      tourSchema.parse({ ...validTour, seo: { ...validTour.seo, title: 'Tour Hà Giang' } }),
+    ).toThrow()
   })
 })
 ```
@@ -713,16 +723,21 @@ export const tourSchema = z
     durationDays: z.number().int().positive(),
     priceFrom: z.number().positive(),
     currency: z.literal('VND'),
-    destinations: z.array(z.string().min(1)).min(1),
+    // Tên điểm đến hiển thị cho người đọc nên cũng bọc locale: bản tiếng Anh
+    // thường bỏ dấu ("Quan Ba") cho khách quốc tế dễ tra cứu.
+    destinations: z.array(localizedTextSchema).min(1),
     heroMedia: mediaAssetSchema,
     gallery: z.array(imageAssetSchema).min(1),
     itinerary: z.array(itineraryDaySchema).min(1),
     inclusions: z.array(localizedTextSchema).min(1),
     exclusions: z.array(localizedTextSchema),
     notes: localizedTextSchema.optional(),
+    // seo.title và seo.description hiện trên tab trình duyệt, kết quả tìm kiếm
+    // và thẻ chia sẻ mạng xã hội — hướng người đọc, nên bọc locale như mọi
+    // trường văn bản khác.
     seo: z.object({
-      title: z.string().min(1),
-      description: z.string().min(1),
+      title: localizedTextSchema,
+      description: localizedTextSchema,
       ogImage: imageAssetSchema,
     }),
   })
@@ -855,7 +870,12 @@ Tạo `content/tours/mau-ha-giang.json`. Đây là **dữ liệu mẫu**, đư�
   "durationDays": 4,
   "priceFrom": 6900000,
   "currency": "VND",
-  "destinations": ["Quản Bạ", "Yên Minh", "Đồng Văn", "Mèo Vạc"],
+  "destinations": [
+    { "vi": "Quản Bạ" },
+    { "vi": "Yên Minh" },
+    { "vi": "Đồng Văn" },
+    { "vi": "Mèo Vạc" }
+  ],
   "heroMedia": {
     "src": "/media/placeholder/hero.avif",
     "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
@@ -885,8 +905,8 @@ Tạo `content/tours/mau-ha-giang.json`. Đây là **dữ liệu mẫu**, đư�
   ],
   "exclusions": [{ "vi": "Chi phí cá nhân" }, { "vi": "Đồ uống có cồn" }],
   "seo": {
-    "title": "Tour Hà Giang 4 ngày 3 đêm",
-    "description": "Cung đường đá Hà Giang qua Quản Bạ, Yên Minh, Đồng Văn, Mèo Vạc.",
+    "title": { "vi": "Tour Hà Giang 4 ngày 3 đêm" },
+    "description": { "vi": "Cung đường đá Hà Giang qua Quản Bạ, Yên Minh, Đồng Văn, Mèo Vạc." },
     "ogImage": {
       "src": "/media/placeholder/og.avif",
       "alt": { "vi": "Ảnh mẫu chờ thay bằng ảnh tour thật" },
@@ -2601,7 +2621,9 @@ export function TourHero({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
           </div>
           <div>
             <dt className="text-ink-500">{t('destinations')}</dt>
-            <dd className="text-lg">{tour.destinations.join(' · ')}</dd>
+            <dd className="text-lg">
+              {tour.destinations.map((d) => d[locale] ?? d.vi).join(' · ')}
+            </dd>
           </div>
         </dl>
       </div>
@@ -2750,16 +2772,19 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { slug } = await params
+  const { locale, slug } = await params
   const tour = await getTour(slug)
   if (!tour) return {}
 
+  const title = tour.seo.title[locale] ?? tour.seo.title.vi
+  const description = tour.seo.description[locale] ?? tour.seo.description.vi
+
   return {
-    title: tour.seo.title,
-    description: tour.seo.description,
+    title,
+    description,
     openGraph: {
-      title: tour.seo.title,
-      description: tour.seo.description,
+      title,
+      description,
       images: [{ url: tour.seo.ogImage.src, width: 1200, height: 630 }],
       type: 'article',
     },
