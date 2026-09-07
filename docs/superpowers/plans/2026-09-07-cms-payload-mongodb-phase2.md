@@ -110,12 +110,12 @@ Thêm vào `.env.example`:
 
 ```
 # Payload CMS (GĐ2)
-DATABASE_URI=
+MONGODB_URI=
 PAYLOAD_SECRET=
 BLOB_READ_WRITE_TOKEN=
 ```
 
-Tạo `.env.local` cho phát triển (đã nằm trong `.gitignore` từ GĐ1 — xác nhận lại). `DATABASE_URI` lấy từ MongoDB Atlas M0, `PAYLOAD_SECRET` là chuỗi ngẫu nhiên dài, `BLOB_READ_WRITE_TOKEN` lấy từ Vercel Blob.
+Tạo `.env.local` cho phát triển (đã nằm trong `.gitignore` từ GĐ1 — xác nhận lại). `MONGODB_URI` lấy từ MongoDB Atlas M0, `PAYLOAD_SECRET` là chuỗi ngẫu nhiên dài, `BLOB_READ_WRITE_TOKEN` lấy từ Vercel Blob.
 
 **Nếu bạn không có sẵn tài khoản Atlas hoặc Blob:** dừng và báo BLOCKED. Đừng dựng MongoDB cục bộ để đi tiếp — nó sẽ giấu đi đúng những lỗi cấu hình mà task này sinh ra để phát hiện.
 
@@ -123,7 +123,7 @@ Tạo `.env.local` cho phát triển (đã nằm trong `.gitignore` từ GĐ1 �
 
 Tạo `src/payload.config.ts`. Yêu cầu bắt buộc, không phải cú pháp:
 
-- Dùng adapter MongoDB, đọc chuỗi kết nối từ `DATABASE_URI`
+- Dùng adapter MongoDB, đọc chuỗi kết nối từ `MONGODB_URI`
 - Dùng plugin Vercel Blob cho storage
 - `secret` đọc từ `PAYLOAD_SECRET`
 - Khai `Users` là collection auth
@@ -144,8 +144,8 @@ function required(name: string, huongDan: string): string {
   return value
 }
 
-const DATABASE_URI = required(
-  'DATABASE_URI',
+const MONGODB_URI = required(
+  'MONGODB_URI',
   'Đây là chuỗi kết nối MongoDB Atlas — lấy ở Atlas → Connect → Drivers.',
 )
 const PAYLOAD_SECRET = required(
@@ -1166,7 +1166,7 @@ Ngưỡng phải giữ: Performance ≥ 90 mobile, LCP < 2.5s, CLS < 0.1, bundle
 
 - [ ] **Step 3: Kiểm build vỡ đúng cách**
 
-Tạm bỏ `DATABASE_URI` khỏi `.env.local` rồi chạy `pnpm build`. Phải vỡ kèm thông báo tiếng Việt nói rõ phải làm gì, **không** phải lỗi driver Mongo khó hiểu. Khôi phục biến sau khi kiểm.
+Tạm bỏ `MONGODB_URI` khỏi `.env.local` rồi chạy `pnpm build`. Phải vỡ kèm thông báo tiếng Việt nói rõ phải làm gì, **không** phải lỗi driver Mongo khó hiểu. Khôi phục biến sau khi kiểm.
 
 - [ ] **Step 4: Ghi kết quả**
 

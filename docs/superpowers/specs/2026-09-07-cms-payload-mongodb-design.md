@@ -120,7 +120,7 @@ GĐ2 không làm phân quyền theo vai trò — mọi người đều sửa đ�
 
 | Biến | Dùng để | Thiếu thì sao |
 |---|---|---|
-| `DATABASE_URI` | Chuỗi kết nối MongoDB Atlas | Build vỡ kèm thông báo tiếng Việt (mục 12) |
+| `MONGODB_URI` | Chuỗi kết nối MongoDB Atlas | Build vỡ kèm thông báo tiếng Việt (mục 12) |
 | `PAYLOAD_SECRET` | Ký phiên đăng nhập của admin | Payload từ chối khởi động |
 | `BLOB_READ_WRITE_TOKEN` | Ghi ảnh lên Vercel Blob | Upload ảnh hỏng, phần còn lại chạy |
 
