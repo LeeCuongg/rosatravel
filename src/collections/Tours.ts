@@ -1,4 +1,3 @@
-import { revalidatePath } from 'next/cache'
 import type {
   ArrayFieldValidation,
   CollectionAfterChangeHook,
@@ -11,6 +10,7 @@ import type {
 } from 'payload'
 
 import { routing } from '../i18n/routing'
+import { revalidatePathAnToan } from '../lib/revalidate'
 
 /**
  * Collection Tours — nơi nhân viên nhập nội dung một tour du lịch.
@@ -118,31 +118,16 @@ const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
  * sống mãi trong cache tới khi có on-demand revalidation. Payload chạy CHUNG
  * tiến trình Next.js (route handler tại src/app/(payload)/api/[...slug] —
  * xem payload.config.ts) nên hook ở đây gọi thẳng revalidatePath, không cần
- * webhook gọi ra ngoài.
- *
- * revalidatePath() chỉ hoạt động khi được gọi TRONG một request Next.js đang
- * xử lý (route handler/server action) — nó đọc AsyncLocalStorage nội bộ của
- * Next (workAsyncStorage). Khi admin lưu trên UI, request đi qua route handler
- * REST của Payload nên store luôn có sẵn — hoạt động bình thường. Nhưng khi
- * Payload Local API được gọi từ một script độc lập ngoài tiến trình Next (vd.
- * `pnpm seed` chạy bằng tsx, hoặc script kiểm chứng của task này), không có
- * request nào đang chạy nên revalidatePath ném "Invariant: static generation
- * store missing". Bọc try/catch để việc dọn cache — vốn không phải phần cốt
- * lõi của thao tác lưu/xoá — không bao giờ làm hỏng chính thao tác đó.
+ * webhook gọi ra ngoài. Việc bắt lỗi "gọi ngoài request Next.js" (vd. khi
+ * `pnpm seed` chạy) nằm ở src/lib/revalidate.ts — dùng chung với Home.ts,
+ * không lặp lại ở đây.
  */
-function safeRevalidatePath(path: string): void {
-  try {
-    revalidatePath(path)
-  } catch (err) {
-    console.warn(`[revalidate] Bỏ qua lỗi revalidatePath("${path}") — có thể đang chạy ngoài request Next.js:`, err)
-  }
-}
 
 /** Làm mới trang tour + trang chủ (có thể đang hiện tour này ở danh sách nổi bật) cho mọi locale. */
 function revalidateTourAndHome(slug: string): void {
   for (const locale of routing.locales) {
-    safeRevalidatePath(`/${locale}/tour/${slug}`)
-    safeRevalidatePath(`/${locale}`)
+    revalidatePathAnToan(`/${locale}/tour/${slug}`)
+    revalidatePathAnToan(`/${locale}`)
   }
 }
 
@@ -167,7 +152,7 @@ const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDo
   }
 
   if (operation === 'create' || slugChanged) {
-    safeRevalidatePath('/sitemap.xml')
+    revalidatePathAnToan('/sitemap.xml')
   }
 
   return doc
@@ -185,7 +170,7 @@ const revalidateToursAfterDelete: CollectionAfterDeleteHook = ({ doc }) => {
   if (typeof slug !== 'string' || slug.length === 0) return doc
 
   revalidateTourAndHome(slug)
-  safeRevalidatePath('/sitemap.xml')
+  revalidatePathAnToan('/sitemap.xml')
 
   return doc
 }
