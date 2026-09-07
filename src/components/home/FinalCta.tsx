@@ -15,7 +15,7 @@ export function FinalCta({ contact }: { contact: HomeContent['contact'] }) {
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/lien-he"
-            className="rounded-full bg-clay-500 px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
+            className="rounded-full bg-clay-600 px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
           >
             {t('bookNow')}
           </Link>

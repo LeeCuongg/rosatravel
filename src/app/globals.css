@@ -6,11 +6,20 @@
   --color-ink-950: #0b0f14;
   --color-ink-900: #141a21;
   --color-ink-700: #2b3541;
-  --color-ink-500: #5c6a7a;
+  /* Màu chữ trên nền --color-ink-950. Đo được 5.53:1 (WCAG AA yêu cầu ≥4.5:1
+     cho chữ thường). Đổi bảng màu sau này thì đo lại — đừng để tụt xuống dưới
+     4.5:1, vì đây là màu thân bài ở 14 chỗ khác nhau (mô tả lịch trình, danh
+     sách loại trừ, nhãn form liên hệ...). */
+  --color-ink-500: #7d8b9c;
   --color-sand-100: #f7f3ec;
   --color-sand-200: #ece4d7;
   --color-sand-400: #c9b99e;
-  --color-clay-500: #b4552f;
+  /* Dùng làm MÀU CHỮ (nhãn, thông báo lỗi) trên nền --color-ink-950. Đo được
+     5.91:1. KHÔNG dùng làm nền cho nút CTA — trên nền này, chữ sáng
+     (--color-sand-100) chỉ đạt ~2.9:1. Nút CTA dùng --color-clay-600 làm nền. */
+  --color-clay-500: #d9724a;
+  /* Dùng làm NỀN cho nút CTA (bg-clay-600) với chữ --color-sand-100 ở trên —
+     đo được 6.13:1. */
   --color-clay-600: #96421f;
 
   --font-display: "Playfair Display", Georgia, serif;
