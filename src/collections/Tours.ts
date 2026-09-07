@@ -86,9 +86,24 @@ const validatePriceFrom: NumberFieldSingleValidation = (value) => {
   return true
 }
 
-/** Đồng bộ `displayTitle` (field thật, dùng cho useAsTitle) từ `title.vi`. */
-const syncDisplayTitle: FieldHook = ({ data }) => {
-  const vi = (data as { title?: { vi?: string } } | undefined)?.title?.vi
+/**
+ * Đồng bộ `displayTitle` (field thật, dùng cho useAsTitle) từ `title.vi`.
+ *
+ * Phải rơi về `originalDoc?.title?.vi` khi `data` không có `title`: field này
+ * có `admin.readOnly: true`, nhưng đó chỉ là ràng buộc trên giao diện admin,
+ * không phải access control. Một request qua REST/Local API có thể gửi thẳng
+ * `displayTitle` mà không kèm `title` trong cùng payload — nếu hook chỉ đọc
+ * `data`, giá trị client gửi lên sẽ được giữ nguyên (vì `data?.title?.vi` là
+ * undefined nên nhánh trả undefined, và Payload giữ giá trị cũ/giá trị gửi
+ * lên tuỳ operation), khiến danh sách tour hiện một cái tên trông hợp lý
+ * nhưng sai, không có gì báo hiệu. Rơi về `originalDoc` buộc field luôn được
+ * suy lại từ nguồn thật (title.vi đã lưu), không bao giờ tin trực tiếp giá
+ * trị displayTitle được gửi lên.
+ */
+const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
+  const dataVi = (data as { title?: { vi?: string } } | undefined)?.title?.vi
+  const originalVi = (originalDoc as { title?: { vi?: string } } | undefined)?.title?.vi
+  const vi = dataVi ?? originalVi
   return typeof vi === 'string' && vi.length > 0 ? vi : undefined
 }
 

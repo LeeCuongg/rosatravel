@@ -4,12 +4,14 @@ import { fileURLToPath } from 'url'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { vi } from '@payloadcms/translations/languages/vi'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Media } from './collections/Media'
 import { Tours } from './collections/Tours'
 import { Users } from './collections/Users'
+import { Home } from './globals/Home'
 
 /**
  * Biến môi trường thiếu phải vỡ ồn ào, cùng khuôn mẫu với src/lib/site.ts của GĐ1.
@@ -51,7 +53,16 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Tours],
+  globals: [Home],
   editor: lexicalEditor(),
+  // Việt hoá toàn bộ admin: nhãn, nút, điều hướng VÀ thông báo lỗi validate.
+  // Không có khối này thì người nhập thấy nhãn tiếng Việt (đặt riêng ở từng
+  // field) nhưng thông báo lỗi mặc định của Payload (vd. "This field requires
+  // at least 1 Rows.") vẫn tiếng Anh — lỗ hổng mà Task 3 phát hiện.
+  i18n: {
+    supportedLanguages: { vi },
+    fallbackLanguage: 'vi',
+  },
   secret: PAYLOAD_SECRET,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

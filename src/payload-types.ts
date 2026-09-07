@@ -89,8 +89,12 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    home: Home;
+  };
+  globalsSelect: {
+    home: HomeSelect<false> | HomeSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -591,6 +595,162 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Nội dung hiển thị trên trang chủ. Chỉ có một bản ghi duy nhất.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: string;
+  hero: {
+    headline: {
+      vi: string;
+    };
+    subline: {
+      vi: string;
+    };
+    media: string | Media;
+  };
+  /**
+   * Mỗi lý do gồm một tiêu đề ngắn và một đoạn giải thích.
+   */
+  whyUs: {
+    title: {
+      vi: string;
+    };
+    body: {
+      vi: string;
+    };
+    id?: string | null;
+  }[];
+  /**
+   * Chọn các tour sẽ hiện nổi bật trên trang chủ, từ danh sách tour đã tạo.
+   */
+  featuredTours: (string | Tour)[];
+  journey: {
+    headline: {
+      vi: string;
+    };
+    /**
+     * Cần tối thiểu 2 điểm đến — hiệu ứng cuộn ngang trên trang chủ không hoạt động với ít hơn 2.
+     */
+    stops: {
+      label: {
+        vi: string;
+      };
+      image: string | Media;
+      id?: string | null;
+    }[];
+  };
+  /**
+   * Có thể để trống nếu chưa có cảm nhận nào để đăng.
+   */
+  testimonials?:
+    | {
+        name: string;
+        quote: {
+          vi: string;
+        };
+        /**
+         * Không bắt buộc — chỉ chọn nếu cảm nhận này gắn với một tour cụ thể.
+         */
+        tour?: (string | null) | Tour;
+        avatar?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  contact: {
+    phone: string;
+    /**
+     * URL đầy đủ, ví dụ: https://zalo.me/0901234567
+     */
+    zaloUrl: string;
+    email: string;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        headline?:
+          | T
+          | {
+              vi?: T;
+            };
+        subline?:
+          | T
+          | {
+              vi?: T;
+            };
+        media?: T;
+      };
+  whyUs?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        body?:
+          | T
+          | {
+              vi?: T;
+            };
+        id?: T;
+      };
+  featuredTours?: T;
+  journey?:
+    | T
+    | {
+        headline?:
+          | T
+          | {
+              vi?: T;
+            };
+        stops?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    vi?: T;
+                  };
+              image?: T;
+              id?: T;
+            };
+      };
+  testimonials?:
+    | T
+    | {
+        name?: T;
+        quote?:
+          | T
+          | {
+              vi?: T;
+            };
+        tour?: T;
+        avatar?: T;
+        id?: T;
+      };
+  contact?:
+    | T
+    | {
+        phone?: T;
+        zaloUrl?: T;
+        email?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
