@@ -26,10 +26,24 @@ async function make(name: string, w: number, h: number) {
   }
 }
 
+// Ảnh og: riêng, KHÔNG có hậu tố -{width} — cố ý, vì URL trong metadata
+// (og:image, sitemap, ...) không bao giờ đi qua src/lib/media/loader.ts, loader
+// đó chỉ chạy bên trong next/image. Xuất ra JPEG chứ không phải AVIF vì các
+// crawler xem trước link (Facebook, Zalo, Twitter) không giải mã được AVIF.
+async function makeOg() {
+  await sharp({
+    create: { width: 1200, height: 630, channels: 3, background: { r: 20, g: 26, b: 33 } },
+  })
+    .resize(1200, 630, { fit: 'cover' })
+    .jpeg({ quality: 82 })
+    .toFile('public/media/placeholder/og.jpg')
+}
+
 async function main() {
   await make('hero', 2400, 1350)
   await make('gallery-1', 1600, 1067)
   await make('og', 1200, 630)
+  await makeOg()
   console.log('done')
 }
 

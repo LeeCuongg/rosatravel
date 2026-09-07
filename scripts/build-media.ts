@@ -62,6 +62,13 @@ async function processImage(file: string) {
     )
   }
 
+  // Ảnh đặt trong assets-src/og/ còn xuất thêm một bản JPEG 1200×630 KHÔNG có
+  // hậu tố -{width}, vì URL og:image không đi qua loader (xem build-placeholders.ts)
+  // và các crawler xem trước link (Facebook, Zalo, Twitter) không giải mã AVIF.
+  if (relative.split(path.sep)[0] === 'og') {
+    await sharp(file).resize(1200, 630, { fit: 'cover' }).jpeg({ quality: 82 }).toFile(`${outPath}.jpg`)
+  }
+
   // Blur placeholder: ảnh 16px rất nhẹ, nhúng thẳng vào JSON dưới dạng data URL.
   const blur = await sharp(file).resize(16).webp({ quality: 40 }).toBuffer()
 
