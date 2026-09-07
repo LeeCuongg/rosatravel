@@ -31,4 +31,16 @@ describe('validateContactInput', () => {
   it('từ chối ghi chú dài bất thường', () => {
     expect(validateContactInput({ ...valid, note: 'x'.repeat(3000) }).ok).toBe(false)
   })
+
+  it('từ chối tên chèn xuống dòng (chèn header email)', () => {
+    const result = validateContactInput({
+      ...valid,
+      name: 'Nguyen\r\nBcc: someone@evil.com',
+    })
+    expect(result.ok).toBe(false)
+  })
+
+  it('từ chối tourSlug không đúng hình dạng slug', () => {
+    expect(validateContactInput({ ...valid, tourSlug: 'not a slug!' }).ok).toBe(false)
+  })
 })

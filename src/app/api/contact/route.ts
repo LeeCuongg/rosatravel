@@ -8,8 +8,20 @@ const recentRequests = new Map<string, number[]>()
 const WINDOW_MS = 60_000
 const MAX_PER_WINDOW = 3
 
+// recentRequests không tự co lại — mỗi IP mới thấy là một entry ở lại vĩnh
+// viễn trong bộ nhớ instance. Dọn các entry đã hết hạn ở mỗi request để map
+// không phình to vô hạn trong vòng đời instance (serverless container có thể
+// sống hàng giờ dưới tải liên tục).
+function pruneExpired(now: number): void {
+  for (const [ip, timestamps] of recentRequests) {
+    const newest = timestamps[timestamps.length - 1] ?? 0
+    if (now - newest >= WINDOW_MS) recentRequests.delete(ip)
+  }
+}
+
 function isRateLimited(ip: string): boolean {
   const now = Date.now()
+  pruneExpired(now)
   const timestamps = (recentRequests.get(ip) ?? []).filter((t) => now - t < WINDOW_MS)
   if (timestamps.length >= MAX_PER_WINDOW) return true
   timestamps.push(now)
@@ -25,7 +37,10 @@ export async function POST(request: Request) {
 
   const result = validateContactInput(await request.json().catch(() => null))
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 400 })
+    // Honeypot trúng bẫy trả về message 'bot' nội bộ — không lộ ra ngoài, nếu
+    // không kẻ spam biết ngay trường nào là bẫy và bỏ qua nó ở lần sau.
+    const message = result.error === 'bot' ? 'Dữ liệu không hợp lệ' : result.error
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 
   const apiKey = process.env.RESEND_API_KEY
@@ -39,6 +54,8 @@ export async function POST(request: Request) {
   const { name, phone, tourSlug, note } = result.data
 
   try {
+    // Không đặt replyTo: form chỉ thu số điện thoại, không thu email, nên
+    // không có địa chỉ nào để trả lời trực tiếp qua email cả.
     await new Resend(apiKey).emails.send({
       from,
       to,
