@@ -6,12 +6,14 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   images: {
-    // Tắt tối ưu ảnh của Vercel: ảnh đã được sinh sẵn lúc build bằng sharp.
-    // Xem scripts/build-media.ts và src/lib/media/loader.ts.
+    // Tắt tối ưu ảnh của Vercel: bốn biến thể AVIF đã được sinh sẵn lúc upload
+    // lên Payload (hook sharp, xem src/collections/Media.ts và
+    // src/lib/media/variants.ts). Loader tuỳ biến chỉ suy URL biến thể từ URL
+    // gốc trên Vercel Blob — xem src/lib/media/loader.ts.
     loader: 'custom',
     loaderFile: './src/lib/media/loader.ts',
-    // Khớp đúng MEDIA_WIDTHS trong src/lib/media/loader.ts. Lệch hai danh sách
-    // này sẽ sinh srcset có mục trùng nhau.
+    // Khớp đúng MEDIA_WIDTHS trong src/lib/media/loader.ts (và variants.ts).
+    // Lệch hai danh sách này sẽ sinh srcset có mục trùng nhau.
     deviceSizes: [640, 1024, 1600, 2400],
   },
 }

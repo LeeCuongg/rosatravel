@@ -7,9 +7,10 @@ const LARGEST_WIDTH = MEDIA_WIDTHS[MEDIA_WIDTHS.length - 1]
 /**
  * Collection Media — nơi duy nhất tạo ra file ảnh dùng trên toàn site.
  *
- * Đây là bản tự động hoá của `scripts/build-media.ts` (GĐ1): thay vì người
- * chạy tay một script rồi copy đường dẫn vào JSON, nhân viên chỉ cần kéo ảnh
- * vào /admin và mọi biến thể + ảnh mờ được sinh ngay lúc lưu.
+ * Đây là bản tự động hoá của script sinh biến thể ảnh chạy tay ở GĐ1 (đã xoá
+ * khỏi repo ở Task 10, còn trong lịch sử git): thay vì người chạy tay một
+ * script rồi copy đường dẫn vào JSON, nhân viên chỉ cần kéo ảnh vào /admin và
+ * mọi biến thể + ảnh mờ được sinh ngay lúc lưu.
  *
  * QUAN TRỌNG — bài học từ GĐ1: loader `next/image` (src/lib/media/loader.ts)
  * là hàm thuần, luôn giả định đủ bốn mốc MEDIA_WIDTHS tồn tại cho mọi ảnh. Vì
@@ -45,9 +46,9 @@ export const Media: CollectionConfig = {
         // phụ thuộc tỉ lệ khung hình của TỪNG ảnh, nên loader (hàm thuần, chỉ
         // nhận src + width) không thể suy ra URL mốc này từ URL mốc khác nếu
         // không biết trước chiều cao. Đặt lại tên chỉ theo bề rộng — đúng quy
-        // ước "-<width>.<ext>" mà scripts/build-media.ts (GĐ1) và
-        // src/lib/media/loader.ts đã dùng — để loader suy ra URL bằng biến đổi
-        // chuỗi thuần, không cần biết kích thước ảnh.
+        // ước "-<width>.<ext>" đã dùng từ GĐ1, tiếp tục dùng ở
+        // src/lib/media/loader.ts — để loader suy ra URL bằng biến đổi chuỗi
+        // thuần, không cần biết kích thước ảnh.
         generateImageName: ({ originalName, extension }: { originalName: string; extension: string }) =>
           `${originalName}-${width}.${extension}`,
       })),

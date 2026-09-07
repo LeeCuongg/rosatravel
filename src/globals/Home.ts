@@ -59,8 +59,8 @@ const validateZaloUrl: TextFieldValidation = (value) => {
  * sửa global `home` trong admin không tự động hiện trên site tới khi có
  * on-demand revalidation. Payload chạy CHUNG tiến trình Next.js nên gọi thẳng
  * revalidatePath, không cần webhook. Việc bắt lỗi "gọi ngoài request
- * Next.js" (vd. khi `pnpm seed` chạy) nằm ở src/lib/revalidate.ts — dùng
- * chung với Tours.ts, không lặp lại ở đây.
+ * Next.js" (vd. khi một script độc lập chạy bằng tsx gọi Local API) nằm ở
+ * src/lib/revalidate.ts — dùng chung với Tours.ts, không lặp lại ở đây.
  */
 const revalidateHomeAfterChange: GlobalAfterChangeHook = ({ doc }) => {
   for (const locale of routing.locales) {

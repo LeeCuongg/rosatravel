@@ -4,7 +4,9 @@ import { z } from 'zod'
 // bằng ĐÚNG pattern này trước khi gửi — hai bên không được phép lệch nhau.
 export const PHONE_PATTERN = /^(\+84|0)\d{8,10}$/
 
-// Slug dùng chung hình dạng với content/tours/*.json (xem src/lib/content).
+// Slug dùng chung hình dạng với trường `slug` của collection `tours` trong
+// Payload (xem src/lib/content/schema.ts, tourSchema) — dữ liệu tour giờ nằm
+// trong CMS, không còn trong file JSON.
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
 // Dựng schema BÊN TRONG một hàm thay vì ở module scope: ContactForm (client

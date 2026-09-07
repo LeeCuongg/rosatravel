@@ -118,9 +118,9 @@ const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
  * sống mãi trong cache tới khi có on-demand revalidation. Payload chạy CHUNG
  * tiến trình Next.js (route handler tại src/app/(payload)/api/[...slug] —
  * xem payload.config.ts) nên hook ở đây gọi thẳng revalidatePath, không cần
- * webhook gọi ra ngoài. Việc bắt lỗi "gọi ngoài request Next.js" (vd. khi
- * `pnpm seed` chạy) nằm ở src/lib/revalidate.ts — dùng chung với Home.ts,
- * không lặp lại ở đây.
+ * webhook gọi ra ngoài. Việc bắt lỗi "gọi ngoài request Next.js" (vd. khi một
+ * script độc lập chạy bằng tsx gọi Local API) nằm ở src/lib/revalidate.ts —
+ * dùng chung với Home.ts, không lặp lại ở đây.
  */
 
 /** Làm mới trang tour + trang chủ (có thể đang hiện tour này ở danh sách nổi bật) cho mọi locale. */

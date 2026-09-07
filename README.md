@@ -8,48 +8,35 @@ Next.js 15 (App Router) · TypeScript · Tailwind v4 · Motion · GSAP ScrollTri
 
 ```bash
 pnpm install
-pnpm placeholders   # BẮT BUỘC ở lần đầu — xem mục Ảnh bên dưới
-pnpm dev            # http://localhost:3000/vi
+cp .env.example .env.local   # điền các biến — xem mục Biến môi trường bên dưới
+pnpm dev                     # http://localhost:3000/vi
 ```
 
-`/` tự chuyển hướng sang `/vi`.
+`/` tự chuyển hướng sang `/vi`. Trang quản trị nội dung ở `/admin` (lần đầu vào sẽ được yêu cầu tạo tài khoản quản trị).
 
-## Ảnh — đọc trước khi build
+## Ảnh
 
-`public/media/` và `assets-src/` nằm trong `.gitignore`, nên **một bản clone mới không có ảnh nào**. Trang sẽ build được nhưng mọi ảnh đều 404 cho tới khi bạn sinh chúng.
+Không còn quy trình chạy tay nào — ảnh vào site hoàn toàn qua `/admin`:
 
-```bash
-pnpm placeholders   # sinh ảnh giữ chỗ để dự án chạy được
-pnpm media          # xử lý ảnh thật đặt trong assets-src/
-pnpm video          # CHƯA CÀI ĐẶT — xem cảnh báo bên dưới
-```
+1. Vào `/admin` → **Thư viện ảnh** → tải ảnh lên
+2. Điền **mô tả (alt) tiếng Việt** — gõ một lần duy nhất trên bản ghi ảnh, mọi nơi dùng lại ảnh đó (trang chủ, tour, gallery...) đều tự dùng chung mô tả này
+3. Xong — Payload tự sinh mọi biến thể ngay lúc lưu, không có bước nào khác
 
-**Quy trình đưa ảnh thật vào:**
+Mỗi ảnh tải lên sinh ra: bốn biến thể AVIF ở bề rộng 640/1024/1600/2400px (dùng cho `srcset` trên site), một biến thể JPEG 1200×630 cho thẻ chia sẻ Zalo/Facebook (Zalo và Facebook không đọc được AVIF), và một ảnh mờ giữ chỗ nhúng thẳng vào bản ghi. Tất cả lưu trên Vercel Blob — repo không chứa file ảnh nào.
 
-1. Đặt ảnh gốc vào `assets-src/` (đặt theo thư mục tour cho dễ quản lý)
-2. Chạy `pnpm media` — sinh AVIF/WebP ở 4 bề rộng 640/1024/1600/2400, kèm blur placeholder
-3. Script ghi metadata ra `content/media-manifest.json`; copy khối cần dùng sang `content/tours/*.json` và **điền `alt` tiếng Việt** (script để `TODO` vì nó không biết ảnh chụp gì)
+**Ảnh gốc nên rộng tối thiểu 2400px.** Nhỏ hơn vẫn tải lên được, nhưng admin sẽ hiện cảnh báo ngay trên bản ghi ảnh đó, và ảnh sẽ mờ trên màn hình lớn.
 
-Ảnh gốc nên rộng ít nhất 2400px. Script sẽ cảnh báo nếu nhỏ hơn — ảnh vẫn hiển thị nhưng sẽ mờ trên màn hình lớn.
-
-**Khi deploy:** vì `public/media` bị gitignore, chọn một trong hai cách và giữ nhất quán — hoặc chạy `pnpm media` trong build command của Vercel (phải commit `assets-src/`, repo nặng), hoặc bỏ `public/media` khỏi `.gitignore` và commit ảnh đã tối ưu (khuyến nghị: AVIF đã nén nhỏ hơn ảnh gốc nhiều lần). Pipeline video chưa nằm trong quy trình này — xem cảnh báo bên dưới.
-
-> **`pnpm video` chưa được cài đặt.** Lệnh này hiện chỉ in cảnh báo và thoát khác 0 — pipeline ffmpeg bị hoãn có chủ đích (xem Task 12 trong `docs/superpowers/plans/`). Đừng đưa video thật vào `assets-src/video/` và mong nó tự encode.
+> **`pnpm video` chưa được cài đặt.** Lệnh này hiện chỉ in cảnh báo và thoát khác 0 — pipeline ffmpeg bị hoãn có chủ đích (xem Task 12 trong `docs/superpowers/plans/`).
 
 ## Nội dung
 
-Nội dung nằm trong `content/`, được validate bằng zod lúc đọc:
+Toàn bộ nội dung — trang chủ, danh sách tour, ảnh — nhập và sửa qua `/admin`, lưu trong MongoDB Atlas. Lưu xong là lên site sau vài giây (revalidate tự động, xem `src/lib/revalidate.ts`), không cần build hay deploy lại.
 
-```
-content/home.json              nội dung trang chủ
-content/tours/<slug>.json      mỗi tour một file
-```
+Component **chỉ** đọc nội dung qua `src/lib/content/index.ts`. Không component nào biết dữ liệu nằm ở CMS hay lưu dạng gì — đó là điều kiện đã cho phép thay toàn bộ nguồn dữ liệu từ file JSON tĩnh sang Payload (GĐ2) mà không sửa một component nào.
 
-Component **chỉ** đọc nội dung qua `src/lib/content/index.ts`. Không component nào biết dữ liệu nằm ở đâu hay lưu dạng gì — đó là điều kiện để sau này thay bằng CMS mà không đụng giao diện.
+Hình dạng dữ liệu được giữ khớp nhau ở hai nơi: `src/lib/content/schema.ts` (zod, phía đọc) và các collection/global Payload — `src/collections/Tours.ts`, `src/globals/Home.ts` (phía nhập liệu). Không có gì tự động giữ hai bên này đồng bộ.
 
-Mọi trường văn bản hướng người đọc bọc theo ngôn ngữ: `{ "vi": "..." }`. Thêm tiếng Anh sau này là thêm khoá `en`, không phải sửa schema.
-
-> **Chưa thay:** `content/home.json` đang để số điện thoại `0900000000` và email `lienhe@example.com` làm giá trị mẫu.
+Mọi trường văn bản hướng người đọc bọc theo ngôn ngữ: `{ "vi": "..." }`. Tiếng Anh để dành cho giai đoạn sau — trường `alt` của ảnh đã có sẵn ô tiếng Anh trong admin, các trường khác cần thêm field `en` vào Payload khi tới lúc.
 
 ## Biến môi trường
 
@@ -60,10 +47,18 @@ Copy `.env.example` thành `.env.local`:
 | `RESEND_API_KEY` | Gửi email từ form liên hệ. Thiếu → form trả lỗi 500 có kiểm soát |
 | `CONTACT_EMAIL_TO` | Địa chỉ nhận yêu cầu đặt tour |
 | `CONTACT_EMAIL_FROM` | Địa chỉ gửi (phải thuộc domain đã xác thực ở Resend) |
+| `MONGODB_URI` | Chuỗi kết nối MongoDB Atlas (Atlas → Connect → Drivers) — nơi lưu toàn bộ nội dung |
+| `PAYLOAD_SECRET` | Chuỗi ngẫu nhiên dài, ký phiên đăng nhập `/admin`. Sinh bằng `openssl rand -base64 32` |
+| `BLOB_READ_WRITE_TOKEN` | Token đọc/ghi Vercel Blob (Vercel → Storage → Blob) — nơi lưu toàn bộ ảnh |
+
+Thiếu bất kỳ biến nào trong ba biến CMS ở trên, `pnpm build`/`pnpm dev` cố ý báo lỗi và dừng ngay (xem `src/payload.config.ts`, hàm `required()`) thay vì để lỗi driver Mongo mù mờ hiện ra sau.
 
 ## Deploy
 
-**Bắt buộc:** đặt `NEXT_PUBLIC_SITE_URL` (URL gốc thật, ví dụ `https://rosatravel.vn`) trong Vercel Project Settings → Environment Variables **trước lần deploy đầu tiên**. `pnpm build` ở môi trường production sẽ cố ý báo lỗi và dừng nếu biến này chưa được đặt (xem `src/lib/site.ts`) — vì thiếu nó thì sitemap và mọi thẻ `og:` sẽ âm thầm trỏ về `localhost`, Search Console từ chối sitemap và mọi lần share Zalo/Facebook đều hỏng ảnh.
+**Bắt buộc trước lần deploy đầu tiên** — đặt trong Vercel Project Settings → Environment Variables:
+
+- `NEXT_PUBLIC_SITE_URL` (URL gốc thật, ví dụ `https://rosatravel.vn`). `pnpm build` ở môi trường production cố ý báo lỗi và dừng nếu thiếu (xem `src/lib/site.ts`) — vì thiếu nó thì sitemap và mọi thẻ `og:` sẽ âm thầm trỏ về `localhost`, Search Console từ chối sitemap và mọi lần share Zalo/Facebook đều hỏng ảnh.
+- `MONGODB_URI`, `PAYLOAD_SECRET`, `BLOB_READ_WRITE_TOKEN` — xem mục Biến môi trường ở trên. Thiếu một trong ba, build cũng cố ý vỡ ngay tại `required()` thay vì để lại lỗi mù mờ ở tầng driver.
 
 Pipeline video (`pnpm video`) chưa được cài đặt — xem mục Lệnh bên dưới.
 
@@ -95,8 +90,6 @@ pnpm build          # build production
 pnpm start          # chạy bản build
 pnpm test           # Vitest
 pnpm lint           # ESLint
-pnpm placeholders   # sinh ảnh giữ chỗ
-pnpm media          # xử lý ảnh trong assets-src/
 pnpm video          # CHƯA CÀI ĐẶT — in cảnh báo rồi thoát khác 0
 ```
 

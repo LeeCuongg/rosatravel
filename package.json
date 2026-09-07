@@ -10,10 +10,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "media": "tsx scripts/build-media.ts",
-    "seed": "tsx scripts/seed-payload.ts",
-    "video": "node -e \"console.error('Pipeline video chưa được cài đặt (cần ffmpeg). Xem Task 12 trong docs/superpowers/plans/.'); process.exit(1)\"",
-    "placeholders": "tsx scripts/build-placeholders.ts"
+    "video": "node -e \"console.error('Pipeline video chưa được cài đặt (cần ffmpeg). Xem Task 12 trong docs/superpowers/plans/.'); process.exit(1)\""
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "^3.88.0",

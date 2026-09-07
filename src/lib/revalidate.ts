@@ -12,8 +12,9 @@ import { revalidatePath } from 'next/cache'
  * Next (workAsyncStorage). Khi admin lưu qua UI, request đi qua route handler
  * REST của Payload (src/app/(payload)/api/[...slug]/route.ts) nên store luôn
  * có sẵn — hoạt động bình thường. Khi Payload Local API được gọi từ một
- * script độc lập ngoài tiến trình Next (vd. `pnpm seed` chạy bằng tsx),
- * không có request nào đang chạy, và revalidatePath ném ĐÚNG MỘT lỗi:
+ * script độc lập chạy bằng tsx, ngoài tiến trình Next (vd. một script seed
+ * hoặc di trú dữ liệu chạy tay), không có request nào đang chạy, và
+ * revalidatePath ném ĐÚNG MỘT lỗi:
  *
  *   Invariant: static generation store missing in revalidatePath <path>
  *
@@ -37,7 +38,7 @@ export function revalidatePathAnToan(duongDan: string): void {
     const laLoiNgoaiRequest = error instanceof Error && error.message.includes(LOI_NGOAI_REQUEST_NEXT)
     if (!laLoiNgoaiRequest) throw error
     console.warn(
-      `[revalidate] Bỏ qua làm mới "${duongDan}": đang chạy ngoài request Next.js (bình thường khi chạy script như pnpm seed).`,
+      `[revalidate] Bỏ qua làm mới "${duongDan}": đang chạy ngoài request Next.js (bình thường khi Payload Local API được gọi từ một script độc lập chạy bằng tsx).`,
     )
   }
 }

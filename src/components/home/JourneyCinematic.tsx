@@ -88,9 +88,9 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
         </h2>
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
           {journey.stops.map((stop, index) => (
-            // key theo index: danh sách cố định, không sắp xếp lại — content/home.json
-            // dùng lại cùng một ảnh cho cả bốn điểm dừng, nên stop.label.vi làm key
-            // không đảm bảo duy nhất.
+            // key theo index: danh sách cố định, không sắp xếp lại — global home
+            // trong Payload có thể dùng lại cùng một ảnh cho nhiều điểm dừng, nên
+            // stop.label.vi làm key không đảm bảo duy nhất.
             <Reveal key={index} delay={index * stagger}>
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
                 <Media
