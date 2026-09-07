@@ -55,3 +55,22 @@ Có thể đổi `display: 'swap'` → `'optional'` để loại bỏ hoàn toà
 ## FPS khi cuộn cinematic — chưa đo
 
 Ngưỡng "≥ 55fps khi cuộn cinematic" **chưa được đo** trong task này. Lý do: phép đo này cần công cụ profiling frame-rate thời gian thực (MCP `chrome-devtools`), hiện chưa được cài đặt trong môi trường này. Không được coi chỉ số này là đạt hay không đạt — cần cài công cụ và đo riêng ở một task khác.
+
+## Bổ sung: đo trên desktop (tier `full`)
+
+Review cuối toàn nhánh chỉ ra rằng mọi phép đo trước đó đều chạy `form-factor=mobile`, mà mobile rơi vào tier `lite` — nghĩa là **toàn bộ nhánh code `full`** (hero pin, hành trình cuộn ngang, parallax lịch trình) **chưa từng được đo bởi bất cứ thứ gì**. Đây là lỗ hổng đo lường lớn hơn cả phần FPS chưa đo.
+
+Đo ngày 2026-09-07, Lighthouse CLI `--preset=desktop`, headless Chrome, trên bản production tại localhost:
+
+| Chỉ số | Đo được |
+|---|---|
+| Performance | **100** |
+| Accessibility | **98** |
+| First Contentful Paint | 0.4s |
+| Largest Contentful Paint | **0.6s** |
+| Cumulative Layout Shift | **0** |
+| Total Blocking Time | 0 ms |
+
+**Về CLS = 0 trên desktop:** review cuối dự đoán một layout shift đáng kể do `JourneyCinematic` render nhánh `lite` phía server rồi đổi sang dải cuộn ngang khi client đo xong tier. Phép đo cho CLS bằng 0 — nhưng **điều đó không có nghĩa là cú đổi bố cục không xảy ra**. Nó nằm dưới màn hình đầu, và CLS chỉ tính những dịch chuyển trong khung nhìn. Cú đổi vẫn có thật; nó chỉ không bị CLS phạt.
+
+**Vẫn chưa đo:** FPS ≥ 55 khi cuộn qua ba cinematic beat. Lighthouse đo tải trang, không đo khung hình trong lúc cuộn. Cần `chrome-devtools` MCP hoặc một performance trace thủ công.
