@@ -145,7 +145,10 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
           className="absolute inset-0 h-full w-full object-cover"
           muted
           playsInline
-          preload="auto"
+          // Hero không scrub (spec: preload="metadata") không cần tải cả video
+          // loop ngay — canScrub (desktop, pin+scrub) mới cần preload="auto" vì
+          // ScrollTrigger cần frame sẵn sàng để scrub mượt ngay khi vào viewport.
+          preload={canScrub ? 'auto' : 'metadata'}
           poster={video.poster.src}
           {...(canScrub ? {} : { autoPlay: true, loop: true })}
         >

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { motion, useScroll, useTransform } from 'motion/react'
@@ -13,6 +14,13 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
   const tier = useMotionTier()
   const { scrollY } = useScroll()
 
+  // MotionTierProvider mặc định 'reduced' cho tới khi effect của nó đo xong
+  // thiết bị thật — nghĩa là lần render đầu tiên trên client LUÔN là 'reduced',
+  // kể cả trên máy mạnh. Không có cờ measured, overlayOpacity dưới đây sẽ khoá
+  // cứng ở 1 cho mọi người dùng ngay lần vẽ đầu, phủ một thanh tối đặc lên hero.
+  const [measured, setMeasured] = useState(false)
+  useEffect(() => setMeasured(true), [])
+
   // Nền header đậm dần khi rời khỏi hero. Chỉ đổi opacity — không animate
   // backdrop-filter hay background-color, cả hai đều buộc trình duyệt vẽ lại.
   // Hook luôn được gọi vô điều kiện; chỉ giá trị dùng mới phụ thuộc tier.
@@ -20,8 +28,10 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
 
   // Tier reduced: cắt hẳn liên kết với scroll, để nền đặc cố định. Hiệu ứng
   // buộc vào vị trí cuộn vẫn là chuyển động dù chỉ đổi opacity, và ở đây đọc
-  // được chữ quan trọng hơn việc hoà vào ảnh hero.
-  const overlayOpacity = tier === 'reduced' ? 1 : scrolledOpacity
+  // được chữ quan trọng hơn việc hoà vào ảnh hero. Coi "chưa đo xong" như
+  // KHÔNG PHẢI reduced — nếu không thì mọi người dùng, kể cả máy mạnh, đều
+  // thấy một thanh tối phủ lên hero trong khoảnh khắc trước khi tier đo xong.
+  const overlayOpacity = measured && tier === 'reduced' ? 1 : scrolledOpacity
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
