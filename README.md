@@ -60,6 +60,10 @@ Thiếu bất kỳ biến nào trong ba biến CMS ở trên, `pnpm build`/`pnpm
 - `NEXT_PUBLIC_SITE_URL` (URL gốc thật, ví dụ `https://rosatravel.vn`). `pnpm build` ở môi trường production cố ý báo lỗi và dừng nếu thiếu (xem `src/lib/site.ts`) — vì thiếu nó thì sitemap và mọi thẻ `og:` sẽ âm thầm trỏ về `localhost`, Search Console từ chối sitemap và mọi lần share Zalo/Facebook đều hỏng ảnh.
 - `MONGODB_URI`, `PAYLOAD_SECRET`, `BLOB_READ_WRITE_TOKEN` — xem mục Biến môi trường ở trên. Thiếu một trong ba, build cũng cố ý vỡ ngay tại `required()` thay vì để lại lỗi mù mờ ở tầng driver.
 
+**Bắt buộc NGAY SAU lần deploy đầu tiên — tạo tài khoản quản trị, đừng để sang hôm sau.** Khi database chưa có người dùng nào, `/admin` cho BẤT KỲ ai mở trang đó tự tạo tài khoản đầu tiên, không cần mật khẩu hay lời mời — đó là cách Payload khởi tạo, và `/admin` là địa chỉ ai cũng đoán được. Người lạ đăng ký trước thì họ nắm toàn quyền nội dung site và tải được file tuỳ ý lên kho Blob công khai mang tên miền công ty. Vào `https://<tên-miền>/admin` ngay sau khi deploy xong, đăng ký tài khoản của bạn — xong bước đó thì cửa đóng lại, mọi tài khoản sau phải do người đã đăng nhập tạo.
+
+**Thêm tài khoản cho nhân viên:** đăng nhập `/admin` → **Người dùng** → **Tạo mới** → nhập email, **Mật khẩu mới** và **Xác nhận mật khẩu** → Lưu. Giai đoạn này chưa phân quyền: mọi tài khoản đều sửa được mọi thứ (xem `src/collections/Users.ts`), nên chỉ tạo cho người thật sự cần.
+
 Pipeline video (`pnpm video`) chưa được cài đặt — xem mục Lệnh bên dưới.
 
 ## Hệ animation
@@ -92,6 +96,8 @@ pnpm test           # Vitest
 pnpm lint           # ESLint
 pnpm video          # CHƯA CÀI ĐẶT — in cảnh báo rồi thoát khác 0
 ```
+
+> **Kiểm thử revalidate trên Windows.** Muốn tự mắt thấy "sửa trong admin là lên site ngay" thì phải chạy `pnpm build` rồi `pnpm start` **từ thư mục viết đúng hoa/thường** (`D:\Rosa`, không phải `d:/Rosa` kiểu Git Bash). Node trên Windows đánh chỉ mục module theo nguyên văn đường dẫn, nên khởi động từ đường dẫn sai chữ hoa làm `next/dist/server/lib/incremental-cache/tags-manifest.external.js` nạp thành HAI bản: bản ghi tag khi revalidate và bản đọc tag khi phục vụ trang là hai `Map` khác nhau, và mọi lần revalidate đều im lặng không tác dụng. Không phải lỗi của code — trên Linux (Vercel) không có chuyện này — nhưng nó đủ giống một bug thật để làm mất cả buổi.
 
 ## Tài liệu thiết kế
 

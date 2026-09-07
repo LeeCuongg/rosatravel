@@ -19,13 +19,27 @@ function loi(thongDiep: string, id?: unknown): never {
 }
 
 /**
- * Payload trả về id dạng chuỗi thay vì document khi truy vấn không đủ `depth`.
- * Phân biệt hai trường hợp này quan trọng: một cái là lỗi truy vấn của lập
- * trình viên, cái kia là lỗi dữ liệu của người nhập, và cách sửa khác hẳn nhau.
+ * Payload trả về id trần thay vì document trong HAI trường hợp, và từ đây
+ * KHÔNG phân biệt được chúng — giá trị nhận về giống hệt nhau:
+ *
+ *  1. Bản ghi được trỏ tới đã bị xoá. Xem
+ *     node_modules/payload/dist/fields/hooks/afterRead/relationshipPopulationPromise.js
+ *     (~dòng 47): tra không ra document thì Payload gán ngược `relationshipValue = id`.
+ *     Đây là trường hợp xảy ra thật ngoài đời — nhân viên xoá một ảnh trong
+ *     Thư viện ảnh mà một tour còn dùng làm ảnh bìa.
+ *  2. Truy vấn thiếu `depth`. Đây là lỗi lập trình, chỉ xuất hiện khi ai đó
+ *     sửa cms.ts.
+ *
+ * Thông báo phải nói cả hai, và phải đặt nguyên nhân (1) lên trước: người đọc
+ * nó gần như luôn là người vừa xoá nhầm một ảnh, không phải lập trình viên.
  */
 function phaiLaDocument(value: unknown, ten: string): Record<string, unknown> {
   if (typeof value === 'string' || typeof value === 'number') {
-    loi(`Quan hệ "${ten}" chưa được nạp — tăng depth khi truy vấn Payload`, value)
+    loi(
+      `Quan hệ "${ten}" chỉ còn lại id — hoặc bản ghi được trỏ tới đã bị xoá ` +
+        `(vào /admin, gắn lại bản ghi khác hoặc bỏ liên kết này), hoặc truy vấn thiếu depth (lỗi lập trình)`,
+      value,
+    )
   }
   if (!value || typeof value !== 'object') {
     loi(`Quan hệ "${ten}" rỗng hoặc sai kiểu`)

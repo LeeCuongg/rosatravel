@@ -24,6 +24,9 @@ export const imageAssetSchema = z.object({
   blurDataURL: z.string().startsWith('data:image/'),
 })
 
+// CHƯA CÓ DỮ LIỆU NÀO ĐI QUA ĐÂY: collection `media` của Payload chỉ sinh ra
+// ảnh, nên videoAssetSchema (và isVideoAsset ở './guards') hiện luôn nhận
+// nhánh false. Giữ nguyên có chủ đích — pipeline video là Task 12, chưa làm.
 export const videoAssetSchema = z
   .object({
     kind: z.literal('video'),

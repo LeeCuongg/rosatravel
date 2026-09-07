@@ -9,8 +9,7 @@ import type {
   TextFieldValidation,
 } from 'payload'
 
-import { routing } from '../i18n/routing'
-import { revalidatePathAnToan } from '../lib/revalidate'
+import { revalidateMoiTrangCoLocale, revalidatePathAnToan } from '../lib/revalidate'
 
 /**
  * Collection Tours — nơi nhân viên nhập nội dung một tour du lịch.
@@ -119,38 +118,32 @@ const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
  * tiến trình Next.js (route handler tại src/app/(payload)/api/[...slug] —
  * xem payload.config.ts) nên hook ở đây gọi thẳng revalidatePath, không cần
  * webhook gọi ra ngoài. Việc bắt lỗi "gọi ngoài request Next.js" (vd. khi một
- * script độc lập chạy bằng tsx gọi Local API) nằm ở src/lib/revalidate.ts —
- * dùng chung với Home.ts, không lặp lại ở đây.
+ * script độc lập gọi Local API) nằm ở src/lib/revalidate.ts — dùng chung với
+ * Media.ts và Home.ts, không lặp lại ở đây.
+ *
+ * Phạm vi làm mới là TOÀN BỘ nhánh /[locale] chứ không phải từng đường dẫn
+ * cụ thể (revalidateMoiTrangCoLocale — lý do đầy đủ ở src/lib/revalidate.ts).
+ * Sửa một tour không chỉ đổi trang tour đó: nó đổi danh sách tour nổi bật
+ * trên trang chủ VÀ danh sách chọn tour trong form ở /lien-he. Làm mới theo
+ * layout bao trọn cả ba, kể cả khi slug vừa đổi — không còn phải nhớ liệt kê
+ * đường dẫn cũ.
  */
-
-/** Làm mới trang tour + trang chủ (có thể đang hiện tour này ở danh sách nổi bật) cho mọi locale. */
-function revalidateTourAndHome(slug: string): void {
-  for (const locale of routing.locales) {
-    revalidatePathAnToan(`/${locale}/tour/${slug}`)
-    revalidatePathAnToan(`/${locale}`)
-  }
-}
 
 /**
  * afterChange: sửa nội dung một tour đã có phải lên trang trong vài giây,
- * không cần rebuild. Slug có thể đổi giữa các lần lưu — Payload cung cấp cả
- * doc mới lẫn previousDoc, nên vừa làm mới đường dẫn mới vừa làm mới đường
- * dẫn CŨ; bỏ sót đường dẫn cũ sẽ để lại một trang tĩnh mồ côi, trỏ tới nội
- * dung không còn ở đó nữa. Tour mới tạo, hoặc slug đổi, còn cần làm mới
- * sitemap.xml — danh sách URL nó liệt kê phải khớp danh sách tour thật.
+ * không cần rebuild. Tour mới tạo, hoặc slug đổi, còn cần làm mới sitemap.xml
+ * — nó nằm NGOÀI nhánh /[locale] (src/app/sitemap.ts) nên không được phạm vi
+ * layout ở trên phủ tới, và danh sách URL nó liệt kê phải khớp danh sách tour
+ * thật.
  */
 const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDoc, operation }) => {
   const slug = (doc as { slug?: string }).slug
   const previousSlug = (previousDoc as { slug?: string } | undefined)?.slug
   if (typeof slug !== 'string' || slug.length === 0) return doc
 
-  revalidateTourAndHome(slug)
+  revalidateMoiTrangCoLocale()
 
   const slugChanged = operation === 'update' && typeof previousSlug === 'string' && previousSlug !== slug
-  if (slugChanged) {
-    revalidateTourAndHome(previousSlug)
-  }
-
   if (operation === 'create' || slugChanged) {
     revalidatePathAnToan('/sitemap.xml')
   }
@@ -161,15 +154,14 @@ const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDo
 /**
  * afterDelete: `afterChange` KHÔNG chạy khi xoá document (đây là hai vòng đời
  * khác nhau trong Payload) — thiếu hook riêng này, trang tour đã xoá vẫn còn
- * phục vụ bản tĩnh cũ vô thời hạn. Cũng làm mới trang chủ (tour xoá có thể
- * đang nằm trong danh sách nổi bật) và sitemap (không được liệt kê URL đã
- * chết).
+ * phục vụ bản tĩnh cũ vô thời hạn. Cũng làm mới sitemap (không được liệt kê
+ * URL đã chết).
  */
 const revalidateToursAfterDelete: CollectionAfterDeleteHook = ({ doc }) => {
   const slug = (doc as { slug?: string } | undefined)?.slug
   if (typeof slug !== 'string' || slug.length === 0) return doc
 
-  revalidateTourAndHome(slug)
+  revalidateMoiTrangCoLocale()
   revalidatePathAnToan('/sitemap.xml')
 
   return doc

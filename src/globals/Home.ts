@@ -1,7 +1,6 @@
 import type { Field, GlobalAfterChangeHook, GlobalConfig, TextFieldValidation } from 'payload'
 
-import { routing } from '../i18n/routing'
-import { revalidatePathAnToan } from '../lib/revalidate'
+import { revalidateMoiTrangCoLocale } from '../lib/revalidate'
 
 /**
  * Global Home — nội dung trang chủ, nhập một lần và luôn chỉ có một bản ghi
@@ -59,13 +58,21 @@ const validateZaloUrl: TextFieldValidation = (value) => {
  * sửa global `home` trong admin không tự động hiện trên site tới khi có
  * on-demand revalidation. Payload chạy CHUNG tiến trình Next.js nên gọi thẳng
  * revalidatePath, không cần webhook. Việc bắt lỗi "gọi ngoài request
- * Next.js" (vd. khi một script độc lập chạy bằng tsx gọi Local API) nằm ở
- * src/lib/revalidate.ts — dùng chung với Tours.ts, không lặp lại ở đây.
+ * Next.js" (vd. khi một script độc lập gọi Local API) nằm ở
+ * src/lib/revalidate.ts — dùng chung với Tours.ts và Media.ts, không lặp lại
+ * ở đây.
+ *
+ * Phạm vi là TOÀN BỘ nhánh /[locale], không chỉ `/vi`. Global này KHÔNG chỉ
+ * nuôi trang chủ: src/app/[locale]/layout.tsx đọc getHomeContent() rồi truyền
+ * nhóm `contact` xuống Header (link Zalo) và Footer (điện thoại, email), và
+ * layout đó bọc MỌI trang. Chỉ làm mới `/vi` là kịch bản tệ nhất: chủ site đổi
+ * số điện thoại, mở trang chủ thấy số mới, yên tâm — trong khi mọi trang tour
+ * (nơi khách sắp đặt chỗ) và trang liên hệ vẫn hiện số cũ vô thời hạn.
+ * Chi tiết vì sao phải là mẫu '/[locale]' chứ không phải '/vi': xem
+ * src/lib/revalidate.ts.
  */
 const revalidateHomeAfterChange: GlobalAfterChangeHook = ({ doc }) => {
-  for (const locale of routing.locales) {
-    revalidatePathAnToan(`/${locale}`)
-  }
+  revalidateMoiTrangCoLocale()
   return doc
 }
 

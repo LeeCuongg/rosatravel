@@ -1,8 +1,39 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
 import { MEDIA_WIDTHS, OG_SIZE, generateBlurDataURL } from '@/lib/media/variants'
+import { revalidateMoiTrangCoLocale } from '@/lib/revalidate'
 
 const LARGEST_WIDTH = MEDIA_WIDTHS[MEDIA_WIDTHS.length - 1]
+
+/**
+ * Task 8 — "đăng là thấy ngay", phần dành cho ảnh.
+ *
+ * Sửa một bản ghi ảnh ĐỔI THẬT nội dung đang hiển thị, chứ không chỉ đổi thư
+ * viện: `alt` được gõ một lần trên bản ghi ảnh rồi dùng lại ở mọi nơi (xem
+ * README, mục Ảnh), còn khi thay file thì `url`, `width`, `height` và
+ * `blurDataURL` đều đổi theo. Thay file là ca nguy hiểm nhất: tên file trên
+ * Vercel Blob đổi, nên trang tour đã sinh tĩnh vẫn trỏ vào URL cũ và MỌI mục
+ * trong `srcset` trả 404 — ảnh biến mất khỏi trang đang chạy mà không có thao
+ * tác lưu nào báo lỗi.
+ *
+ * afterDelete cũng cần: xoá ảnh không kích hoạt afterChange (hai vòng đời
+ * khác nhau trong Payload).
+ *
+ * Phạm vi là toàn bộ nhánh /[locale], không cố tính xem trang nào đang dùng
+ * ảnh này. Một ảnh có thể nằm ở ảnh bìa tour, bộ ảnh, ảnh từng ngày, ảnh chia
+ * sẻ mạng xã hội, banner trang chủ, chặng hành trình hoặc avatar cảm nhận —
+ * truy ngược cho đủ nghĩa là truy vấn cả tour lẫn global home ngay trong hook,
+ * và bỏ sót một chỗ thì hậu quả đúng bằng việc không có hook nào.
+ */
+const revalidateMediaAfterChange: CollectionAfterChangeHook = ({ doc }) => {
+  revalidateMoiTrangCoLocale()
+  return doc
+}
+
+const revalidateMediaAfterDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  revalidateMoiTrangCoLocale()
+  return doc
+}
 
 /**
  * Collection Media — nơi duy nhất tạo ra file ảnh dùng trên toàn site.
@@ -137,5 +168,7 @@ export const Media: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [revalidateMediaAfterChange],
+    afterDelete: [revalidateMediaAfterDelete],
   },
 }

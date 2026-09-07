@@ -37,10 +37,26 @@ describe('mapMedia', () => {
     expect(() => mapMedia(thieu)).toThrow(/m1/)
   })
 
-  it('ném lỗi khi quan hệ chưa được nạp (chỉ còn id dạng chuỗi)', () => {
-    // Payload trả về id thay vì document khi depth không đủ. Đây là lỗi truy vấn,
-    // không phải lỗi dữ liệu, và thông báo phải nói đúng điều đó.
-    expect(() => mapMedia('m1')).toThrow(/chưa được nạp|depth/i)
+  it('ném lỗi khi quan hệ chỉ còn lại id', () => {
+    // Payload trả về id trần trong hai trường hợp không phân biệt được: ảnh đã
+    // bị xoá, hoặc truy vấn thiếu depth. Thông báo phải nêu CẢ HAI.
+    expect(() => mapMedia('m1')).toThrow(/m1/)
+  })
+
+  it('thông báo nêu cả hai nguyên nhân: bản ghi đã xoá và thiếu depth', () => {
+    // Ca thật hay gặp là nhân viên xoá một ảnh mà tour còn dùng. Bản cũ chỉ nói
+    // "tăng depth khi truy vấn Payload" — vừa sai nguyên nhân, vừa là việc
+    // người biên tập không thể làm. Test này giữ cho thông báo không rơi lại
+    // về một nửa sự thật đó.
+    let thongDiep = ''
+    try {
+      mapMedia('m1')
+    } catch (error) {
+      thongDiep = error instanceof Error ? error.message : String(error)
+    }
+    expect(thongDiep).toMatch(/xoá/i)
+    expect(thongDiep).toMatch(/\/admin/)
+    expect(thongDiep).toMatch(/depth/i)
   })
 })
 
