@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    tours: Tour;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    tours: ToursSelect<false> | ToursSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -210,6 +212,71 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tours".
+ */
+export interface Tour {
+  id: string;
+  slug: string;
+  title: {
+    vi: string;
+  };
+  tagline: {
+    vi: string;
+  };
+  summary: {
+    vi: string;
+  };
+  durationDays: number;
+  priceFrom: number;
+  destinations?:
+    | {
+        vi: string;
+        id?: string | null;
+      }[]
+    | null;
+  heroMedia: string | Media;
+  gallery: (string | Media)[];
+  itinerary?:
+    | {
+        title: {
+          vi: string;
+        };
+        description: {
+          vi: string;
+        };
+        media?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  inclusions?:
+    | {
+        vi: string;
+        id?: string | null;
+      }[]
+    | null;
+  exclusions?:
+    | {
+        vi: string;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: {
+    vi?: string | null;
+  };
+  seo: {
+    title: {
+      vi: string;
+    };
+    description: {
+      vi: string;
+    };
+    ogImage: string | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -239,6 +306,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'tours';
+        value: string | Tour;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -382,6 +453,88 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tours_select".
+ */
+export interface ToursSelect<T extends boolean = true> {
+  slug?: T;
+  title?:
+    | T
+    | {
+        vi?: T;
+      };
+  tagline?:
+    | T
+    | {
+        vi?: T;
+      };
+  summary?:
+    | T
+    | {
+        vi?: T;
+      };
+  durationDays?: T;
+  priceFrom?: T;
+  destinations?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  heroMedia?: T;
+  gallery?: T;
+  itinerary?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        description?:
+          | T
+          | {
+              vi?: T;
+            };
+        media?: T;
+        id?: T;
+      };
+  inclusions?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  exclusions?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  notes?:
+    | T
+    | {
+        vi?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        description?:
+          | T
+          | {
+              vi?: T;
+            };
+        ogImage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

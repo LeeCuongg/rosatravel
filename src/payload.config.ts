@@ -8,6 +8,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Media } from './collections/Media'
+import { Tours } from './collections/Tours'
 import { Users } from './collections/Users'
 
 /**
@@ -49,7 +50,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Tours],
   editor: lexicalEditor(),
   secret: PAYLOAD_SECRET,
   typescript: {
