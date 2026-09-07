@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RosaTravel
 
-## Getting Started
+Landing page bán tour du lịch, tập trung vào trải nghiệm cuộn dạng *cinematic scroll-telling*.
 
-First, run the development server:
+Next.js 15 (App Router) · TypeScript · Tailwind v4 · Motion · GSAP ScrollTrigger · Lenis · next-intl
+
+## Chạy dự án
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm placeholders   # BẮT BUỘC ở lần đầu — xem mục Ảnh bên dưới
+pnpm dev            # http://localhost:3000/vi
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`/` tự chuyển hướng sang `/vi`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ảnh — đọc trước khi build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`public/media/` và `assets-src/` nằm trong `.gitignore`, nên **một bản clone mới không có ảnh nào**. Trang sẽ build được nhưng mọi ảnh đều 404 cho tới khi bạn sinh chúng.
 
-## Learn More
+```bash
+pnpm placeholders   # sinh ảnh giữ chỗ để dự án chạy được
+pnpm media          # xử lý ảnh thật đặt trong assets-src/
+pnpm video          # encode video trong assets-src/video/ (cần ffmpeg)
+```
 
-To learn more about Next.js, take a look at the following resources:
+**Quy trình đưa ảnh thật vào:**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Đặt ảnh gốc vào `assets-src/` (đặt theo thư mục tour cho dễ quản lý)
+2. Chạy `pnpm media` — sinh AVIF/WebP ở 4 bề rộng 640/1024/1600/2400, kèm blur placeholder
+3. Script ghi metadata ra `content/media-manifest.json`; copy khối cần dùng sang `content/tours/*.json` và **điền `alt` tiếng Việt** (script để `TODO` vì nó không biết ảnh chụp gì)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ảnh gốc nên rộng ít nhất 2400px. Script sẽ cảnh báo nếu nhỏ hơn — ảnh vẫn hiển thị nhưng sẽ mờ trên màn hình lớn.
 
-## Deploy on Vercel
+**Khi deploy:** vì `public/media` bị gitignore, chọn một trong hai cách và giữ nhất quán — hoặc chạy `pnpm media && pnpm video` trong build command của Vercel (phải commit `assets-src/`, repo nặng), hoặc bỏ `public/media` khỏi `.gitignore` và commit ảnh đã tối ưu (khuyến nghị: AVIF đã nén nhỏ hơn ảnh gốc nhiều lần).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Nội dung
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Nội dung nằm trong `content/`, được validate bằng zod lúc đọc:
+
+```
+content/home.json              nội dung trang chủ
+content/tours/<slug>.json      mỗi tour một file
+```
+
+Component **chỉ** đọc nội dung qua `src/lib/content/index.ts`. Không component nào biết dữ liệu nằm ở đâu hay lưu dạng gì — đó là điều kiện để sau này thay bằng CMS mà không đụng giao diện.
+
+Mọi trường văn bản hướng người đọc bọc theo ngôn ngữ: `{ "vi": "..." }`. Thêm tiếng Anh sau này là thêm khoá `en`, không phải sửa schema.
+
+> **Chưa thay:** `content/home.json` đang để số điện thoại `0900000000` và email `lienhe@example.com` làm giá trị mẫu.
+
+## Biến môi trường
+
+Copy `.env.example` thành `.env.local`:
+
+| Biến | Dùng để |
+|---|---|
+| `RESEND_API_KEY` | Gửi email từ form liên hệ. Thiếu → form trả lỗi 500 có kiểm soát |
+| `CONTACT_EMAIL_TO` | Địa chỉ nhận yêu cầu đặt tour |
+| `CONTACT_EMAIL_FROM` | Địa chỉ gửi (phải thuộc domain đã xác thực ở Resend) |
+| `NEXT_PUBLIC_SITE_URL` | URL gốc cho metadata, sitemap và robots |
+
+## Hệ animation
+
+Ba tầng, quyết định tại runtime từ `prefers-reduced-motion`, loại con trỏ, RAM và số nhân CPU:
+
+| Tầng | Khi nào | Hành vi |
+|---|---|---|
+| `reduced` | Người dùng bật giảm chuyển động | Chỉ fade. Không pin, không scrub, tắt smooth scroll |
+| `lite` | Cảm ứng, RAM ≤ 4GB, hoặc CPU ≤ 4 nhân | Bố cục thay thế hoàn chỉnh — không pin, không scrub |
+| `full` | Còn lại | Đầy đủ |
+
+Tầng `lite` **không phải bản bị cắt xén**: các section cinematic có bố cục riêng được thiết kế cho màn hình nhỏ.
+
+Quy ước bắt buộc khi sửa code animation:
+
+- Chỉ animate `transform` và `opacity`
+- Timing JS lấy từ `src/lib/motion/tokens.ts`; timing CSS lấy từ biến `--duration-*` / `--ease-*` trong `globals.css`. Hai bản phải khớp nhau
+- `transition-*` đứng một mình cũng không được — nó lấy easing mặc định của Tailwind, không khớp token
+- Component nào tạo ScrollTrigger thì tự kill trong cleanup của mình
+- Mọi `import()` GSAP/Lenis phải có `.catch`
+
+## Lệnh
+
+```bash
+pnpm dev            # server phát triển
+pnpm build          # build production
+pnpm start          # chạy bản build
+pnpm test           # Vitest
+pnpm lint           # ESLint
+pnpm placeholders   # sinh ảnh giữ chỗ
+pnpm media          # xử lý ảnh trong assets-src/
+pnpm video          # encode video (cần ffmpeg)
+```
+
+## Tài liệu thiết kế
+
+- [Spec giai đoạn 1](docs/superpowers/specs/2026-09-06-travel-landing-page-design.md) — phạm vi, kiến trúc, tiêu chí nghiệm thu
+- [Implementation plan](docs/superpowers/plans/2026-09-06-travel-landing-page-phase1.md) — 15 task, từng bước một
