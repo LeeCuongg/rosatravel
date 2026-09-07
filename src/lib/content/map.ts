@@ -37,7 +37,7 @@ function phaiLaDocument(value: unknown, ten: string): Record<string, unknown> {
   if (typeof value === 'string' || typeof value === 'number') {
     loi(
       `Quan hệ "${ten}" chỉ còn lại id — hoặc bản ghi được trỏ tới đã bị xoá ` +
-        `(vào /admin, gắn lại bản ghi khác hoặc bỏ liên kết này), hoặc truy vấn thiếu depth (lỗi lập trình)`,
+        `(vào /admin, gắn lại bản ghi khác hoặc bỏ liên kết này), hoặc truy vấn thiếu depth — lỗi lập trình`,
       value,
     )
   }

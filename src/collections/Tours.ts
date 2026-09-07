@@ -137,13 +137,19 @@ const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
  * thật.
  */
 const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDoc, operation }) => {
-  const slug = (doc as { slug?: string }).slug
-  const previousSlug = (previousDoc as { slug?: string } | undefined)?.slug
-  if (typeof slug !== 'string' || slug.length === 0) return doc
-
+  // Không chốt theo slug trước khi làm gì cả: cả hai lời gọi bên dưới đều
+  // không cần tới slug. Chỉ phép so sánh slug cũ/mới mới cần, và thiếu slug
+  // thì phép so sánh đó đơn giản là false. Chốt sớm sẽ bỏ qua TOÀN BỘ việc
+  // làm mới cho một document thiếu slug — kể cả sitemap.
   revalidateMoiTrangCoLocale()
 
-  const slugChanged = operation === 'update' && typeof previousSlug === 'string' && previousSlug !== slug
+  const slug = (doc as { slug?: string }).slug
+  const previousSlug = (previousDoc as { slug?: string } | undefined)?.slug
+  const slugChanged =
+    operation === 'update' &&
+    typeof slug === 'string' &&
+    typeof previousSlug === 'string' &&
+    previousSlug !== slug
   if (operation === 'create' || slugChanged) {
     revalidatePathAnToan('/sitemap.xml')
   }
@@ -158,9 +164,8 @@ const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDo
  * URL đã chết).
  */
 const revalidateToursAfterDelete: CollectionAfterDeleteHook = ({ doc }) => {
-  const slug = (doc as { slug?: string } | undefined)?.slug
-  if (typeof slug !== 'string' || slug.length === 0) return doc
-
+  // Cũng không chốt theo slug — không lời gọi nào dưới đây dùng tới nó, mà
+  // sitemap thì đặc biệt không được bỏ sót: bỏ sót là để URL chết nằm lại.
   revalidateMoiTrangCoLocale()
   revalidatePathAnToan('/sitemap.xml')
 

@@ -72,8 +72,8 @@ export function revalidatePathAnToan(duongDan: string, kieu?: 'layout' | 'page')
         true,
       )
       // Giữ lỗi gốc để lập trình viên vẫn lần được stack trace đầy đủ trong log
-      // server. APIError dùng chỗ `cause` cho tham số `data`, nhưng data ở đây
-      // là undefined nên gán đè không mất gì.
+      // server. APIError dùng chỗ `cause` cho tham số `data`; ta truyền
+      // undefined nên constructor để nó về mặc định null — gán đè không mất gì.
       loiChoNguoiBienTap.cause = error
       throw loiChoNguoiBienTap
     }
