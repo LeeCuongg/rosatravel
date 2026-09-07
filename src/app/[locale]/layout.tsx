@@ -15,14 +15,14 @@ import '../globals.css'
 
 const sans = Be_Vietnam_Pro({
   subsets: ['vietnamese', 'latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500'],
   variable: '--font-be-vietnam',
   display: 'swap',
 })
 
 const display = Playfair_Display({
   subsets: ['vietnamese', 'latin'],
-  weight: ['400', '600'],
+  weight: ['400'],
   variable: '--font-playfair',
   display: 'swap',
 })
