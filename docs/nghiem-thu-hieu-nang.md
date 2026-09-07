@@ -1,5 +1,13 @@
 # Nghiệm thu hiệu năng — Task 15 (một phần)
 
+## Cập nhật 2026-09-07 — sau đợt sửa lỗi review toàn nhánh
+
+**Accessibility (Lighthouse, mobile, `/vi`):** điểm **0.98**. Audit `color-contrast` đạt tuyệt đối (1.0) sau khi nâng `--color-ink-500` (3.48:1 → 5.53:1) và `--color-clay-500` (3.92:1 → 5.91:1); tách riêng `--color-clay-600` (6.13:1) làm nền cho 4 nút CTA vì bản thân `--color-clay-500` mới sáng hơn không còn đủ tương phản khi dùng làm nền với chữ sáng. Audit còn lại chưa đạt: `heading-order` (thứ tự heading không tuần tự) — lỗi có sẵn từ trước, không liên quan tới đợt sửa màu sắc này, không nằm trong phạm vi đợt sửa.
+
+**Performance (Lighthouse, mobile, `/vi`, simulated throttling), đo sau toàn bộ 8 nhóm sửa lỗi:** 3 lần đo liên tiếp cho **score 0.95–0.96, LCP 2.6–2.8s, FCP 1.7s** — cao hơn hẳn con số "sau" 99/2.0s/0.8s ghi ở bảng dưới. Để loại trừ khả năng đợt sửa lỗi này gây regression thật, đã dựng lại đúng commit `b344429` (điểm mốc "sau" gốc) trong một git worktree riêng và đo lại **dưới cùng điều kiện máy hiện tại**: kết quả **score 0.95, LCP 2.9s, FCP 1.7s** — gần như giống hệt số đo sau khi sửa. Kết luận: chênh lệch so với bảng gốc là do **tải hệ thống của máy đo tại thời điểm đo, không phải do các thay đổi trong đợt sửa lỗi này** — 8 nhóm sửa lỗi (site.ts, og-image, màu sắc, contact route, ContactForm, next-intl Link, tier flash, React key/sizes/JSON-LD) không đổi bundle JS trang chủ theo hướng đáng kể (167kB → 169kB, do thêm `src/i18n/navigation.ts` cho 4 chỗ Link). Số liệu trong bảng gốc bên dưới **không được thay thế** — giữ nguyên làm mốc tham chiếu vào ngày đo gốc; số đo lại hôm nay được ghi nhận riêng ở đây vì môi trường đo không lặp lại được cùng điều kiện tải hệ thống.
+
+File JSON kết quả các lần đo: `.superpowers/perf/lh-a11y.json` (accessibility), `.superpowers/perf/lh-home-mobile-final.json`, `-final2.json`, `-final3.json` (performance sau sửa), `lh-baseline-check.json` (đo lại b344429 dưới cùng điều kiện để đối chứng).
+
 ## Điều kiện đo
 
 - Công cụ: Lighthouse CLI (`lighthouse@latest`, v13.4.1), Chrome headless (`--headless=new --no-sandbox --disable-gpu`).
