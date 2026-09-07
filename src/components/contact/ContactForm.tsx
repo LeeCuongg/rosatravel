@@ -3,23 +3,44 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { PHONE_PATTERN } from '@/lib/contact/validate'
 
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
 export function ContactForm({ tours }: { tours: { slug: string; label: string }[] }) {
   const t = useTranslations('contact')
+  const te = useTranslations('errors')
   const params = useSearchParams()
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setStatus('sending')
 
     // Giữ tham chiếu form TRƯỚC khi await: React tái sử dụng sự kiện tổng hợp,
     // sau await thì event.currentTarget đã là null và .reset() sẽ ném lỗi.
     const formEl = event.currentTarget
     const form = new FormData(formEl)
+
+    const name = String(form.get('name') ?? '').trim()
+    if (!name) {
+      setStatus('error')
+      setMessage(te('nameRequired'))
+      return
+    }
+
+    // Cùng PHONE_PATTERN với server (src/lib/contact/validate.ts) — validate ở
+    // đây chỉ để báo lỗi sớm, server vẫn là nguồn sự thật cuối cùng.
+    const phone = String(form.get('phone') ?? '')
+      .trim()
+      .replace(/[\s.\-()]/g, '')
+    if (!PHONE_PATTERN.test(phone)) {
+      setStatus('error')
+      setMessage(te('phoneInvalid'))
+      return
+    }
+
+    setStatus('sending')
 
     const response = await fetch('/api/contact', {
       method: 'POST',
@@ -31,6 +52,16 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
       setStatus('success')
       setMessage(t('success'))
       formEl.reset()
+      return
+    }
+
+    if (response?.status === 400) {
+      const data: { error?: string } | null = await response.json().catch(() => null)
+      setStatus('error')
+      setMessage(data?.error || t('error'))
+    } else if (response?.status === 429) {
+      setStatus('error')
+      setMessage(t('tooMany'))
     } else {
       setStatus('error')
       setMessage(t('error'))

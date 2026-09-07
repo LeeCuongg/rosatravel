@@ -36,7 +36,8 @@
     "submit": "Gửi yêu cầu",
     "sending": "Đang gửi...",
     "success": "Đã nhận yêu cầu. Chúng tôi sẽ liên hệ trong 24 giờ.",
-    "error": "Gửi không thành công. Vui lòng gọi trực tiếp cho chúng tôi."
+    "error": "Gửi không thành công. Vui lòng gọi trực tiếp cho chúng tôi.",
+    "tooMany": "Bạn vừa gửi quá nhiều yêu cầu. Vui lòng thử lại sau một phút."
   },
   "errors": {
     "nameRequired": "Vui lòng nhập họ tên",
