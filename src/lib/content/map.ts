@@ -61,6 +61,36 @@ export function mapMedia(doc: unknown): ImageAsset {
   }
 }
 
+/**
+ * Ảnh chia sẻ mạng xã hội dùng biến thể `og` mà collection Media sinh sẵn:
+ * JPEG 1200×630, cắt sẵn, không hậu tố kích thước.
+ *
+ * KHÔNG dùng mapMedia ở đây. mapMedia trả URL gốc để next/image gắn thêm biến
+ * thể theo bề rộng — nhưng URL trong thẻ og: không bao giờ đi qua loader, và
+ * Zalo lẫn Facebook không đọc được AVIF. Lấy nhầm bản gốc nghĩa là thẻ share
+ * hiện ảnh sai tỉ lệ, hoặc không hiện gì.
+ */
+export function mapOgImage(doc: unknown): ImageAsset {
+  const m = phaiLaDocument(doc, 'ảnh chia sẻ mạng xã hội')
+  const og = (m.sizes as Record<string, Record<string, unknown>> | undefined)?.og
+  if (!og?.url) {
+    loi(
+      'Ảnh chia sẻ mạng xã hội chưa có biến thể og — tải lại ảnh này trong /admin để sinh bản 1200×630',
+      m.id,
+    )
+  }
+  if (!m.blurDataURL) {
+    loi('Ảnh thiếu blurDataURL — hook sinh ảnh mờ không chạy, thử tải lại ảnh', m.id)
+  }
+  return {
+    src: String(og.url),
+    alt: m.alt as ImageAsset['alt'],
+    width: Number(og.width),
+    height: Number(og.height),
+    blurDataURL: String(m.blurDataURL),
+  }
+}
+
 export function mapTour(doc: unknown): unknown {
   const t = phaiLaDocument(doc, 'tour')
   const itinerary = (t.itinerary as unknown[] | undefined) ?? []
@@ -97,7 +127,7 @@ export function mapTour(doc: unknown): unknown {
     seo: {
       title: (t.seo as Record<string, unknown>)?.title,
       description: (t.seo as Record<string, unknown>)?.description,
-      ogImage: mapMedia((t.seo as Record<string, unknown>)?.ogImage),
+      ogImage: mapOgImage((t.seo as Record<string, unknown>)?.ogImage),
     },
   }
 }

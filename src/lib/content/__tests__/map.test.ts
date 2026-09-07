@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapMedia, mapTour, mapHome } from '../map'
+import { mapMedia, mapOgImage, mapTour, mapHome } from '../map'
 import { imageAssetSchema, tourSchema, homeContentSchema } from '../schema'
 
 const mediaDoc = {
@@ -9,6 +9,15 @@ const mediaDoc = {
   height: 1350,
   alt: { vi: 'Đèo Mã Pí Lèng nhìn từ trên cao' },
   blurDataURL: 'data:image/webp;base64,UklGRg==',
+  // Biến thể og mà collection Media sinh sẵn — JPEG 1200×630 cắt sẵn, tên
+  // riêng không theo quy ước "-<width>.<ext>" vì không đi qua loader.
+  sizes: {
+    og: {
+      url: 'https://blob.example.com/anh-og.jpg',
+      width: 1200,
+      height: 630,
+    },
+  },
 }
 
 describe('mapMedia', () => {
@@ -32,6 +41,23 @@ describe('mapMedia', () => {
     // Payload trả về id thay vì document khi depth không đủ. Đây là lỗi truy vấn,
     // không phải lỗi dữ liệu, và thông báo phải nói đúng điều đó.
     expect(() => mapMedia('m1')).toThrow(/chưa được nạp|depth/i)
+  })
+})
+
+describe('mapOgImage', () => {
+  it('lấy URL và kích thước từ sizes.og, không phải bản gốc', () => {
+    // Bản gốc (mediaDoc.url/width/height) là 2400x1350 — nếu mapOgImage lỡ đọc
+    // nhầm trường gốc thay vì sizes.og, thẻ chia sẻ mạng xã hội sẽ hiện ảnh sai
+    // tỉ lệ. sizes.og luôn đúng 1200x630, cắt sẵn cho Facebook/Zalo.
+    const result = imageAssetSchema.parse(mapOgImage(mediaDoc))
+    expect(result.src).toBe('https://blob.example.com/anh-og.jpg')
+    expect(result.width).toBe(1200)
+    expect(result.height).toBe(630)
+  })
+
+  it('ném lỗi nói rõ id khi ảnh chưa có biến thể og', () => {
+    const { sizes, ...thieuOg } = mediaDoc
+    expect(() => mapOgImage(thieuOg)).toThrow(/m1/)
   })
 })
 
@@ -97,6 +123,15 @@ describe('mapTour', () => {
   it('giữ notes khi có nội dung thật', () => {
     const result = tourSchema.parse(mapTour({ ...tourDoc, notes: { vi: 'Mang theo áo ấm.' } }))
     expect(result.notes).toEqual({ vi: 'Mang theo áo ấm.' })
+  })
+
+  it('lấy seo.ogImage từ biến thể og 1200×630, không phải ảnh gốc', () => {
+    // Đây là chỗ GĐ1 từng để lọt lỗi: dùng mapMedia (URL gốc) cho seo.ogImage
+    // khiến thẻ chia sẻ mạng xã hội hiện ảnh sai tỉ lệ. mapOgImage sửa việc đó.
+    const result = tourSchema.parse(mapTour(tourDoc))
+    expect(result.seo.ogImage.src).toBe('https://blob.example.com/anh-og.jpg')
+    expect(result.seo.ogImage.width).toBe(1200)
+    expect(result.seo.ogImage.height).toBe(630)
   })
 })
 
