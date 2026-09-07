@@ -7,6 +7,7 @@ import { routing } from '@/i18n/routing'
 import { MotionTierProvider } from '@/lib/motion/MotionTierProvider'
 import { SmoothScroll } from '@/lib/motion/SmoothScroll'
 import { getHomeContent } from '@/lib/content'
+import { SITE_URL } from '@/lib/site'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
@@ -31,7 +32,7 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(SITE_URL),
   // Metadata tĩnh không gọi được useTranslations, nên tên thương hiệu buộc phải
   // viết thẳng ở đây. Nếu đổi tên, nhớ đổi cả messages/vi.json khoá brand.name.
   title: { default: 'RosaTravel', template: '%s | RosaTravel' },
