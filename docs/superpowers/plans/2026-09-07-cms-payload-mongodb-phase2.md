@@ -378,14 +378,14 @@ Tạo `src/collections/Tours.ts`. Các trường và ràng buộc:
 | `summary` | group `{ vi: textarea }` | `vi` bắt buộc | Mô tả tổng quan |
 | `durationDays` | number | bắt buộc, nguyên, > 0 | Số ngày |
 | `priceFrom` | number | bắt buộc, > 0 | Giá từ (VND) |
-| `destinations` | array of group `{ vi: text }` | tối thiểu 1 | Điểm đến |
+| `destinations` | array of group `{ vi: text }` | **`required: true`** + `minRows: 1` | Điểm đến |
 | `heroMedia` | relationship → `media` | bắt buộc | Ảnh bìa |
 | `gallery` | relationship → `media`, hasMany | tối thiểu 1 | Bộ ảnh |
 | `itinerary` | array | số phần tử phải bằng `durationDays` | Lịch trình từng ngày |
 | `itinerary[].title` | group `{ vi: text }` | bắt buộc | Tiêu đề ngày |
 | `itinerary[].description` | group `{ vi: textarea }` | bắt buộc | Mô tả ngày |
 | `itinerary[].media` | relationship → `media` | không bắt buộc | Ảnh của ngày |
-| `inclusions` | array of group `{ vi: text }` | tối thiểu 1 | Bao gồm |
+| `inclusions` | array of group `{ vi: text }` | **`required: true`** + `minRows: 1` | Bao gồm |
 | `exclusions` | array of group `{ vi: text }` | cho phép rỗng | Không bao gồm |
 | `notes` | group `{ vi: textarea }` | không bắt buộc | Ghi chú |
 | `seo.title` | group `{ vi: text }` | bắt buộc | Tiêu đề SEO |
@@ -393,6 +393,8 @@ Tạo `src/collections/Tours.ts`. Các trường và ràng buộc:
 | `seo.ogImage` | relationship → `media` | bắt buộc | Ảnh chia sẻ mạng xã hội |
 
 **Không khai `currency`.** `tourSchema` bắt buộc nó là hằng `'VND'`; bắt người nhập chọn một giá trị chỉ có một lựa chọn là phiền vô ích. Task 5 sẽ gán cứng `'VND'` khi ánh xạ.
+
+**`minRows` KHÔNG có tác dụng nếu thiếu `required: true`.** Payload trả về hợp lệ ngay khi mảng rỗng mà trường không bắt buộc (`validations.js`: `if (!required && arrayLength === 0) return true`), nên `minRows` không bao giờ được kiểm. Thiếu `required` nghĩa là người nhập lưu được tour không có điểm đến nào — và lỗi chỉ lộ ra lúc build ở Task 5.
 
 **`itinerary` phải khớp `durationDays`.** Thêm validate ở cấp collection với thông báo tiếng Việt: "Số ngày trong lịch trình (X) không khớp Số ngày (Y)". Đây là ràng buộc mà `tourSchema` đã có; bắt nó ngay trong admin thì người nhập sửa được ngay, còn để tới zod thì họ chỉ thấy build vỡ.
 
