@@ -7,6 +7,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 
 /**
@@ -48,7 +49,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users],
+  collections: [Users, Media],
   editor: lexicalEditor(),
   secret: PAYLOAD_SECRET,
   typescript: {
@@ -61,9 +62,15 @@ export default buildConfig({
   plugins: [
     vercelBlobStorage({
       enabled: true,
-      // Chưa có collection nội dung nào dùng upload ở task này (Task 1 GĐ2).
-      // Collection Media sẽ được thêm ở task sau và khai ở đây.
-      collections: {},
+      collections: {
+        // disablePayloadAccessControl: true để trường `url` trỏ thẳng ra domain
+        // public của Vercel Blob thay vì route proxy /api/media/file/<tên file>
+        // của Payload. Mặc định (không đặt cờ này) mọi request ảnh phải qua
+        // server Payload để proxy tới Blob — đúng cái chi phí runtime mà pipeline
+        // ảnh của GĐ1 được sinh ra để triệt tiêu. Next/image loader (Task 7)
+        // cũng cần URL Blob thật để suy ra bốn mốc bằng biến đổi chuỗi thuần.
+        media: { disablePayloadAccessControl: true },
+      },
       token: BLOB_READ_WRITE_TOKEN,
     }),
   ],
