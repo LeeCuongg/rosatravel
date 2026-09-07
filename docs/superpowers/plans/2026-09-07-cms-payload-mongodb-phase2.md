@@ -988,7 +988,12 @@ Expected: FAIL ở các trường hợp dùng quy ước mới
 
 - [ ] **Step 4: Sửa loader**
 
-Giữ nguyên chữ ký và giữ nguyên hai lối thoát sớm hiện có (URL của dịch vụ khác đi thẳng; URL đã có mốc thì giữ nguyên). Chỉ đổi phần dựng URL biến thể.
+Giữ nguyên chữ ký. Nhưng **hai lối thoát sớm cũ đều phải viết lại**, không giữ nguyên:
+
+- **"URL của dịch vụ khác đi thẳng"** trước đây kiểm bằng "có phải URL tuyệt đối không". URL của Vercel Blob cũng tuyệt đối, nên giữ nguyên là loader bỏ qua *mọi* ảnh. Đổi sang kiểm tên miền Blob.
+- **"URL đã có mốc kích thước thì giữ nguyên"** phải **bỏ hẳn**. Nó là phỏng đoán dựa trên tên file, và không có cách nào phân biệt một biến thể thật với một ảnh gốc tình cờ đặt tên giống. Ảnh seed thật tên `hero-2400.avif` khớp đúng mẫu đó, khiến loader trả ảnh gốc cho mọi bề rộng — điện thoại tải bản 2400px, mọi biến thể vô dụng, không lỗi nào.
+
+Bỏ được vì `mapMedia` **luôn** trả URL gốc, không bao giờ trả biến thể, và Next.js luôn gọi loader với `src` nguyên bản cho từng mốc — nên không có đường nào để loader nhận lại output của chính nó.
 
 - [ ] **Step 5: Chạy test và kiểm bằng mắt**
 
