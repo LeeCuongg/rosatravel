@@ -1,4 +1,7 @@
-import type { Field, GlobalConfig, TextFieldValidation } from 'payload'
+import { revalidatePath } from 'next/cache'
+import type { Field, GlobalAfterChangeHook, GlobalConfig, TextFieldValidation } from 'payload'
+
+import { routing } from '../i18n/routing'
 
 /**
  * Global Home — nội dung trang chủ, nhập một lần và luôn chỉ có một bản ghi
@@ -50,11 +53,43 @@ const validateZaloUrl: TextFieldValidation = (value) => {
   return true
 }
 
+/**
+ * Task 8 — "đăng là thấy ngay". Trang chủ được sinh tĩnh (không có
+ * `export const revalidate`/`dynamic` trong src/app/[locale]/page.tsx), nên
+ * sửa global `home` trong admin không tự động hiện trên site tới khi có
+ * on-demand revalidation. Payload chạy CHUNG tiến trình Next.js nên gọi thẳng
+ * revalidatePath, không cần webhook.
+ *
+ * Cùng lý do bọc try/catch như src/collections/Tours.ts: revalidatePath() chỉ
+ * hoạt động khi đang chạy TRONG một request Next.js (đọc AsyncLocalStorage
+ * nội bộ của Next). Khi admin lưu qua route handler REST của Payload thì có
+ * — hoạt động bình thường. Khi Payload Local API được gọi từ script độc lập
+ * ngoài tiến trình Next (vd. `pnpm seed`), không có — nó ném "Invariant:
+ * static generation store missing". Không để lỗi dọn cache đó làm hỏng chính
+ * thao tác lưu.
+ */
+const revalidateHomeAfterChange: GlobalAfterChangeHook = ({ doc }) => {
+  for (const locale of routing.locales) {
+    try {
+      revalidatePath(`/${locale}`)
+    } catch (err) {
+      console.warn(
+        `[revalidate] Bỏ qua lỗi revalidatePath("/${locale}") — có thể đang chạy ngoài request Next.js:`,
+        err,
+      )
+    }
+  }
+  return doc
+}
+
 export const Home: GlobalConfig = {
   slug: 'home',
   label: 'Trang chủ',
   admin: {
     description: 'Nội dung hiển thị trên trang chủ. Chỉ có một bản ghi duy nhất.',
+  },
+  hooks: {
+    afterChange: [revalidateHomeAfterChange],
   },
   fields: [
     {

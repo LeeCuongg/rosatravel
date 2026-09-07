@@ -1,11 +1,16 @@
+import { revalidatePath } from 'next/cache'
 import type {
   ArrayFieldValidation,
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
   CollectionConfig,
   Field,
   FieldHook,
   NumberFieldSingleValidation,
   TextFieldValidation,
 } from 'payload'
+
+import { routing } from '../i18n/routing'
 
 /**
  * Collection Tours — nơi nhân viên nhập nội dung một tour du lịch.
@@ -108,6 +113,84 @@ const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
 }
 
 /**
+ * Task 8 — "đăng là thấy ngay". Mọi trang trong site được sinh tĩnh (không có
+ * `export const revalidate`/`dynamic` nào trong src/app), nên nội dung cũ
+ * sống mãi trong cache tới khi có on-demand revalidation. Payload chạy CHUNG
+ * tiến trình Next.js (route handler tại src/app/(payload)/api/[...slug] —
+ * xem payload.config.ts) nên hook ở đây gọi thẳng revalidatePath, không cần
+ * webhook gọi ra ngoài.
+ *
+ * revalidatePath() chỉ hoạt động khi được gọi TRONG một request Next.js đang
+ * xử lý (route handler/server action) — nó đọc AsyncLocalStorage nội bộ của
+ * Next (workAsyncStorage). Khi admin lưu trên UI, request đi qua route handler
+ * REST của Payload nên store luôn có sẵn — hoạt động bình thường. Nhưng khi
+ * Payload Local API được gọi từ một script độc lập ngoài tiến trình Next (vd.
+ * `pnpm seed` chạy bằng tsx, hoặc script kiểm chứng của task này), không có
+ * request nào đang chạy nên revalidatePath ném "Invariant: static generation
+ * store missing". Bọc try/catch để việc dọn cache — vốn không phải phần cốt
+ * lõi của thao tác lưu/xoá — không bao giờ làm hỏng chính thao tác đó.
+ */
+function safeRevalidatePath(path: string): void {
+  try {
+    revalidatePath(path)
+  } catch (err) {
+    console.warn(`[revalidate] Bỏ qua lỗi revalidatePath("${path}") — có thể đang chạy ngoài request Next.js:`, err)
+  }
+}
+
+/** Làm mới trang tour + trang chủ (có thể đang hiện tour này ở danh sách nổi bật) cho mọi locale. */
+function revalidateTourAndHome(slug: string): void {
+  for (const locale of routing.locales) {
+    safeRevalidatePath(`/${locale}/tour/${slug}`)
+    safeRevalidatePath(`/${locale}`)
+  }
+}
+
+/**
+ * afterChange: sửa nội dung một tour đã có phải lên trang trong vài giây,
+ * không cần rebuild. Slug có thể đổi giữa các lần lưu — Payload cung cấp cả
+ * doc mới lẫn previousDoc, nên vừa làm mới đường dẫn mới vừa làm mới đường
+ * dẫn CŨ; bỏ sót đường dẫn cũ sẽ để lại một trang tĩnh mồ côi, trỏ tới nội
+ * dung không còn ở đó nữa. Tour mới tạo, hoặc slug đổi, còn cần làm mới
+ * sitemap.xml — danh sách URL nó liệt kê phải khớp danh sách tour thật.
+ */
+const revalidateToursAfterChange: CollectionAfterChangeHook = ({ doc, previousDoc, operation }) => {
+  const slug = (doc as { slug?: string }).slug
+  const previousSlug = (previousDoc as { slug?: string } | undefined)?.slug
+  if (typeof slug !== 'string' || slug.length === 0) return doc
+
+  revalidateTourAndHome(slug)
+
+  const slugChanged = operation === 'update' && typeof previousSlug === 'string' && previousSlug !== slug
+  if (slugChanged) {
+    revalidateTourAndHome(previousSlug)
+  }
+
+  if (operation === 'create' || slugChanged) {
+    safeRevalidatePath('/sitemap.xml')
+  }
+
+  return doc
+}
+
+/**
+ * afterDelete: `afterChange` KHÔNG chạy khi xoá document (đây là hai vòng đời
+ * khác nhau trong Payload) — thiếu hook riêng này, trang tour đã xoá vẫn còn
+ * phục vụ bản tĩnh cũ vô thời hạn. Cũng làm mới trang chủ (tour xoá có thể
+ * đang nằm trong danh sách nổi bật) và sitemap (không được liệt kê URL đã
+ * chết).
+ */
+const revalidateToursAfterDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  const slug = (doc as { slug?: string } | undefined)?.slug
+  if (typeof slug !== 'string' || slug.length === 0) return doc
+
+  revalidateTourAndHome(slug)
+  safeRevalidatePath('/sitemap.xml')
+
+  return doc
+}
+
+/**
  * Ràng buộc cốt lõi của task này: số phần tử trong `itinerary` phải khớp
  * `durationDays`. `data` là dữ liệu toàn bộ document (đây là field cấp cao
  * nhất, không nằm trong group/array khác) nên đọc thẳng `data.durationDays`
@@ -139,6 +222,10 @@ export const Tours: CollectionConfig = {
     // vì nhân viên cần nó để lấy URL.
     useAsTitle: 'displayTitle',
     defaultColumns: ['displayTitle', 'slug', 'durationDays', 'priceFrom'],
+  },
+  hooks: {
+    afterChange: [revalidateToursAfterChange],
+    afterDelete: [revalidateToursAfterDelete],
   },
   fields: [
     {
