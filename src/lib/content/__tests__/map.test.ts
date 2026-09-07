@@ -86,6 +86,18 @@ describe('mapTour', () => {
     const sai = { ...tourDoc, durationDays: 5 }
     expect(() => tourSchema.parse(mapTour(sai))).toThrow()
   })
+
+  it('bỏ notes khi người nhập xoá hết nội dung — Payload lưu thành { vi: "" }', () => {
+    // Đây là lý do coNoiDung tồn tại: { vi: '' } là truthy, nên kiểm tra
+    // `t.notes ? ...` sẽ để nó lọt qua rồi vỡ ở localizedTextSchema.min(1).
+    const result = tourSchema.parse(mapTour({ ...tourDoc, notes: { vi: '' } }))
+    expect(result.notes).toBeUndefined()
+  })
+
+  it('giữ notes khi có nội dung thật', () => {
+    const result = tourSchema.parse(mapTour({ ...tourDoc, notes: { vi: 'Mang theo áo ấm.' } }))
+    expect(result.notes).toEqual({ vi: 'Mang theo áo ấm.' })
+  })
 })
 
 describe('mapHome', () => {
@@ -119,5 +131,22 @@ describe('mapHome', () => {
   it('ném lỗi nói rõ id khi quan hệ trỏ tới tour không còn tồn tại', () => {
     const moCoi = { ...homeDoc, featuredTours: [{ id: 'khong-ton-tai' }] }
     expect(() => mapHome(moCoi, slugById)).toThrow(/khong-ton-tai/)
+  })
+
+  it('chuyển quan hệ tour trong cảm nhận thành slug', () => {
+    const withTestimonial = {
+      ...homeDoc,
+      testimonials: [{ name: 'Chị Lan', quote: { vi: 'Chuyến đi rất đáng nhớ.' }, tour: { id: 't1' } }],
+    }
+    const result = homeContentSchema.parse(mapHome(withTestimonial, slugById))
+    expect(result.testimonials[0].tourSlug).toBe('mau-ha-giang')
+  })
+
+  it('ném lỗi nêu id khi quan hệ tour trong cảm nhận chưa được nạp hoặc mồ côi', () => {
+    const withOrphan = {
+      ...homeDoc,
+      testimonials: [{ name: 'Chị Lan', quote: { vi: 'Rất đáng nhớ.' }, tour: 'id-khong-ton-tai' }],
+    }
+    expect(() => mapHome(withOrphan, slugById)).toThrow(/id-khong-ton-tai/)
   })
 })

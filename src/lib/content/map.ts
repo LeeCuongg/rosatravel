@@ -33,6 +33,20 @@ function phaiLaDocument(value: unknown, ten: string): Record<string, unknown> {
   return value as Record<string, unknown>
 }
 
+/**
+ * Lấy slug của một tour từ giá trị quan hệ, dù Payload trả về cả document hay
+ * chỉ id. Ném lỗi nêu id khi không tra được — quan hệ mồ côi phải ồn ào, không
+ * được biến mất trong im lặng.
+ */
+function slugCuaTour(ref: unknown, tourSlugById: Map<string, string>, nguCanh: string): string {
+  const id = typeof ref === 'object' && ref !== null ? (ref as { id: unknown }).id : ref
+  const slug = tourSlugById.get(String(id))
+  if (!slug) {
+    loi(`${nguCanh} trỏ tới một tour không còn tồn tại`, id)
+  }
+  return slug
+}
+
 export function mapMedia(doc: unknown): ImageAsset {
   const m = phaiLaDocument(doc, 'media')
   if (!m.blurDataURL) {
@@ -100,14 +114,9 @@ export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknow
       media: mapMedia(hero?.media),
     },
     whyUs: h.whyUs,
-    featuredTourSlugs: ((h.featuredTours as unknown[] | undefined) ?? []).map((ref) => {
-      const id = typeof ref === 'object' && ref !== null ? (ref as { id: unknown }).id : ref
-      const slug = tourSlugById.get(String(id))
-      if (!slug) {
-        loi('Tour nổi bật trỏ tới một tour không còn tồn tại — bỏ nó khỏi trang chủ', id)
-      }
-      return slug
-    }),
+    featuredTourSlugs: ((h.featuredTours as unknown[] | undefined) ?? []).map((ref) =>
+      slugCuaTour(ref, tourSlugById, 'Tour nổi bật'),
+    ),
     journey: {
       headline: journey?.headline,
       stops: ((journey?.stops as unknown[] | undefined) ?? []).map((s) => {
@@ -120,7 +129,7 @@ export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknow
       return {
         name: t.name,
         quote: t.quote,
-        ...(t.tour ? { tourSlug: tourSlugById.get(String((t.tour as { id: unknown }).id)) } : {}),
+        ...(t.tour ? { tourSlug: slugCuaTour(t.tour, tourSlugById, 'Cảm nhận khách hàng') } : {}),
         ...(t.avatar ? { avatar: mapMedia(t.avatar) } : {}),
       }
     }),
