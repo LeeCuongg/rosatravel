@@ -58,7 +58,12 @@ Copy `.env.example` thành `.env.local`:
 | `RESEND_API_KEY` | Gửi email từ form liên hệ. Thiếu → form trả lỗi 500 có kiểm soát |
 | `CONTACT_EMAIL_TO` | Địa chỉ nhận yêu cầu đặt tour |
 | `CONTACT_EMAIL_FROM` | Địa chỉ gửi (phải thuộc domain đã xác thực ở Resend) |
-| `NEXT_PUBLIC_SITE_URL` | URL gốc cho metadata, sitemap và robots |
+
+## Deploy
+
+**Bắt buộc:** đặt `NEXT_PUBLIC_SITE_URL` (URL gốc thật, ví dụ `https://rosatravel.vn`) trong Vercel Project Settings → Environment Variables **trước lần deploy đầu tiên**. `pnpm build` ở môi trường production sẽ cố ý báo lỗi và dừng nếu biến này chưa được đặt (xem `src/lib/site.ts`) — vì thiếu nó thì sitemap và mọi thẻ `og:` sẽ âm thầm trỏ về `localhost`, Search Console từ chối sitemap và mọi lần share Zalo/Facebook đều hỏng ảnh.
+
+Pipeline video (`pnpm video`) chưa được cài đặt — xem mục Lệnh bên dưới.
 
 ## Hệ animation
 
