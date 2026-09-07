@@ -169,3 +169,39 @@ Review cuối toàn nhánh chỉ ra rằng mọi phép đo trước đó đều 
 **Về CLS = 0 trên desktop:** review cuối dự đoán một layout shift đáng kể do `JourneyCinematic` render nhánh `lite` phía server rồi đổi sang dải cuộn ngang khi client đo xong tier. Phép đo cho CLS bằng 0 — nhưng **điều đó không có nghĩa là cú đổi bố cục không xảy ra**. Nó nằm dưới màn hình đầu, và CLS chỉ tính những dịch chuyển trong khung nhìn. Cú đổi vẫn có thật; nó chỉ không bị CLS phạt.
 
 **Vẫn chưa đo:** FPS ≥ 55 khi cuộn qua ba cinematic beat. Lighthouse đo tải trang, không đo khung hình trong lúc cuộn. Cần `chrome-devtools` MCP hoặc một performance trace thủ công.
+
+---
+
+## Đo lại với ảnh thật (07/09/2026)
+
+Chín ảnh phong cảnh Hà Giang từ Wikimedia Commons đã thay toàn bộ ảnh placeholder
+(xem `docs/nguon-anh.md`). Cùng máy, cùng phương pháp đo như các mục trên.
+
+| Chỉ số | Ngưỡng | Ảnh placeholder | **Ảnh thật** | Kết quả |
+|---|---|---|---|---|
+| Performance (mobile) | ≥ 90 | 98 | **99** | Đạt |
+| Accessibility | ≥ 98 | 98 | **98** | Đạt |
+| LCP (mobile) | < 2.5s | 2.3s | **2.0s** | Đạt |
+| CLS | < 0.1 | 0 | **0** | Đạt |
+| FCP | — | 1.2s | **0.9s** | — |
+
+**Cảnh báo ở mục trên đã KHÔNG xảy ra, và cần nói rõ.** Cả GĐ1 lẫn GĐ2 đều ghi
+rằng LCP "gần như chắc chắn tăng" khi ảnh thật thay ảnh placeholder khối màu
+phẳng. Thực tế LCP không tăng. Hai lý do:
+
+1. **Phần tử LCP là chữ, không phải ảnh.** Từ GĐ1 đã chẩn đoán: LCP là dòng
+   headline vẽ lại sau khi font Playfair Display tải xong. Ảnh nặng thêm không
+   đụng tới đường đi đó.
+2. **AVIF nén quá tốt để tạo khác biệt.** Ảnh hero gốc 575 KB JPEG ở 2400px, sau
+   khi qua pipeline thành **72 KB** ở bản 2400px và **11 KB** ở bản 640px — mốc
+   mà điện thoại thật sự tải. Mười một kilobyte thì không dịch nổi LCP.
+
+Chênh lệch 2.3s → 2.0s nằm trong dải dao động 2.0–2.9s do tải máy đã ghi nhận ở
+mục GĐ1, nên **không được đọc là ảnh thật làm site nhanh hơn**. Kết luận đúng và
+đủ là: ảnh thật không làm chậm đi một cách đo được.
+
+Vẫn còn một biến chưa kiểm: chín ảnh này đều là ảnh phong cảnh đã tối ưu sẵn ở
+2400px. Ảnh chụp từ điện thoại đời mới (4000–8000px, 10–20 MB) đi qua cùng
+pipeline vẫn cho ra biến thể cỡ tương đương, nhưng thời gian **upload và xử lý
+lúc thêm ảnh trong /admin** sẽ lâu hơn đáng kể. Đó là trải nghiệm của người nhập
+liệu, không phải của khách — chưa đo.
