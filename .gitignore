@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Media sinh ra lúc build
 /public/media
+
+# Kết quả đo và workspace quy trình — rác tạm, không phải mã nguồn
+/.superpowers
