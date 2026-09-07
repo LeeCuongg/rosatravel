@@ -166,7 +166,7 @@ export function HeroCinematic({ hero, locale }: HeroCinematicProps) {
         />
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-b from-ink-950/40 via-transparent to-ink-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink-950/75 via-transparent to-ink-950" />
 
       <div ref={headlineRef} className="relative flex h-full items-end px-6 pb-24">
         <div className="mx-auto w-full max-w-7xl">

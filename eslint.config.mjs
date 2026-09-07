@@ -29,6 +29,11 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Thư mục nháp của quy trình (ledger, số đo, script dùng một lần). Đã bị
+      // .gitignore chặn, không bao giờ được ship. Không lint ở đây — nếu không
+      // một script nháp viết vội sẽ làm đỏ lint của cả dự án, và người ta sẽ đi
+      // sửa file nháp thay vì sửa chỗ đáng sửa.
+      ".superpowers/**",
     ],
   },
 ];

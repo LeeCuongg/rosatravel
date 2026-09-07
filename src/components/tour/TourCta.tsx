@@ -15,7 +15,7 @@ export function TourCta({ slug }: { slug: string }) {
         {/* ?tour=<slug> được ContactForm đọc để chọn sẵn tour trong dropdown. */}
         <Link
           href={`/lien-he?tour=${slug}`}
-          className="mt-8 inline-block rounded-full bg-clay-600 px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
+          className="mt-8 inline-block rounded-full bg-clay-600 text-on-clay px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
         >
           {t('bookNow')}
         </Link>

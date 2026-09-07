@@ -205,3 +205,38 @@ Vẫn còn một biến chưa kiểm: chín ảnh này đều là ảnh phong c�
 pipeline vẫn cho ra biến thể cỡ tương đương, nhưng thời gian **upload và xử lý
 lúc thêm ảnh trong /admin** sẽ lâu hơn đáng kể. Đó là trải nghiệm của người nhập
 liệu, không phải của khách — chưa đo.
+
+---
+
+## Đo lại sau khi đổi sang bảng màu sáng (07/09/2026)
+
+Chủ dự án thấy giao diện tối quá và chọn hướng nền kem sáng.
+
+| Chỉ số | Ngưỡng | Nền tối | **Nền sáng** | Kết quả |
+|---|---|---|---|---|
+| Performance (mobile) | ≥ 90 | 99 | **99** | Đạt |
+| Accessibility | ≥ 98 | 98 | **98** | Đạt |
+| LCP (mobile) | < 2.5s | 2.0s | **2.0s** | Đạt |
+| CLS | < 0.1 | 0 | **0** | Đạt |
+
+Kiểm `color-contrast` của Lighthouse: đạt. Chín cặp màu đã được đo tay theo
+công thức WCAG trước khi viết code (xem chú thích trong `globals.css`), thấp
+nhất là viền ô nhập 3.45:1 trên ngưỡng 3:1 dành cho thành phần phi văn bản.
+
+**Ghi cả lần đo xấu:** lần chạy đầu cho Performance 93, LCP 3.1s — vượt ngưỡng.
+Lần hai trên cùng bản build cho 99 và 2.0s. Chênh lệch do máy đo lúc đó đang
+chạy đồng thời server, build và Lighthouse; nằm trong dải dao động 2.0–2.9s đã
+ghi nhận từ GĐ1. Không loại bỏ số xấu này khỏi hồ sơ.
+
+**Một phát hiện đáng nhớ về ảnh.** Khi đổi ảnh hero từ ảnh chạng vạng sang ảnh
+ruộng bậc thang, dung lượng biến thể AVIF tăng vọt:
+
+| Bản | Ảnh chạng vạng | Ảnh ruộng bậc thang |
+|---|---|---|
+| 640px | 11 KB | **29 KB** |
+| 2400px | 72 KB | **304 KB** |
+
+Cùng bề rộng, cùng cấu hình nén. Ảnh nhiều chi tiết nhỏ (ruộng, lá, nước gợn)
+nén kém hơn hẳn ảnh có mảng màu lớn phẳng. Khi chọn ảnh hero thật, đây là yếu
+tố cần cân nhắc ngang với việc ảnh có đẹp hay không — 304 KB cho một ảnh là
+mức phải để mắt.

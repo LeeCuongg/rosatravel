@@ -53,7 +53,7 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
           </Link>
           <a
             href={contact.zaloUrl}
-            className="rounded-full bg-clay-600 px-5 py-2 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
+            className="rounded-full bg-clay-600 text-on-clay px-5 py-2 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
           >
             {tc('zalo')}
           </a>

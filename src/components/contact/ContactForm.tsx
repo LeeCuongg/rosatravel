@@ -116,7 +116,7 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
       <button
         type="submit"
         disabled={status === 'sending'}
-        className="w-full rounded-full bg-clay-600 px-8 py-3 font-medium disabled:opacity-60"
+        className="w-full rounded-full bg-clay-600 text-on-clay px-8 py-3 font-medium disabled:opacity-60"
       >
         {status === 'sending' ? t('sending') : t('submit')}
       </button>
