@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
