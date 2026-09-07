@@ -2,6 +2,7 @@ import type {
   ArrayFieldValidation,
   CollectionConfig,
   Field,
+  FieldHook,
   NumberFieldSingleValidation,
   TextFieldValidation,
 } from 'payload'
@@ -25,6 +26,14 @@ import type {
  * ngày đó (phần tử đầu = ngày 1, phần tử thứ hai = ngày 2, ...). Task 5 suy
  * ra `day` từ chỉ số mảng (index + 1) thay vì đọc một trường lưu trùng lặp
  * mà người nhập có thể gõ sai.
+ *
+ * `displayTitle` (bên dưới) tồn tại chỉ để làm `useAsTitle`: Payload từ chối
+ * cả field lồng trong group ('title.vi' — lỗi InvalidConfiguration lúc khởi
+ * động) LẪN field ảo thường (virtual: true kiểu `canhBaoKichThuoc` của
+ * Media.ts — lỗi tương tự, vì "A virtual field can be used as the title only
+ * when linked to a relationship field"). Cách còn lại là một field thật,
+ * lưu xuống DB, được đồng bộ tự động từ `title.vi` bằng hook — không bắt
+ * người nhập gõ tên tour hai lần.
  */
 
 /** Nhóm văn bản song ngữ, hiện chỉ có tiếng Việt — tiếng Anh để dành cho GĐ sau. */
@@ -77,6 +86,12 @@ const validatePriceFrom: NumberFieldSingleValidation = (value) => {
   return true
 }
 
+/** Đồng bộ `displayTitle` (field thật, dùng cho useAsTitle) từ `title.vi`. */
+const syncDisplayTitle: FieldHook = ({ data }) => {
+  const vi = (data as { title?: { vi?: string } } | undefined)?.title?.vi
+  return typeof vi === 'string' && vi.length > 0 ? vi : undefined
+}
+
 /**
  * Ràng buộc cốt lõi của task này: số phần tử trong `itinerary` phải khớp
  * `durationDays`. `data` là dữ liệu toàn bộ document (đây là field cấp cao
@@ -103,11 +118,12 @@ export const Tours: CollectionConfig = {
     plural: 'Tour',
   },
   admin: {
-    // Payload không cho useAsTitle trỏ vào field lồng trong group (chỉ nhận
-    // field cấp cao nhất) — 'title.vi' bị InvalidConfiguration khi khởi động.
-    // Dùng slug vì nó cũng là field cấp cao nhất, duy nhất, luôn có giá trị.
-    useAsTitle: 'slug',
-    defaultColumns: ['slug', 'durationDays', 'priceFrom'],
+    // Xem giải thích ở comment đầu file: 'displayTitle' là field thật, đồng
+    // bộ tự động từ title.vi, vì Payload không chấp nhận field lồng trong
+    // group hay field ảo thường làm useAsTitle. Vẫn giữ slug làm cột riêng
+    // vì nhân viên cần nó để lấy URL.
+    useAsTitle: 'displayTitle',
+    defaultColumns: ['displayTitle', 'slug', 'durationDays', 'priceFrom'],
   },
   fields: [
     {
@@ -123,6 +139,19 @@ export const Tours: CollectionConfig = {
       type: 'group',
       label: 'Tên tour',
       fields: [viTextGroup('Tiếng Việt')],
+    },
+    {
+      name: 'displayTitle',
+      type: 'text',
+      label: 'Tên hiển thị',
+      admin: {
+        readOnly: true,
+        description:
+          'Tự động lấy từ "Tên tour" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách tour và trên đầu trang quản trị.',
+      },
+      hooks: {
+        beforeChange: [syncDisplayTitle],
+      },
     },
     {
       name: 'tagline',
@@ -150,12 +179,21 @@ export const Tours: CollectionConfig = {
       label: 'Giá từ (VND)',
       required: true,
       min: 1,
+      admin: {
+        description: 'Nhập số nguyên, không dấu chấm hay dấu phẩy. Ví dụ: 6900000 nghĩa là 6.900.000đ.',
+      },
       validate: validatePriceFrom,
     },
     {
       name: 'destinations',
       type: 'array',
       label: 'Điểm đến',
+      // required: true bắt buộc — nếu chỉ có minRows mà thiếu required thì
+      // validateArrayLength (payload/dist/fields/validations.js) trả về true
+      // ngay khi mảng rỗng, không bao giờ đọc tới minRows. Payload
+      // validation của bản thân array cũng bị bỏ qua trên client, nên UI
+      // không cảnh báo gì cả — mảng 0 dòng lưu được êm re.
+      required: true,
       minRows: 1,
       fields: [viTextGroup('Tiếng Việt')],
     },
@@ -179,7 +217,13 @@ export const Tours: CollectionConfig = {
       name: 'itinerary',
       type: 'array',
       label: 'Lịch trình từng ngày',
-      minRows: 1,
+      // Không đặt minRows ở đây: một khi field có `validate` riêng thì
+      // Payload dùng validate đó THAY CHO TOÀN BỘ default validate (kể cả
+      // phần đọc minRows) — sanitizeFields chỉ gắn validate mặc định khi
+      // field.validate === undefined. minRows sẽ là dead code, không ai gọi
+      // tới. Không sao: validateItineraryMatchesDuration đã bao luôn ràng
+      // buộc "không được rỗng", vì durationDays luôn > 0 (ép bởi
+      // validateDurationDays) nên rows.length phải khớp một số > 0.
       validate: validateItineraryMatchesDuration,
       fields: [
         {
@@ -207,13 +251,22 @@ export const Tours: CollectionConfig = {
       name: 'inclusions',
       type: 'array',
       label: 'Bao gồm',
+      // required: true — xem giải thích ở field 'destinations' phía trên,
+      // cùng lỗi minRows-không-tác-dụng-nếu-thiếu-required.
+      required: true,
       minRows: 1,
+      admin: {
+        description: 'Những gì khách được hưởng khi mua tour.',
+      },
       fields: [viTextGroup('Tiếng Việt')],
     },
     {
       name: 'exclusions',
       type: 'array',
       label: 'Không bao gồm',
+      admin: {
+        description: 'Những chi phí khách tự lo, không nằm trong giá tour.',
+      },
       fields: [viTextGroup('Tiếng Việt')],
     },
     {
@@ -231,12 +284,20 @@ export const Tours: CollectionConfig = {
           name: 'title',
           type: 'group',
           label: 'Tiêu đề SEO',
+          admin: {
+            description:
+              'Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn, chứa tên tour.',
+          },
           fields: [viTextGroup('Tiếng Việt')],
         },
         {
           name: 'description',
           type: 'group',
           label: 'Mô tả SEO',
+          admin: {
+            description:
+              'Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link tour lên Zalo/Facebook.',
+          },
           fields: [viTextGroup('Tiếng Việt', 'textarea')],
         },
         {

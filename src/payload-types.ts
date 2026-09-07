@@ -220,6 +220,10 @@ export interface Tour {
   title: {
     vi: string;
   };
+  /**
+   * Tự động lấy từ "Tên tour" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách tour và trên đầu trang quản trị.
+   */
+  displayTitle?: string | null;
   tagline: {
     vi: string;
   };
@@ -227,13 +231,14 @@ export interface Tour {
     vi: string;
   };
   durationDays: number;
+  /**
+   * Nhập số nguyên, không dấu chấm hay dấu phẩy. Ví dụ: 6900000 nghĩa là 6.900.000đ.
+   */
   priceFrom: number;
-  destinations?:
-    | {
-        vi: string;
-        id?: string | null;
-      }[]
-    | null;
+  destinations: {
+    vi: string;
+    id?: string | null;
+  }[];
   heroMedia: string | Media;
   gallery: (string | Media)[];
   itinerary?:
@@ -248,12 +253,16 @@ export interface Tour {
         id?: string | null;
       }[]
     | null;
-  inclusions?:
-    | {
-        vi: string;
-        id?: string | null;
-      }[]
-    | null;
+  /**
+   * Những gì khách được hưởng khi mua tour.
+   */
+  inclusions: {
+    vi: string;
+    id?: string | null;
+  }[];
+  /**
+   * Những chi phí khách tự lo, không nằm trong giá tour.
+   */
   exclusions?:
     | {
         vi: string;
@@ -264,9 +273,15 @@ export interface Tour {
     vi?: string | null;
   };
   seo: {
+    /**
+     * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn, chứa tên tour.
+     */
     title: {
       vi: string;
     };
+    /**
+     * Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link tour lên Zalo/Facebook.
+     */
     description: {
       vi: string;
     };
@@ -465,6 +480,7 @@ export interface ToursSelect<T extends boolean = true> {
     | {
         vi?: T;
       };
+  displayTitle?: T;
   tagline?:
     | T
     | {
