@@ -21,7 +21,7 @@ pnpm dev            # http://localhost:3000/vi
 ```bash
 pnpm placeholders   # sinh ảnh giữ chỗ để dự án chạy được
 pnpm media          # xử lý ảnh thật đặt trong assets-src/
-pnpm video          # encode video trong assets-src/video/ (cần ffmpeg)
+pnpm video          # CHƯA CÀI ĐẶT — xem cảnh báo bên dưới
 ```
 
 **Quy trình đưa ảnh thật vào:**
@@ -32,7 +32,9 @@ pnpm video          # encode video trong assets-src/video/ (cần ffmpeg)
 
 Ảnh gốc nên rộng ít nhất 2400px. Script sẽ cảnh báo nếu nhỏ hơn — ảnh vẫn hiển thị nhưng sẽ mờ trên màn hình lớn.
 
-**Khi deploy:** vì `public/media` bị gitignore, chọn một trong hai cách và giữ nhất quán — hoặc chạy `pnpm media && pnpm video` trong build command của Vercel (phải commit `assets-src/`, repo nặng), hoặc bỏ `public/media` khỏi `.gitignore` và commit ảnh đã tối ưu (khuyến nghị: AVIF đã nén nhỏ hơn ảnh gốc nhiều lần).
+**Khi deploy:** vì `public/media` bị gitignore, chọn một trong hai cách và giữ nhất quán — hoặc chạy `pnpm media` trong build command của Vercel (phải commit `assets-src/`, repo nặng), hoặc bỏ `public/media` khỏi `.gitignore` và commit ảnh đã tối ưu (khuyến nghị: AVIF đã nén nhỏ hơn ảnh gốc nhiều lần). Pipeline video chưa nằm trong quy trình này — xem cảnh báo bên dưới.
+
+> **`pnpm video` chưa được cài đặt.** Lệnh này hiện chỉ in cảnh báo và thoát khác 0 — pipeline ffmpeg bị hoãn có chủ đích (xem Task 12 trong `docs/superpowers/plans/`). Đừng đưa video thật vào `assets-src/video/` và mong nó tự encode.
 
 ## Nội dung
 
@@ -95,7 +97,7 @@ pnpm test           # Vitest
 pnpm lint           # ESLint
 pnpm placeholders   # sinh ảnh giữ chỗ
 pnpm media          # xử lý ảnh trong assets-src/
-pnpm video          # encode video (cần ffmpeg)
+pnpm video          # CHƯA CÀI ĐẶT — in cảnh báo rồi thoát khác 0
 ```
 
 ## Tài liệu thiết kế

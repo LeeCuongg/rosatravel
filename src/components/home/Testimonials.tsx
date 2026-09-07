@@ -17,7 +17,9 @@ export function Testimonials({
     <section className="mx-auto max-w-5xl px-6 py-(--spacing-section)">
       <div className="grid gap-10 sm:grid-cols-2">
         {items.map((item, index) => (
-          <Reveal key={item.name} delay={index * stagger}>
+          // key theo index: danh sách cố định, không sắp xếp lại — tránh phụ
+          // thuộc vào item.name (không đảm bảo duy nhất).
+          <Reveal key={index} delay={index * stagger}>
             <figure>
               <blockquote className="font-[family-name:var(--font-playfair)] text-xl leading-relaxed">
                 “{item.quote[locale] ?? item.quote.vi}”

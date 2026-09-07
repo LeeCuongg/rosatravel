@@ -17,11 +17,16 @@ export function Gallery({ images, locale }: { images: ImageAsset[]; locale: 'vi'
           // index % 3 chặn trần độ trễ ở 2 × stagger dù gallery có bao nhiêu ảnh, để ảnh
           // cuối không phải chờ hết một chuỗi stagger dài. Lưu ý: CSS columns lấp đầy cột
           // một từ trên xuống rồi mới tràn sang cột hai, KHÔNG chia vòng tròn như lưới.
-          <Reveal key={image.src} delay={(index % 3) * stagger} className="mb-4 break-inside-avoid">
+          // key theo index: danh sách cố định, không sắp xếp lại — image.src
+          // không đảm bảo duy nhất (một ảnh có thể lặp lại trong gallery).
+          <Reveal key={index} delay={(index % 3) * stagger} className="mb-4 break-inside-avoid">
             <Media
               media={image}
               locale={locale}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              // Lưới tối đa max-w-7xl (1280px), 3 cột (columns-3) + gap-4 =>
+              // mỗi cột dừng ở ~416px, giống TourCard.tsx. Để 33vw thì trên màn
+              // hình rộng trình duyệt sẽ đòi biến thể to hơn thật cần và tải phí.
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 416px"
               className="w-full rounded-lg"
             />
           </Reveal>

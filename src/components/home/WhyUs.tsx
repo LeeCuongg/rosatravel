@@ -11,8 +11,11 @@ export function WhyUs({ items, locale }: WhyUsProps) {
   return (
     <section className="mx-auto max-w-7xl px-6 py-(--spacing-section)">
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        {/* key theo index: đây là danh sách cố định, không sắp xếp lại — dùng
+            item.title.vi làm key khiến React reconciliation phụ thuộc vào
+            nội dung hiển thị, sai khi hai mục trùng chữ. */}
         {items.map((item, index) => (
-          <Reveal key={item.title.vi} delay={index * stagger}>
+          <Reveal key={index} delay={index * stagger}>
             <h3 className="font-[family-name:var(--font-playfair)] text-2xl">
               {item.title[locale] ?? item.title.vi}
             </h3>

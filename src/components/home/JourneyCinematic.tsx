@@ -88,7 +88,10 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
         </h2>
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
           {journey.stops.map((stop, index) => (
-            <Reveal key={stop.label.vi} delay={index * stagger}>
+            // key theo index: danh sách cố định, không sắp xếp lại — content/home.json
+            // dùng lại cùng một ảnh cho cả bốn điểm dừng, nên stop.label.vi làm key
+            // không đảm bảo duy nhất.
+            <Reveal key={index} delay={index * stagger}>
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
                 <Media
                   media={stop.image}
@@ -117,9 +120,10 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
               {headline}
             </h2>
           </div>
-          {journey.stops.map((stop) => (
+          {journey.stops.map((stop, index) => (
+            // key theo index: cùng lý do ở nhánh lite/reduced phía trên.
             <figure
-              key={stop.label.vi}
+              key={index}
               className="relative h-[70vh] w-[50vw] shrink-0 overflow-hidden rounded-lg"
             >
               <Media

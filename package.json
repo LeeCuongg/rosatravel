@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "media": "tsx scripts/build-media.ts",
-    "video": "tsx scripts/build-video.ts",
+    "video": "node -e \"console.error('Pipeline video chưa được cài đặt (cần ffmpeg). Xem Task 12 trong docs/superpowers/plans/.'); process.exit(1)\"",
     "placeholders": "tsx scripts/build-placeholders.ts"
   },
   "dependencies": {

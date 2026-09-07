@@ -21,8 +21,10 @@ export function InclusionList({
         <Reveal>
           <h3 className="text-sm uppercase tracking-widest text-clay-500">{t('inclusions')}</h3>
           <ul className="mt-4 space-y-2">
-            {inclusions.map((item) => (
-              <li key={item.vi} className="border-b border-ink-700 pb-2">
+            {/* key theo index: danh sách cố định, không sắp xếp lại — hai mục
+                trùng chữ (vd hai lần "Bữa sáng") sẽ không duy nhất nếu dùng item.vi. */}
+            {inclusions.map((item, index) => (
+              <li key={index} className="border-b border-ink-700 pb-2">
                 {text(item)}
               </li>
             ))}
@@ -32,8 +34,9 @@ export function InclusionList({
           <Reveal delay={stagger}>
             <h3 className="text-sm uppercase tracking-widest text-ink-500">{t('exclusions')}</h3>
             <ul className="mt-4 space-y-2 text-ink-500">
-              {exclusions.map((item) => (
-                <li key={item.vi} className="border-b border-ink-700 pb-2">
+              {/* key theo index: cùng lý do ở danh sách inclusions phía trên. */}
+              {exclusions.map((item, index) => (
+                <li key={index} className="border-b border-ink-700 pb-2">
                   {text(item)}
                 </li>
               ))}

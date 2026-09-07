@@ -59,6 +59,9 @@ export default async function TourPage({ params }: { params: Params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
+          // Thoát '<' thành <: nội dung tour (mô tả, tiêu đề) đến từ content
+          // JSON, không phải hằng số. Một mô tả chứa chuỗi "</script>" sẽ đóng
+          // sớm thẻ script này và làm vỡ phần còn lại của trang nếu không thoát.
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'TouristTrip',
@@ -74,7 +77,7 @@ export default async function TourPage({ params }: { params: Params }) {
               price: tour.priceFrom,
               priceCurrency: tour.currency,
             },
-          }),
+          }).replace(/</g, '\\u003c'),
         }}
       />
     </main>
