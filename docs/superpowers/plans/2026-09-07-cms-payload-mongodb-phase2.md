@@ -454,6 +454,31 @@ Tạo `src/globals/Home.ts`, khớp `homeContentSchema` trong `src/lib/content/s
 
 **`journey.stops` tối thiểu 2 là ràng buộc thật, không phải tuỳ ý.** `JourneyCinematic` tính quãng cuộn ngang từ tổng bề rộng các điểm đến; dưới 2 điểm thì quãng cuộn bằng 0 và section pin sẽ khoá màn hình mà không có gì di chuyển. GĐ1 đã thêm `Math.max(0, ...)` để chặn, nhưng chặn ở đây thì người nhập biết ngay.
 
+- [ ] **Step 1b: Việt hoá toàn bộ giao diện admin**
+
+Task 3 phát hiện: nhãn trường thì tiếng Việt, nhưng **thông báo lỗi vẫn là tiếng Anh** — người nhập thấy `This field requires at least 1 Rows.` Với một giao diện mà tiêu chí thành công là "nhân viên người Việt không rành kỹ thuật làm được một mình", đó là lỗ hổng thật.
+
+Payload có sẵn bản dịch tiếng Việt trong `@payloadcms/translations` (đã kiểm: `dist/languages/vi.js` tồn tại ở phiên bản 3.88.0). Bật nó trong `src/payload.config.ts`:
+
+```ts
+import { vi } from '@payloadcms/translations/languages/vi'
+```
+
+rồi thêm vào cấu hình:
+
+```ts
+  // Việt hoá toàn bộ admin: nhãn, nút, điều hướng VÀ thông báo lỗi validate.
+  // Không có khối này thì người nhập thấy nhãn tiếng Việt nhưng lỗi tiếng Anh.
+  i18n: {
+    supportedLanguages: { vi },
+    fallbackLanguage: 'vi',
+  },
+```
+
+**Đối chiếu tài liệu** cho đường dẫn import và hình dạng khối `i18n` chính xác ở phiên bản đã cài.
+
+Kiểm chứng: lưu một tour thiếu điểm đến, thông báo lỗi phải bằng tiếng Việt. Dán đúng thông báo bạn thấy vào report.
+
 - [ ] **Step 2: Kiểm bằng tay**
 
 Vào `/admin` → Home. Nhập đủ nội dung. Xác nhận chọn tour nổi bật từ danh sách hoạt động, và thêm chỉ 1 điểm đến vào Hành trình thì bị chặn.
