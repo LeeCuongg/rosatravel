@@ -2693,7 +2693,7 @@ import { FinalCta } from '@/components/home/FinalCta'
 <FinalCta contact={home.contact} />
 ```
 
-- [ ] **Step 4: Xác minh và commit**
+- [ ] **Step 5: Xác minh và commit**
 
 Run: `pnpm build`
 Expected: build pass. `content/home.json` có `testimonials: []` nên section cảm nhận không render — đúng thiết kế.
@@ -2961,7 +2961,7 @@ export default async function TourPage({ params }: { params: Params }) {
 }
 ```
 
-- [ ] **Step 4: Xác minh và commit**
+- [ ] **Step 5: Xác minh và commit**
 
 `pnpm build` — output phải cho thấy `/[locale]/tour/[slug]` là static với 1 route được sinh (`/vi/tour/mau-ha-giang`).
 
@@ -3661,14 +3661,32 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ### Task 14: SEO — metadata, sitemap, robots, dữ liệu có cấu trúc
 
 **Files:**
-- Create: `src/app/sitemap.ts`, `src/app/robots.ts`
-- Modify: `src/app/[locale]/layout.tsx`, `src/app/[locale]/page.tsx`, `src/app/[locale]/tour/[slug]/page.tsx`
+- Create: `src/lib/site.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`
+- Modify: `src/app/[locale]/layout.tsx`, `src/app/[locale]/tour/[slug]/page.tsx`
 
 **Interfaces:**
 - Consumes: `getTourSlugs()`, `getHomeContent()`, `NEXT_PUBLIC_SITE_URL`
 - Produces: `/sitemap.xml`, `/robots.txt`, JSON-LD trên trang tour
 
-- [ ] **Step 1: Viết sitemap**
+- [ ] **Step 1: Tạo nguồn SITE_URL dùng chung**
+
+Tạo `src/lib/site.ts`:
+
+```ts
+/**
+ * Nguồn duy nhất cho URL gốc của site. Ba nơi cần nó (metadataBase, sitemap,
+ * robots) — viết lặp ba lần thì một chỗ đổi mà hai chỗ kia không đổi sẽ khiến
+ * sitemap trỏ sang origin khác với canonical, một lỗi SEO im lặng.
+ *
+ * Cắt dấu gạch chéo cuối để `${SITE_URL}/vi` không thành `//vi` nếu biến môi
+ * trường được đặt kèm dấu gạch chéo.
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+).replace(/\/$/, '')
+```
+
+- [ ] **Step 2: Viết sitemap**
 
 Tạo `src/app/sitemap.ts`:
 
@@ -3676,8 +3694,7 @@ Tạo `src/app/sitemap.ts`:
 import type { MetadataRoute } from 'next'
 import { getTourSlugs } from '@/lib/content'
 import { routing } from '@/i18n/routing'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+import { SITE_URL } from '@/lib/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await getTourSlugs()
@@ -3687,16 +3704,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const locale of routing.locales) {
     for (const path of staticPaths) {
+      // Không đặt lastModified: nó sẽ bằng thời điểm build cho MỌI trang ở MỌI
+      // lần deploy, tức là báo "vừa sửa" kể cả khi nội dung không đổi. Công cụ
+      // tìm kiếm hạ trọng số những lastmod không đáng tin, nên khai sai còn tệ
+      // hơn không khai. Muốn dùng đúng thì phải lấy từ thời điểm sửa thật của
+      // nội dung (mtime file, hoặc trường updatedAt trong schema tour).
       entries.push({
         url: `${SITE_URL}/${locale}${path}`,
-        lastModified: new Date(),
         priority: path === '' ? 1 : 0.6,
       })
     }
     for (const slug of slugs) {
       entries.push({
         url: `${SITE_URL}/${locale}/tour/${slug}`,
-        lastModified: new Date(),
         priority: 0.8,
       })
     }
@@ -3706,14 +3726,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 }
 ```
 
-- [ ] **Step 2: Viết robots**
+- [ ] **Step 3: Viết robots**
 
 Tạo `src/app/robots.ts`:
 
 ```ts
 import type { MetadataRoute } from 'next'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+import { SITE_URL } from '@/lib/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -3723,13 +3742,13 @@ export default function robots(): MetadataRoute.Robots {
 }
 ```
 
-- [ ] **Step 3: Thêm metadataBase và JSON-LD**
+- [ ] **Step 4: Thêm metadataBase và JSON-LD**
 
 Trong `src/app/[locale]/layout.tsx`, đổi `metadata` thành:
 
 ```tsx
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(SITE_URL),
   // Metadata tĩnh không gọi được useTranslations, nên tên thương hiệu buộc phải
   // viết thẳng ở đây. Nếu đổi tên, nhớ đổi cả messages/vi.json khoá brand.name.
   title: { default: 'RosaTravel', template: '%s | RosaTravel' },
@@ -3765,7 +3784,7 @@ Trong `src/app/[locale]/tour/[slug]/page.tsx`, thêm JSON-LD vào cuối `<main>
 
 `TouristTrip` là schema.org type đúng cho tour du lịch, và `offers.price` giúp Google hiển thị giá trong kết quả tìm kiếm.
 
-- [ ] **Step 4: Xác minh và commit**
+- [ ] **Step 5: Xác minh và commit**
 
 `pnpm build`, mở `/sitemap.xml` và `/robots.txt` ở dev. Kiểm tra JSON-LD bằng công cụ Rich Results Test của Google sau khi deploy.
 
