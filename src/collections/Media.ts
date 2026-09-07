@@ -18,6 +18,15 @@ const LARGEST_WIDTH = MEDIA_WIDTHS[MEDIA_WIDTHS.length - 1]
  * đúng là lỗi 404 ở breakpoint lớn mà GĐ1 đã gặp. `withoutEnlargement: true`
  * buộc Payload luôn sinh file ở mốc đó (bằng kích thước gốc nếu ảnh nhỏ hơn),
  * không bao giờ phóng to và không bao giờ bỏ qua.
+ *
+ * CHỈ DÙNG CHO ẢNH CÔNG KHAI.
+ *
+ * payload.config.ts đặt disablePayloadAccessControl: true cho collection này, nên
+ * file nằm trên domain Blob và ai có URL đều xem được — vĩnh viễn, bất kể sau này
+ * thêm access.read gì vào đây. Cờ đó ở cấp collection, không phải cấp bản ghi.
+ *
+ * Cần lưu tài sản riêng tư (ảnh giấy tờ, hợp đồng, chứng từ đặt tour)? Tạo
+ * collection khác, KHÔNG dùng lại collection này.
  */
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -47,6 +56,14 @@ export const Media: CollectionConfig = {
         width: OG_SIZE.width,
         height: OG_SIZE.height,
         fit: 'cover' as const,
+        // upload.focalPoint không bị tắt (mặc định bật) vì og thực sự crop —
+        // người biên tập cần chỉnh được điểm lấy nét cho khung 1200x630. Hệ quả:
+        // mọi ảnh đều mang focal point mặc định {x:50,y:50}, và cả bốn mốc AVIF
+        // ở trên cũng đi qua nhánh resize-with-focal-point thay vì resize thường.
+        // Vô hại với bốn mốc đó vì chúng chỉ ràng buộc bề rộng (không có height),
+        // nên luôn giữ nguyên tỉ lệ khung hình gốc — không có gì để crop lệch.
+        // Khi người biên tập chỉnh focal point cho og, các mốc bề rộng có thể xê
+        // dịch nhẹ theo, nhưng vẫn full-bleed đúng tỉ lệ, không bao giờ crop.
         // false (chứ không phải mặc định undefined): og luôn phải đúng
         // 1200x630 cho Facebook/Zalo, kể cả khi ảnh gốc nhỏ hơn — chấp nhận
         // phóng to vì đây là ảnh chia sẻ mạng xã hội, không phải ảnh hiển thị

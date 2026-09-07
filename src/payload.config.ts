@@ -62,6 +62,12 @@ export default buildConfig({
   plugins: [
     vercelBlobStorage({
       enabled: true,
+      // addRandomSuffix PHẢI là false: loader ảnh (src/lib/media/loader.ts) suy
+      // URL của mốc này từ mốc khác bằng biến đổi chuỗi thuần trên phần tên
+      // chung. Payload đã tự chống trùng tên ở tầng trên (hero.jpg -> hero-1),
+      // nên hậu tố ngẫu nhiên của Blob là thừa và sẽ phá vỡ quy ước đó — ảnh
+      // 404 ở mọi breakpoint, không có test nào bắt được.
+      addRandomSuffix: false,
       collections: {
         // disablePayloadAccessControl: true để trường `url` trỏ thẳng ra domain
         // public của Vercel Blob thay vì route proxy /api/media/file/<tên file>
