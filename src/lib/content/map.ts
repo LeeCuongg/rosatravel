@@ -38,11 +38,11 @@ function phaiLaDocument(value: unknown, ten: string): Record<string, unknown> {
  * chỉ id. Ném lỗi nêu id khi không tra được — quan hệ mồ côi phải ồn ào, không
  * được biến mất trong im lặng.
  */
-function slugCuaTour(ref: unknown, tourSlugById: Map<string, string>, nguCanh: string): string {
+function slugCuaTour(ref: unknown, tourSlugById: Map<string, string>, nguCanh: string, goiY: string): string {
   const id = typeof ref === 'object' && ref !== null ? (ref as { id: unknown }).id : ref
   const slug = tourSlugById.get(String(id))
   if (!slug) {
-    loi(`${nguCanh} trỏ tới một tour không còn tồn tại`, id)
+    loi(`${nguCanh} trỏ tới một tour không còn tồn tại — ${goiY}`, id)
   }
   return slug
 }
@@ -115,7 +115,7 @@ export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknow
     },
     whyUs: h.whyUs,
     featuredTourSlugs: ((h.featuredTours as unknown[] | undefined) ?? []).map((ref) =>
-      slugCuaTour(ref, tourSlugById, 'Tour nổi bật'),
+      slugCuaTour(ref, tourSlugById, 'Tour nổi bật', 'bỏ nó khỏi trang chủ'),
     ),
     journey: {
       headline: journey?.headline,
@@ -129,7 +129,9 @@ export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknow
       return {
         name: t.name,
         quote: t.quote,
-        ...(t.tour ? { tourSlug: slugCuaTour(t.tour, tourSlugById, 'Cảm nhận khách hàng') } : {}),
+        ...(t.tour
+          ? { tourSlug: slugCuaTour(t.tour, tourSlugById, 'Cảm nhận khách hàng', 'bỏ liên kết tour khỏi cảm nhận này') }
+          : {}),
         ...(t.avatar ? { avatar: mapMedia(t.avatar) } : {}),
       }
     }),

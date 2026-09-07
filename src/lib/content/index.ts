@@ -2,12 +2,13 @@
  * INTERFACE CÔNG KHAI CỦA CONTENT LAYER.
  *
  * Đây là chỗ DUY NHẤT component được phép import nội dung. Không component nào
- * được import từ './fs' hay đọc file trực tiếp.
+ * được import từ './cms' hay gọi Payload trực tiếp.
  *
- * GĐ2 (cắm CMS): viết './cms.ts' với cùng bốn hàm dưới đây, rồi đổi các dòng
- * re-export. Không một file nào trong src/components phải sửa.
+ * Nội dung đọc từ Payload qua Local API ('./cms.ts'). GĐ1 đọc từ file JSON
+ * trong content/; đổi nguồn dữ liệu chỉ tốn đúng dòng import dưới đây — không
+ * một file nào trong src/components phải sửa.
  */
-import { readHomeContent, readTour, readTours, readTourSlugs } from './fs'
+import { readHomeContent, readTour, readTours, readTourSlugs } from './cms'
 import type { HomeContent, Tour } from './schema'
 
 export async function getTours(): Promise<Tour[]> {
