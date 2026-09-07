@@ -632,6 +632,19 @@ Tạo `src/lib/content/map.ts`. Nguyên tắc dẫn đường: **mọi lỗi ph�
 ```ts
 import type { ImageAsset } from './schema'
 
+/**
+ * Trường văn bản bọc locale có được coi là "có nội dung" không.
+ *
+ * Payload lưu group để trống thành `{ vi: '' }`, và object đó truthy — nên mọi
+ * kiểm tra kiểu `x ? ... : ...` đều để nó lọt qua rồi vỡ ở zod. Đây là lỗi
+ * Task 3 phát hiện khi nhập thử tour đầu tiên.
+ */
+function coNoiDung(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false
+  const vi = (value as { vi?: unknown }).vi
+  return typeof vi === 'string' && vi.trim().length > 0
+}
+
 /** Ném lỗi kèm ngữ cảnh đủ để tìm ra bản ghi trong admin. */
 function loi(thongDiep: string, id?: unknown): never {
   throw new Error(id ? `${thongDiep} (bản ghi: ${String(id)})` : thongDiep)
@@ -695,7 +708,10 @@ export function mapTour(doc: unknown): unknown {
     }),
     inclusions: t.inclusions,
     exclusions: (t.exclusions as unknown[] | undefined) ?? [],
-    ...(t.notes ? { notes: t.notes } : {}),
+    // Payload lưu trường group để trống thành { vi: '' } chứ không bỏ hẳn, và
+    // { vi: '' } là truthy — kiểm bằng `t.notes ?` sẽ để nó lọt qua rồi vỡ ở
+    // localizedTextSchema.min(1). Phải kiểm nội dung, không kiểm sự tồn tại.
+    ...(coNoiDung(t.notes) ? { notes: t.notes } : {}),
     seo: {
       title: (t.seo as Record<string, unknown>)?.title,
       description: (t.seo as Record<string, unknown>)?.description,
