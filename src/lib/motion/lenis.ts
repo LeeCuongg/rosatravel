@@ -27,27 +27,35 @@ interface LenisLike {
 let hienTai: LenisLike | null = null
 
 /**
- * Có ai đang yêu cầu khoá cuộn không.
+ * ĐẾM số lớp đang yêu cầu khoá cuộn, chứ không phải một cờ bật/tắt.
  *
- * Phải nhớ riêng chứ không chỉ gọi `stop()` một lần: SmoothScroll nạp Lenis
- * bằng import động, nên có khoảnh khắc lớp phủ đã mở mà Lenis chưa đăng ký.
- * Không có cờ này thì lệnh khoá rơi vào khoảng không, và vài trăm mili giây sau
- * Lenis khởi động ở trạng thái đang chạy — nền trôi tự do dưới lớp phủ.
+ * Phải đếm vì các lớp phủ LỒNG NHAU: mở một bài "Chuyến đã đi" là khoá lần
+ * một, mở tiếp ngăn kéo địa điểm bên trong bài đó là khoá lần hai. Với một cờ
+ * boolean, đóng ngăn kéo sẽ mở khoá cuộn trong khi bài vẫn đang mở — nền lại
+ * trôi tự do dưới lớp phủ, đúng cái lỗi mà cơ chế này sinh ra để chặn.
+ *
+ * Cũng phải nhớ trạng thái chứ không chỉ gọi `stop()` một lần: SmoothScroll nạp
+ * Lenis bằng import động, nên có khoảnh khắc lớp phủ đã mở mà Lenis chưa đăng
+ * ký. Không có bộ đếm thì lệnh khoá rơi vào khoảng không, và vài trăm mili giây
+ * sau Lenis khởi động ở trạng thái đang chạy.
  */
-let dangKhoa = false
+let soLopDangKhoa = 0
 
 /** SmoothScroll gọi khi tạo xong instance, và gọi lại với `null` khi dọn dẹp. */
 export function dangKyLenis(instance: LenisLike | null): void {
   hienTai = instance
-  if (instance && dangKhoa) instance.stop()
+  if (instance && soLopDangKhoa > 0) instance.stop()
 }
 
 export function khoaCuonTrang(): void {
-  dangKhoa = true
+  soLopDangKhoa += 1
   hienTai?.stop()
 }
 
 export function moKhoaCuonTrang(): void {
-  dangKhoa = false
-  hienTai?.start()
+  // Kẹp sàn về 0: một lần mở khoá thừa (vd. effect bị gọi cleanup hai lần trong
+  // Strict Mode) không được đẩy bộ đếm xuống âm, vì khi đó lần khoá kế tiếp sẽ
+  // không có tác dụng và lỗi hiện ra ở một thao tác hoàn toàn khác.
+  soLopDangKhoa = Math.max(0, soLopDangKhoa - 1)
+  if (soLopDangKhoa === 0) hienTai?.start()
 }

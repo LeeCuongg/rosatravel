@@ -153,7 +153,10 @@ export default async function LocationPage({ params }: { params: Params }) {
         <Frame label={ts('otherLocations')} width="sml" bodyClassName="p-4 sm:p-6">
           <div className="flex flex-col gap-4">
             {goiY.map((item) => (
-              <LocationCard key={item.slug} location={item} locale={locale} />
+              // nganKeo={false}: trang này KHÔNG gắn <LocationDrawer>, nên
+              // đổi tham số URL sẽ chẳng mở ra gì. Ở đây điều hướng thẳng mới
+              // là hành vi đúng.
+              <LocationCard key={item.slug} location={item} locale={locale} nganKeo={false} />
             ))}
           </div>
         </Frame>

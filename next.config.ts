@@ -5,6 +5,23 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+  /**
+   * Ba gói này KHÔNG được webpack đóng gói — Next `require()` thẳng chúng từ
+   * node_modules lúc chạy.
+   *
+   * Lý do rất cụ thể: `@vercel/blob` (do @payloadcms/storage-vercel-blob kéo
+   * vào) phụ thuộc `undici`. Ở chế độ dev, webpack tách nó thành
+   * `.next/server/vendor-chunks/undici@6.28.1.js` nhưng KHÔNG phát ra file đó
+   * cho mọi entry cần tới. Trang /lien-he vì thế vỡ với
+   * `Cannot find module './vendor-chunks/undici@6.28.1.js'` → HTTP 500, trong
+   * khi `next build` lại chạy tốt và prerender trang đó bình thường. Một lỗi
+   * chỉ có ở dev là loại tệ nhất: nó làm mất niềm tin vào chính máy đang code.
+   *
+   * `mongoose` và `sharp` thêm vào cùng lý do phòng ngừa — cả hai đều là gói
+   * Node thuần có binary/`require` động, thứ mà bundler không xử lý đúng.
+   */
+  serverExternalPackages: ['@vercel/blob', 'undici', 'mongoose', 'sharp'],
+
   images: {
     // Tắt tối ưu ảnh của Vercel: bốn biến thể AVIF đã được sinh sẵn lúc upload
     // lên Payload (hook sharp, xem src/collections/Media.ts và

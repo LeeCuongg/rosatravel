@@ -1,9 +1,12 @@
+import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
 import { Media } from '@/components/media/Media'
 import { Reveal } from '@/components/motion/Reveal'
 import { Rule } from '@/components/ui/Frame'
 import { TextLink } from '@/components/ui/TextLink'
 import { DaySection } from '@/components/story/DaySection'
+import { LocationDrawer } from '@/components/location/LocationDrawer'
+import { gomDiaDiem } from '@/components/location/gom-dia-diem'
 import type { CaseStudy } from '@/lib/content'
 
 /**
@@ -25,14 +28,29 @@ import type { CaseStudy } from '@/lib/content'
 export function CaseArticle({
   caseStudy,
   locale,
+  /**
+   * Bài này có phải nội dung chính của trang không.
+   *
+   * Quyết định `priority` cho ảnh đầu bài, và đó là khác biệt đo được: ở trang
+   * đầy đủ, ảnh đó LÀ phần tử LCP nên phải tải sớm. Trong lớp phủ thì không —
+   * Next prefetch sẵn route lớp phủ cho cả bốn thẻ trên trang chủ, nên để
+   * `priority` là trang chủ preload bốn ảnh hero mà người dùng có thể không
+   * bao giờ mở. Trình duyệt đã cảnh báo đúng chuyện này:
+   * "preloaded ... but not used within a few seconds".
+   */
+  laTrangDayDu = true,
 }: {
   caseStudy: CaseStudy
   locale: 'vi' | 'en'
+  laTrangDayDu?: boolean
 }) {
   const t = useTranslations('caseStudy')
   const tc = useTranslations('cta')
 
   return (
+    // data-accent ở gốc bài khiến MỌI `text-accent` bên trong — kể cả trong
+    // ngăn kéo địa điểm, vốn là position:fixed — lấy đúng màu riêng của bài
+    // này. Biến CSS đi theo cây DOM, không theo vị trí trên màn hình.
     <article data-accent={caseStudy.accent}>
       {/* ── Ảnh đầu bài, chữ đè lên ─────────────────────────────────────────
           Đây là chỗ DUY NHẤT trên toàn site còn đặt chữ lên ảnh. Được phép vì
@@ -44,7 +62,7 @@ export function CaseArticle({
           media={caseStudy.heroImage}
           locale={locale}
           fill
-          priority
+          priority={laTrangDayDu}
           sizes="100vw"
           className="object-cover"
         />
@@ -121,6 +139,12 @@ export function CaseArticle({
         </ol>
         <Rule />
       </div>
+
+      {/* Ngăn kéo nằm TRONG article để thừa hưởng data-accent ở trên. Nó tự ẩn
+          khi URL không có tham số `?dia-diem=`, nên đặt ở đây không tốn gì. */}
+      <Suspense>
+        <LocationDrawer locations={gomDiaDiem(caseStudy.days)} locale={locale} />
+      </Suspense>
     </article>
   )
 }

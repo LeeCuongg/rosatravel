@@ -44,7 +44,9 @@ export default async function CaseStudyModal({ params }: { params: Params }) {
       subtitle={caseStudy.subtitle[locale] ?? caseStudy.subtitle.vi}
       accent={caseStudy.accent}
     >
-      <CaseArticle caseStudy={caseStudy} locale={locale} />
+      {/* laTrangDayDu={false}: xem giải thích ở CaseArticle — trong lớp phủ,
+          ảnh đầu bài không phải LCP và không đáng preload từ trang chủ. */}
+      <CaseArticle caseStudy={caseStudy} locale={locale} laTrangDayDu={false} />
     </CaseOverlay>
   )
 }

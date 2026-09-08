@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server'
-import { getCaseStudies, getHomeContent, getTours, isVideoAsset } from '@/lib/content'
-import { HeroEditorial, gomAnhCollage } from '@/components/home/HeroEditorial'
+import { getCaseStudies, getHomeContent, getTours } from '@/lib/content'
+import { HeroEditorial } from '@/components/home/HeroEditorial'
 import { WhyUs } from '@/components/home/WhyUs'
 import { TourGrid } from '@/components/home/TourGrid'
 import { JourneyCinematic } from '@/components/home/JourneyCinematic'
@@ -28,14 +28,6 @@ export default async function HomePage({
     .map((slug) => allTours.find((t) => t.slug === slug))
     .filter((t): t is NonNullable<typeof t> => Boolean(t))
 
-  // Ảnh bìa của các tour nổi bật được góp vào mảng ảnh hero. Lấy TẤT CẢ tour
-  // chứ không chỉ tour nổi bật: mảng cần tối đa 10 ảnh khác nhau, và một site
-  // mới thường chỉ có vài tour được đánh dấu nổi bật.
-  const anhBiaTour = allTours.map((tour) =>
-    isVideoAsset(tour.heroMedia) ? tour.heroMedia.poster : tour.heroMedia,
-  )
-  const anhCollage = gomAnhCollage(home.hero.media, home.journey.stops, anhBiaTour)
-
   const danhSachTourChoForm = allTours.map((tour) => ({
     slug: tour.slug,
     label: tour.title[locale] ?? tour.title.vi,
@@ -43,7 +35,7 @@ export default async function HomePage({
 
   return (
     <main>
-      <HeroEditorial hero={home.hero} images={anhCollage} locale={locale} />
+      <HeroEditorial hero={home.hero} locale={locale} />
       <WhyUs items={home.whyUs} locale={locale} />
       <TourGrid tours={featured} locale={locale} />
       <CaseGrid cases={caseStudies} locale={locale} />

@@ -1,9 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from '@/i18n/navigation'
+import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { khoaCuonTrang, moKhoaCuonTrang } from '@/lib/motion/lenis'
+import { useMotionTier } from '@/lib/motion/MotionTierProvider'
+import { duration, easingArray } from '@/lib/motion/tokens'
 
 /**
  * LỚP PHỦ bọc quanh một bài "Chuyến đã đi".
@@ -35,13 +38,22 @@ export function CaseOverlay({
 }) {
   const router = useRouter()
   const t = useTranslations('caseStudy')
+  const tier = useMotionTier()
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // router.back() chứ không phải router.push('/'): lớp phủ được mở bằng một
-  // lần điều hướng, nên đóng nó phải là đi LÙI lại — có thế người đọc mới quay
-  // về đúng vị trí cuộn cũ trên trang chủ. push('/') sẽ ném họ về đầu trang và
-  // còn chất thêm một mục nữa vào lịch sử, khiến nút Back không thoát ra được.
-  const dong = useCallback(() => router.back(), [router])
+  /**
+   * Lớp phủ này do ROUTER dựng lên (intercepting route), nên khi điều hướng đi
+   * là React gỡ nó khỏi cây ngay lập tức — không có chỗ nào để chạy animation
+   * thoát, và đóng thành ra biến mất đột ngột. AnimatePresence cũng không cứu
+   * được vì cha của nó cũng bị thay.
+   *
+   * Cách duy nhất còn lại: tự giữ cờ "đang đóng", chạy hết animation, RỒI mới
+   * gọi router.back() trong onAnimationComplete.
+   */
+  const [dangDong, setDangDong] = useState(false)
+  const dong = useCallback(() => setDangDong(true), [])
+
+  const thoiLuong = tier === 'reduced' ? 0.01 : duration.slow
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -87,16 +99,37 @@ export function CaseOverlay({
       {/* Nền tối. Là <button> chứ không phải <div onClick>: bấm ra ngoài để
           đóng phải dùng được bằng bàn phím, và một <div> có onClick thì trình
           đọc màn hình không thông báo gì cả. */}
-      <button
+      <motion.button
         type="button"
         aria-label={t('close')}
         onClick={dong}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: dangDong ? 0 : 1 }}
+        transition={{ duration: thoiLuong, ease: easingArray.enter }}
         className="absolute inset-0 bg-sand-100/45 backdrop-blur-[2px]"
       />
 
-      <div
+      {/* Trượt lên từ mép dưới. Chỉ animate `y` (transform) — trình duyệt chạy
+          nó trên compositor, không phải tính lại bố cục hay vẽ lại từng khung.
+          Animate `top` hay `height` cho ra cùng hiệu ứng nhìn nhưng rớt khung
+          hình trên máy yếu. */}
+      <motion.div
         ref={panelRef}
         tabIndex={-1}
+        initial={{ y: '100%' }}
+        animate={{ y: dangDong ? '100%' : 0 }}
+        transition={{ duration: thoiLuong, ease: easingArray.enter }}
+        onAnimationComplete={() => {
+          // Cũng chạy sau animation VÀO, nên phải kiểm cờ — thiếu `if` này thì
+          // lớp phủ tự đóng ngay khi vừa mở xong.
+          //
+          // router.back() chứ không phải router.push('/'): lớp phủ được mở bằng
+          // một lần điều hướng, nên đóng nó phải là đi LÙI lại — có thế người
+          // đọc mới quay về đúng vị trí cuộn cũ. push('/') sẽ ném họ về đầu
+          // trang và chất thêm một mục vào lịch sử, khiến nút Back không thoát
+          // ra được.
+          if (dangDong) router.back()
+        }}
         className="relative mx-auto mt-6 flex h-[calc(100svh-1.5rem)] w-[calc(100%-1.5rem)] max-w-med flex-col overflow-hidden bg-ink-950 outline-none sm:mt-10 sm:h-[calc(100svh-2.5rem)] sm:w-[calc(100%-5rem)]"
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-dashed border-rule px-4 py-3 sm:px-6">
@@ -132,7 +165,7 @@ export function CaseOverlay({
             hợp cuộn tới đáy rồi tiếp tục lăn: không có nó, trình duyệt chuyển
             đà cuộn sang trang nền. */}
         <div className="grow overflow-y-auto overscroll-contain">{children}</div>
-      </div>
+      </motion.div>
     </div>
   )
 }

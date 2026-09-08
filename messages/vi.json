@@ -71,7 +71,9 @@
       "thien-nhien": "Thiên nhiên",
       "van-hoa": "Văn hoá",
       "cho-mua-sam": "Chợ và mua sắm"
-    }
+    },
+    "viewFull": "Xem trang đầy đủ",
+    "goToImage": "Xem ảnh {n}"
   },
   "caseStudy": {
     "highlights": "Điểm nhấn chuyến đi",

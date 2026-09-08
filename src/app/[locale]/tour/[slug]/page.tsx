@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
@@ -9,6 +10,8 @@ import { InclusionList } from '@/components/tour/InclusionList'
 import { TourCta } from '@/components/tour/TourCta'
 import { RelatedTours } from '@/components/tour/RelatedTours'
 import { Eyebrow } from '@/components/ui/Frame'
+import { LocationDrawer } from '@/components/location/LocationDrawer'
+import { gomDiaDiem } from '@/components/location/gom-dia-diem'
 import { Reveal } from '@/components/motion/Reveal'
 import { routing, type Locale } from '@/i18n/routing'
 
@@ -67,6 +70,12 @@ export default async function TourPage({ params }: { params: Params }) {
       <InclusionList inclusions={tour.inclusions} exclusions={tour.exclusions} locale={locale} />
       <TourCta slug={tour.slug} />
       <RelatedTours tours={allTours} currentSlug={tour.slug} locale={locale} />
+
+      {/* Cùng ngăn kéo với bài "Chuyến đã đi". Địa điểm trong lịch trình tour
+          đã được nạp sẵn ở server (depth 2), nên mở ra là thấy ngay. */}
+      <Suspense>
+        <LocationDrawer locations={gomDiaDiem(tour.itinerary)} locale={locale} />
+      </Suspense>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -50,12 +50,19 @@
   /* 3.02:1 trên nền trang — vừa đủ ngưỡng WCAG cho thành phần phi văn bản. */
   --color-rule-strong: #9d8e70;
 
-  /* MÀU NHẤN THEO NGỮ CẢNH.
-     Trỏ vào biến `--accent` do khối cha đặt (xem [data-accent] bên dưới), có
-     màu dự phòng là đất nung. Nhờ vậy `text-accent` dùng được ở bất cứ đâu:
-     bên trong một bài "Chuyến đã đi" nó lấy màu riêng của bài đó, ngoài phạm
-     vi đó nó là màu nhấn mặc định của site. */
-  --color-accent: var(--accent, #a33600);
+  /* MÀU NHẤN THEO NGỮ CẢNH — giá trị MẶC ĐỊNH.
+     Các khối [data-accent] bên dưới ghi đè chính biến này cho cây con của
+     chúng. Nhờ vậy `text-accent` dùng được ở bất cứ đâu: bên trong một bài
+     "Chuyến đã đi" nó lấy màu riêng của bài đó, ngoài phạm vi đó nó là màu
+     nhấn mặc định của site.
+
+     KHÔNG viết `var(--accent, #a33600)` ở đây. Đã thử và nó SAI: CSS thay thế
+     var() trong một custom property ngay TẠI NƠI KHAI BÁO. Khai ở :root, nơi
+     --accent chưa tồn tại, thì giá trị bị chốt cứng thành màu dự phòng, và mọi
+     phần tử con thừa hưởng đúng giá trị đã chốt đó — đặt --accent sâu bên
+     trong không kích hoạt thay thế lại lần nữa. Kết quả: bốn bài "Chuyến đã
+     đi" cùng ra một màu, và không có gì báo lỗi. */
+  --color-accent: #a33600;
 
   /* ══════════════════════════════════════════════════════════════════════
      CHỮ
@@ -141,12 +148,16 @@
    MỌI giá trị đã đo tương phản trên nền #fdf8ec và đều vượt 4.5:1 — chúng làm
    MÀU CHỮ cho tiêu đề trong bài, không chỉ làm viền. Danh sách này phải khớp
    MAU_NHAN trong src/collections/CaseStudies.ts và enum `accent` trong
-   src/lib/content/schema.ts; thêm màu thì thêm ở cả ba chỗ, và ĐO LẠI. */
-[data-accent='dat-nung'] { --accent: #a33600; } /* 6.42:1 */
-[data-accent='xanh-reu'] { --accent: #2f4f3a; } /* 8.54:1 */
-[data-accent='chi-lam']  { --accent: #2f4257; } /* 9.51:1 */
-[data-accent='tim-man']  { --accent: #5d3a54; } /* 8.88:1 */
-[data-accent='vang-dat'] { --accent: #8a6a1f; } /* 4.86:1 */
+   src/lib/content/schema.ts; thêm màu thì thêm ở cả ba chỗ, và ĐO LẠI.
+
+   Ghi đè thẳng `--color-accent` (biến mà Tailwind sinh ra tiện ích
+   `text-accent` từ đó), KHÔNG qua một biến trung gian — xem giải thích dài
+   trong khối @theme phía trên. */
+[data-accent='dat-nung'] { --color-accent: #a33600; } /* 6.42:1 */
+[data-accent='xanh-reu'] { --color-accent: #2f4f3a; } /* 8.54:1 */
+[data-accent='chi-lam']  { --color-accent: #2f4257; } /* 9.51:1 */
+[data-accent='tim-man']  { --color-accent: #5d3a54; } /* 8.88:1 */
+[data-accent='vang-dat'] { --color-accent: #8a6a1f; } /* 4.86:1 */
 
 :root {
   /* PHẢI là light: nền trang là kem, chữ là nâu đậm. Khai 'dark' thì trình
