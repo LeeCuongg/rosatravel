@@ -1,4 +1,4 @@
-import type { ImageAsset } from './schema'
+import type { ImageAsset, LocalizedText } from './schema'
 
 /**
  * Trường văn bản bọc locale có được coi là "có nội dung" không.
@@ -105,6 +105,58 @@ export function mapOgImage(doc: unknown): ImageAsset {
   }
 }
 
+/**
+ * Mảng quan hệ hasMany. Payload trả về `undefined` khi chưa ai chọn gì, và
+ * mảng id trần khi truy vấn thiếu depth — `phaiLaDocument` bắt trường hợp thứ
+ * hai, ở đây chỉ cần lo trường hợp thứ nhất.
+ */
+function mangQuanHe(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : []
+}
+
+/**
+ * Mảng đoạn văn (hoặc mảng gạch đầu dòng). Lọc bỏ dòng rỗng thay vì để zod
+ * ném lỗi: nút "Thêm dòng" của admin tạo ra một dòng trống ngay lập tức, và
+ * bấm nhầm rồi lưu là chuyện thường ngày. Cùng lý do đã ghi ở `faq` trong
+ * mapHome.
+ */
+function doanVan(value: unknown): unknown[] {
+  return mangQuanHe(value).filter(coNoiDung)
+}
+
+/**
+ * Nhãn khối địa điểm. Payload lưu group để trống thành `{ vi: '' }` chứ không
+ * bỏ hẳn, nên phải kiểm nội dung — cùng cái bẫy đã ghi ở `coNoiDung`.
+ */
+function nhanKhoiDiaDiem(value: unknown): { locationsLabel: LocalizedText } | Record<string, never> {
+  return coNoiDung(value) ? { locationsLabel: value as LocalizedText } : {}
+}
+
+export function mapLocation(doc: unknown): unknown {
+  const l = phaiLaDocument(doc, 'địa điểm')
+  return {
+    slug: l.slug,
+    name: l.name,
+    category: l.category,
+    excerpt: l.excerpt,
+    // Mảng đoạn văn: mỗi dòng trong admin là một group { vi }, và schema đợi
+    // đúng hình dạng đó — KHÔNG bóc lấy chuỗi `vi` ra ở đây.
+    body: doanVan(l.body),
+    // Chuỗi rỗng phải thành `undefined`, không được lọt xuống dưới: schema đòi
+    // `.min(1)` cho address và `z.url()` cho website, nên một ô để trống trong
+    // admin sẽ làm vỡ build với thông báo về "địa chỉ không hợp lệ" — trong khi
+    // ý người nhập chỉ là "nơi này không có địa chỉ".
+    ...(typeof l.address === 'string' && l.address.trim() ? { address: l.address.trim() } : {}),
+    ...(typeof l.website === 'string' && l.website.trim() ? { website: l.website.trim() } : {}),
+    images: mangQuanHe(l.images).map(mapMedia),
+    seo: {
+      title: (l.seo as Record<string, unknown>)?.title,
+      description: (l.seo as Record<string, unknown>)?.description,
+      ogImage: mapOgImage((l.seo as Record<string, unknown>)?.ogImage),
+    },
+  }
+}
+
 export function mapTour(doc: unknown): unknown {
   const t = phaiLaDocument(doc, 'tour')
   const itinerary = (t.itinerary as unknown[] | undefined) ?? []
@@ -129,7 +181,9 @@ export function mapTour(doc: unknown): unknown {
         day: index + 1,
         title: d.title,
         description: d.description,
-        ...(d.media ? { media: mapMedia(d.media) } : {}),
+        images: mangQuanHe(d.images).map(mapMedia),
+        ...nhanKhoiDiaDiem(d.locationsLabel),
+        locations: mangQuanHe(d.locations).map(mapLocation),
       }
     }),
     inclusions: t.inclusions,
@@ -146,10 +200,46 @@ export function mapTour(doc: unknown): unknown {
   }
 }
 
+export function mapCaseStudy(doc: unknown): unknown {
+  const c = phaiLaDocument(doc, 'chuyến đã đi')
+  const hero = mapMedia(c.heroImage)
+
+  return {
+    slug: c.slug,
+    title: c.title,
+    subtitle: c.subtitle,
+    accent: c.accent,
+    heroImage: hero,
+    // Bỏ trống ảnh thẻ thì dùng ảnh đầu bài. Rơi về như vậy chứ không để
+    // undefined: khối thẻ ở trang chủ không có nhánh nào xử lý ảnh thiếu, và
+    // một ô tròn trống giữa ba ô có ảnh nhìn ra ngay là lỗi.
+    thumbnail: c.thumbnail ? mapMedia(c.thumbnail) : hero,
+    highlights: doanVan(c.highlights),
+    ourRole: doanVan(c.ourRole),
+    days: mangQuanHe(c.days).map((ngay, index) => {
+      const d = ngay as Record<string, unknown>
+      return {
+        day: index + 1,
+        title: d.title,
+        body: doanVan(d.body),
+        images: mangQuanHe(d.images).map(mapMedia),
+        ...nhanKhoiDiaDiem(d.locationsLabel),
+        locations: mangQuanHe(d.locations).map(mapLocation),
+      }
+    }),
+    seo: {
+      title: (c.seo as Record<string, unknown>)?.title,
+      description: (c.seo as Record<string, unknown>)?.description,
+      ogImage: mapOgImage((c.seo as Record<string, unknown>)?.ogImage),
+    },
+  }
+}
+
 export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknown {
   const h = phaiLaDocument(doc, 'home')
   const hero = h.hero as Record<string, unknown>
   const journey = h.journey as Record<string, unknown>
+  const guide = h.guide as Record<string, unknown> | undefined
 
   return {
     hero: {
@@ -179,6 +269,35 @@ export function mapHome(doc: unknown, tourSlugById: Map<string, string>): unknow
         ...(t.avatar ? { avatar: mapMedia(t.avatar) } : {}),
       }
     }),
+    /**
+     * Lọc bỏ dòng rỗng thay vì để zod ném lỗi.
+     *
+     * Mảng trong admin Payload có nút "Thêm dòng" tạo ra một dòng trống ngay
+     * lập tức. Người nhập bấm nhầm rồi lưu là chuyện thường ngày — và nếu
+     * dòng trống đó đi tới zod thì CẢ TRANG CHỦ ngừng build với một thông báo
+     * về schema, chỉ vì một dòng không ai định nhập. Ở đây nó chỉ đơn giản là
+     * không xuất hiện.
+     *
+     * Khác hẳn với quan hệ mồ côi ở slugCuaTour phía trên, nơi bắt buộc phải
+     * ném lỗi: ở đó có một tour đã bị xoá và người vận hành CẦN biết.
+     */
+    faq: ((h.faq as unknown[] | undefined) ?? [])
+      .map((x) => x as Record<string, unknown>)
+      .filter((f) => coNoiDung(f.question) && coNoiDung(f.answer))
+      .map((f) => ({ question: f.question, answer: f.answer })),
+    // Nhóm `guide` để trống được Payload lưu thành object có mọi khoá rỗng,
+    // không phải undefined — nên phải kiểm nội dung của `name`, y như lý do đã
+    // ghi ở `notes` trong mapTour.
+    ...(typeof guide?.name === 'string' && guide.name.trim().length > 0
+      ? {
+          guide: {
+            name: guide.name.trim(),
+            role: guide.role,
+            bio: guide.bio,
+            ...(guide.photo ? { photo: mapMedia(guide.photo) } : {}),
+          },
+        }
+      : {}),
     contact: h.contact,
   }
 }

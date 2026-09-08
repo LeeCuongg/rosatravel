@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { imageAssetSchema, videoAssetSchema, tourSchema } from '../schema'
+import { caseStudySchema, imageAssetSchema, locationSchema, videoAssetSchema, tourSchema } from '../schema'
 
 const validImage = {
   src: '/media/tours/mau-ha-giang/deo-ma-pi-leng.avif',
@@ -71,11 +71,13 @@ const validTour = {
   gallery: [validImage],
   // Số ngày phải khớp durationDays: 4 — schema có refine kiểm tra điều này,
   // nên fixture "hợp lệ" bắt buộc có đủ 4 ngày.
+  // `images` và `locations` là mảng BẮT BUỘC (được phép rỗng) từ GĐ3 — bỏ
+  // chúng đi thì zod từ chối cả tour, nên fixture phải khai đủ.
   itinerary: [
-    { day: 1, title: { vi: 'Hà Nội – Quản Bạ' }, description: { vi: 'Khởi hành sớm.' } },
-    { day: 2, title: { vi: 'Quản Bạ – Đồng Văn' }, description: { vi: 'Qua Yên Minh.' } },
-    { day: 3, title: { vi: 'Đồng Văn – Mèo Vạc' }, description: { vi: 'Vượt Mã Pí Lèng.' } },
-    { day: 4, title: { vi: 'Mèo Vạc – Hà Nội' }, description: { vi: 'Về xuôi.' } },
+    { day: 1, title: { vi: 'Hà Nội – Quản Bạ' }, description: { vi: 'Khởi hành sớm.' }, images: [], locations: [] },
+    { day: 2, title: { vi: 'Quản Bạ – Đồng Văn' }, description: { vi: 'Qua Yên Minh.' }, images: [], locations: [] },
+    { day: 3, title: { vi: 'Đồng Văn – Mèo Vạc' }, description: { vi: 'Vượt Mã Pí Lèng.' }, images: [], locations: [] },
+    { day: 4, title: { vi: 'Mèo Vạc – Hà Nội' }, description: { vi: 'Về xuôi.' }, images: [], locations: [] },
   ],
   inclusions: [{ vi: 'Xe đưa đón' }],
   exclusions: [{ vi: 'Chi phí cá nhân' }],
@@ -115,5 +117,98 @@ describe('tourSchema', () => {
     expect(() =>
       tourSchema.parse({ ...validTour, seo: { ...validTour.seo, title: 'Tour Hà Giang' } }),
     ).toThrow()
+  })
+})
+
+// ── Địa điểm và Chuyến đã đi (GĐ3) ──────────────────────────────────────────
+
+const validLocation = {
+  slug: 'homestay-cuc-bac',
+  name: { vi: 'Homestay Cực Bắc' },
+  category: 'luu-tru' as const,
+  excerpt: { vi: 'Nhà sàn nhìn thẳng ra thung lũng.' },
+  body: [{ vi: 'Chủ nhà là người Mông, nấu cơm cho khách ăn cùng gia đình.' }],
+  images: [validImage],
+  seo: {
+    title: { vi: 'Homestay Cực Bắc, Đồng Văn' },
+    description: { vi: 'Nhà sàn nhìn ra thung lũng ở Đồng Văn.' },
+    ogImage: validImage,
+  },
+}
+
+describe('locationSchema', () => {
+  it('chấp nhận địa điểm hợp lệ không có địa chỉ và website', () => {
+    // Cả hai đều không bắt buộc: một khúc sông hay một con đèo không có địa chỉ
+    // bưu chính, và phần lớn hàng quán vùng cao không có web.
+    expect(() => locationSchema.parse(validLocation)).not.toThrow()
+  })
+
+  it('từ chối website là chuỗi rỗng thay vì bỏ trống', () => {
+    // Đây là lỗi thật của lớp ánh xạ, không phải giả thuyết: Payload lưu ô text
+    // để trống thành '' chứ không phải undefined. mapLocation phải bỏ hẳn khoá
+    // đó đi, và test này chốt lại rằng zod sẽ bắt nếu ai đó gỡ phần lọc ra.
+    expect(() => locationSchema.parse({ ...validLocation, website: '' })).toThrow()
+  })
+
+  it('từ chối loại địa điểm ngoài danh sách cho trước', () => {
+    expect(() => locationSchema.parse({ ...validLocation, category: 'quan-bar' })).toThrow()
+  })
+
+  it('từ chối địa điểm không có ảnh nào', () => {
+    // Thẻ địa điểm luôn đọc images[0] — không có ảnh là thẻ vỡ.
+    expect(() => locationSchema.parse({ ...validLocation, images: [] })).toThrow()
+  })
+})
+
+const validCase = {
+  slug: 'ha-giang-nhom-chin-nguoi',
+  title: { vi: 'Hà Giang cho một nhóm chín người' },
+  subtitle: { vi: 'Sáu ngày cuối tháng Mười' },
+  accent: 'xanh-reu' as const,
+  heroImage: validImage,
+  thumbnail: validImage,
+  highlights: [{ vi: 'Nhóm chín người, ba thế hệ, một chiếc xe.' }],
+  ourRole: [{ vi: 'Đặt xe và tài xế quen đường đèo' }],
+  days: [
+    {
+      day: 1,
+      title: { vi: 'Hà Nội – Hà Giang' },
+      body: [{ vi: 'Khởi hành lúc năm giờ sáng.' }],
+      images: [],
+      locations: [],
+    },
+  ],
+  seo: {
+    title: { vi: 'Chuyến Hà Giang cho nhóm chín người' },
+    description: { vi: 'Sáu ngày Hà Giang cho một gia đình ba thế hệ.' },
+    ogImage: validImage,
+  },
+}
+
+describe('caseStudySchema', () => {
+  it('chấp nhận bài hợp lệ', () => {
+    expect(() => caseStudySchema.parse(validCase)).not.toThrow()
+  })
+
+  it('từ chối màu nhấn ngoài bảng đã đo tương phản', () => {
+    // Bảng màu nằm ở ba nơi phải khớp nhau: MAU_NHAN (CaseStudies.ts), enum này,
+    // và các khối [data-accent] trong globals.css. Thêm màu mà quên đo tương
+    // phản là chữ tiêu đề trượt chuẩn WCAG mà không ai thấy.
+    expect(() => caseStudySchema.parse({ ...validCase, accent: 'hong-neon' })).toThrow()
+  })
+
+  it('từ chối bài không có ngày nào', () => {
+    expect(() => caseStudySchema.parse({ ...validCase, days: [] })).toThrow()
+  })
+
+  it('KHÔNG đòi số ngày khớp một trường độ dài nào cả', () => {
+    // Khác hẳn tourSchema (có refine ép itinerary.length === durationDays). Đây
+    // là bài viết, không phải bảng lịch trình: được phép gộp hai ngày nhạt vào
+    // một mục hoặc bỏ hẳn ngày cuối chỉ ngồi sân bay.
+    const nhieuNgay = {
+      ...validCase,
+      days: [validCase.days[0], { ...validCase.days[0], day: 2 }],
+    }
+    expect(() => caseStudySchema.parse(nhieuNgay)).not.toThrow()
   })
 })

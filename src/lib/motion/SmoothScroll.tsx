@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { dangKyLenis } from './lenis'
 import { useMotionTier } from './MotionTierProvider'
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       gsap.registerPlugin(ScrollTrigger)
 
       const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 })
+      // Gửi tay cầm ra ngoài để lớp phủ khoá được cuộn nền — xem ./lenis.ts.
+      dangKyLenis(lenis)
 
       // ScrollTrigger phải cập nhật theo tiến độ của Lenis, không theo sự kiện
       // scroll gốc — nếu không, vị trí pin sẽ trễ một frame và thấy rung.
@@ -34,6 +37,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       gsap.ticker.lagSmoothing(0)
 
       cleanup = () => {
+        dangKyLenis(null)
         gsap.ticker.remove(raf)
         lenis.destroy()
         // Không kill ScrollTrigger ở đây. Component nào tạo trigger thì tự kill

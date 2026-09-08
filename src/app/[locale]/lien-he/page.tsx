@@ -19,11 +19,11 @@ export default async function ContactPage({
   }))
 
   return (
-    <main className="mx-auto max-w-xl px-6 pb-(--spacing-section) pt-40">
-      <h1 className="font-[family-name:var(--font-playfair)] text-4xl">{t('title')}</h1>
+    <main className="mx-auto max-w-sml px-gutter py-section">
+      <h1 className="font-display text-clay-500 text-center text-d2">{t('title')}</h1>
       {/* useSearchParams cần Suspense để trang vẫn sinh tĩnh được. */}
       <Suspense>
-        <div className="mt-10">
+        <div className="mt-14">
           <ContactForm tours={tours} />
         </div>
       </Suspense>

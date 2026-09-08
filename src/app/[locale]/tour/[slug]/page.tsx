@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { setRequestLocale } from 'next-intl/server'
-import { getTour, getTourSlugs } from '@/lib/content'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { getTour, getTourSlugs, getTours } from '@/lib/content'
 import { TourHero } from '@/components/tour/TourHero'
 import { ItineraryCinematic } from '@/components/tour/ItineraryCinematic'
 import { Gallery } from '@/components/tour/Gallery'
 import { InclusionList } from '@/components/tour/InclusionList'
 import { TourCta } from '@/components/tour/TourCta'
+import { RelatedTours } from '@/components/tour/RelatedTours'
+import { Eyebrow } from '@/components/ui/Frame'
 import { Reveal } from '@/components/motion/Reveal'
 import { routing, type Locale } from '@/i18n/routing'
 
@@ -40,22 +42,31 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function TourPage({ params }: { params: Params }) {
   const { locale, slug } = await params
   setRequestLocale(locale)
+  const t = await getTranslations('sections')
 
-  const tour = await getTour(slug)
+  // Hai truy vấn chạy song song: danh sách tour cho khối "Hành trình khác"
+  // không phụ thuộc vào tour đang xem, nên chờ tuần tự là phí đúng một vòng
+  // round-trip tới database ở MỌI trang tour được sinh ra lúc build.
+  const [tour, allTours] = await Promise.all([getTour(slug), getTours()])
   if (!tour) notFound()
 
   return (
     <main>
       <TourHero tour={tour} locale={locale} />
-      <section className="mx-auto max-w-3xl px-6 py-(--spacing-section)">
+      <section className="mx-auto max-w-sml px-gutter py-section text-center">
         <Reveal>
-          <p className="text-xl leading-relaxed">{tour.summary[locale] ?? tour.summary.vi}</p>
+          <Eyebrow>{t('tourStory')}</Eyebrow>
+          {/* Tóm tắt để cỡ d3 bằng chữ serif, KHÔNG phải cỡ thân bài: đây là
+              đoạn duy nhất trên trang có nhiệm vụ thuyết phục, phần còn lại
+              (lịch trình, bao gồm) là thông tin tra cứu. */}
+          <p className="font-display mt-6 text-d3">{tour.summary[locale] ?? tour.summary.vi}</p>
         </Reveal>
       </section>
       <ItineraryCinematic days={tour.itinerary} locale={locale} />
       <Gallery images={tour.gallery} locale={locale} />
       <InclusionList inclusions={tour.inclusions} exclusions={tour.exclusions} locale={locale} />
       <TourCta slug={tour.slug} />
+      <RelatedTours tours={allTours} currentSlug={tour.slug} locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

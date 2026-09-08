@@ -1,25 +1,31 @@
-import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { Reveal } from '@/components/motion/Reveal'
+import { Frame } from '@/components/ui/Frame'
+import { TextLink } from '@/components/ui/TextLink'
 
+/**
+ * CTA cuối trang tour.
+ *
+ * Cố tình KHÔNG đặt biểu mẫu đầy đủ ở đây như trang chủ. Người đọc tới được
+ * cuối một trang tour là đã chọn xong chuyến đi — thứ họ cần là một cú bấm,
+ * không phải bốn ô để điền. Biểu mẫu ở trang liên hệ sẽ tự chọn sẵn đúng tour
+ * này nhờ tham số `?tour=`.
+ */
 export function TourCta({ slug }: { slug: string }) {
   const t = useTranslations('cta')
 
   return (
-    <section className="mx-auto max-w-3xl px-6 pb-(--spacing-section) text-center">
+    <Frame width="sml" bodyClassName="p-10 sm:p-16 text-center">
       <Reveal>
-        <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl">
-          {t('tourHeadline')}
-        </h2>
-        <p className="mt-3 text-ink-500">{t('tourSub')}</p>
+        <h2 className="font-display text-clay-500 text-d2">{t('tourHeadline')}</h2>
+        <p className="mt-4 text-meta text-ink-500">{t('tourSub')}</p>
         {/* ?tour=<slug> được ContactForm đọc để chọn sẵn tour trong dropdown. */}
-        <Link
-          href={`/lien-he?tour=${slug}`}
-          className="mt-8 inline-block rounded-full bg-clay-600 text-on-clay px-8 py-3 font-medium transition-transform duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:scale-105"
-        >
-          {t('bookNow')}
-        </Link>
+        <div className="mt-10">
+          <TextLink href={`/lien-he?tour=${slug}`} size="lg">
+            {t('bookNow')}
+          </TextLink>
+        </div>
       </Reveal>
-    </section>
+    </Frame>
   )
 }

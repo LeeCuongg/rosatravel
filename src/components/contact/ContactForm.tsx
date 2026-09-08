@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PHONE_PATTERN } from '@/lib/contact/validate'
+import { SubmitButton } from '@/components/ui/TextLink'
 
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
@@ -68,27 +69,53 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
     }
   }
 
+  /**
+   * Ô nhập chỉ có MỘT đường kẻ dưới, nét đứt, nền trong suốt.
+   *
+   * Bản GĐ2 dùng ô viền kín bo góc trên nền kem đậm — mẫu chuẩn của bảng điều
+   * khiển quản trị, và nó kéo cả biểu mẫu ra khỏi tông biên tập của trang.
+   * Đường kẻ dưới là cùng một ngôn ngữ với khung Frame và vách ngăn cột, nên
+   * biểu mẫu trông như một phần của trang chứ không phải một tiện ích gắn vào.
+   *
+   * Màu là rule-strong (3.02:1) chứ KHÔNG phải rule (1.55:1): đây là ranh giới
+   * của một thành phần điều khiển, WCAG đòi tối thiểu 3:1. Đường kẻ trang trí
+   * mới được phép nhạt.
+   *
+   * Khi focus, kẻ chuyển sang nét liền màu đất nung — đổi cả kiểu nét chứ
+   * không chỉ đổi màu, để người phân biệt màu kém vẫn thấy được ô đang chọn.
+   */
   const inputClass =
-    'w-full rounded-md border border-ink-700 bg-ink-900 px-4 py-3 outline-none focus:border-sand-400'
+    'w-full rounded-none border-b border-dashed border-rule-strong bg-transparent py-3 ' +
+    'text-body outline-none transition-colors duration-[var(--duration-fast)] ' +
+    'focus:border-solid focus:border-clay-500'
+
+  const labelClass = 'block text-label uppercase text-ink-500'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <label className="block">
-        <span className="text-sm text-ink-500">{t('name')}</span>
-        <input name="name" required className={`mt-1 ${inputClass}`} />
-      </label>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Họ tên và điện thoại đứng cạnh nhau: hai ô ngắn xếp dọc làm biểu mẫu
+          dài ra vô ích, và người đọc cảm nhận biểu mẫu dài là biểu mẫu phiền. */}
+      <div className="grid gap-8 sm:grid-cols-2">
+        <label className="block">
+          <span className={labelClass}>{t('name')}</span>
+          <input name="name" required className={inputClass} />
+        </label>
+
+        <label className="block">
+          <span className={labelClass}>{t('phone')}</span>
+          <input name="phone" type="tel" required inputMode="tel" className={inputClass} />
+        </label>
+      </div>
 
       <label className="block">
-        <span className="text-sm text-ink-500">{t('phone')}</span>
-        <input name="phone" type="tel" required inputMode="tel" className={`mt-1 ${inputClass}`} />
-      </label>
-
-      <label className="block">
-        <span className="text-sm text-ink-500">{t('tour')}</span>
+        <span className={labelClass}>{t('tour')}</span>
+        {/* appearance-none để bỏ nền và mũi tên mặc định của hệ điều hành —
+            không bỏ thì trên Windows ô select hiện ra một khối xám đặc giữa
+            các ô chỉ có đường kẻ. */}
         <select
           name="tourSlug"
           defaultValue={params.get('tour') ?? ''}
-          className={`mt-1 ${inputClass}`}
+          className={`${inputClass} appearance-none`}
         >
           <option value="">—</option>
           {tours.map((tour) => (
@@ -100,8 +127,13 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
       </label>
 
       <label className="block">
-        <span className="text-sm text-ink-500">{t('note')}</span>
-        <textarea name="note" rows={4} className={`mt-1 ${inputClass}`} />
+        <span className={labelClass}>{t('note')}</span>
+        <textarea
+          name="note"
+          rows={3}
+          placeholder={t('notePlaceholder')}
+          className={`${inputClass} resize-none placeholder:text-ink-700`}
+        />
       </label>
 
       {/* Honeypot: ẩn khỏi người dùng và khỏi trình đọc màn hình, bot vẫn điền. */}
@@ -113,19 +145,20 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
         className="absolute left-[-9999px] h-0 w-0"
       />
 
-      <button
-        type="submit"
-        disabled={status === 'sending'}
-        className="w-full rounded-full bg-clay-600 text-on-clay px-8 py-3 font-medium disabled:opacity-60"
-      >
-        {status === 'sending' ? t('sending') : t('submit')}
-      </button>
+      <div className="flex flex-col items-center gap-4 pt-2">
+        <SubmitButton type="submit" disabled={status === 'sending'}>
+          {status === 'sending' ? t('sending') : t('submit')}
+        </SubmitButton>
 
-      {message && (
-        <p role="status" className={status === 'error' ? 'text-clay-500' : 'text-sand-400'}>
-          {message}
-        </p>
-      )}
+        {message && (
+          <p
+            role="status"
+            className={`text-meta ${status === 'error' ? 'text-clay-500' : 'text-sand-400'}`}
+          >
+            {message}
+          </p>
+        )}
+      </div>
     </form>
   )
 }

@@ -43,11 +43,50 @@ export const videoAssetSchema = z
 
 export const mediaAssetSchema = z.union([imageAssetSchema, videoAssetSchema])
 
+/**
+ * Nhóm SEO — giống hệt nhau ở tour, địa điểm và chuyến đã đi, nên khai một lần.
+ * Cả ba trường đều hiện ra trước mắt người đọc (tab trình duyệt, kết quả tìm
+ * kiếm, thẻ chia sẻ) nên đều bọc locale.
+ */
+export const seoSchema = z.object({
+  title: localizedTextSchema,
+  description: localizedTextSchema,
+  ogImage: imageAssetSchema,
+})
+
+/**
+ * ĐỊA ĐIỂM — một nơi có thật, tồn tại độc lập với mọi chuyến đi.
+ *
+ * `body` là mảng đoạn văn thuần chứ không phải cây rich text: xem giải thích ở
+ * `doanVanArray` trong src/collections/fields.ts.
+ */
+export const locationSchema = z.object({
+  slug: z
+    .string()
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'slug chỉ gồm chữ thường, số và dấu gạch ngang'),
+  name: localizedTextSchema,
+  category: z.enum(['an-uong', 'luu-tru', 'thien-nhien', 'van-hoa', 'cho-mua-sam']),
+  excerpt: localizedTextSchema,
+  body: z.array(localizedTextSchema).min(1),
+  address: z.string().min(1).optional(),
+  website: z.url().optional(),
+  images: z.array(imageAssetSchema).min(1),
+  seo: seoSchema,
+})
+
 export const itineraryDaySchema = z.object({
   day: z.number().int().positive(),
   title: localizedTextSchema,
   description: localizedTextSchema,
-  media: imageAssetSchema.optional(),
+  /**
+   * ĐỔI Ở GĐ3: trước đây là `media?: ImageAsset` (một ảnh). Giờ là mảng, để
+   * bố cục ngày dựng được dải ảnh hai cột. Mảng RỖNG là hợp lệ — ngày không
+   * có ảnh vẫn là một ngày hợp lệ.
+   */
+  images: z.array(imageAssetSchema),
+  /** Nhãn của khối địa điểm ("Ăn ở đâu"). Bỏ trống thì dùng nhãn mặc định. */
+  locationsLabel: localizedTextSchema.optional(),
+  locations: z.array(locationSchema),
 })
 
 export const tourSchema = z
@@ -70,19 +109,69 @@ export const tourSchema = z
     inclusions: z.array(localizedTextSchema).min(1),
     exclusions: z.array(localizedTextSchema),
     notes: localizedTextSchema.optional(),
-    // seo.title và seo.description hiện trên tab trình duyệt, kết quả tìm kiếm
-    // và thẻ chia sẻ mạng xã hội — hướng người đọc, nên bọc locale như mọi
-    // trường văn bản khác.
-    seo: z.object({
-      title: localizedTextSchema,
-      description: localizedTextSchema,
-      ogImage: imageAssetSchema,
-    }),
+    seo: seoSchema,
   })
   .refine((t) => t.itinerary.length === t.durationDays, {
     message: 'Số ngày trong lịch trình phải khớp durationDays',
     path: ['itinerary'],
   })
+
+/**
+ * Một mục Câu hỏi thường gặp. Số thứ tự KHÔNG nằm ở đây — nó được suy ra từ vị
+ * trí trong mảng lúc hiển thị, để người nhập kéo thả sắp lại thứ tự mà không
+ * phải đánh số lại bằng tay.
+ */
+export const faqItemSchema = z.object({
+  question: localizedTextSchema,
+  answer: localizedTextSchema,
+})
+
+/**
+ * Người dẫn đường — khối tự giới thiệu đặt dưới biểu mẫu liên hệ.
+ *
+ * `name` là chuỗi trần, không bọc locale: tên riêng của một người không dịch.
+ * `role` và `bio` thì có ("Người sáng lập" / "Founder").
+ */
+export const guideSchema = z.object({
+  name: z.string().min(1),
+  role: localizedTextSchema,
+  bio: localizedTextSchema,
+  photo: imageAssetSchema.optional(),
+})
+
+/**
+ * CHUYẾN ĐÃ ĐI — một chuyến có thật đã tổ chức xong, kể lại theo ngày.
+ *
+ * Khác Tour ở chỗ KHÔNG có giá và KHÔNG có `durationDays`. Số ngày ở đây suy
+ * ra từ độ dài mảng `days`, và cố tình không có ràng buộc "phải khớp" như bên
+ * tour: bài viết được phép gộp hai ngày nhạt vào một mục, hoặc bỏ hẳn ngày
+ * cuối chỉ ngồi sân bay. Nó là bài viết, không phải bảng lịch trình.
+ */
+export const caseDaySchema = z.object({
+  day: z.number().int().positive(),
+  title: localizedTextSchema,
+  body: z.array(localizedTextSchema).min(1),
+  images: z.array(imageAssetSchema),
+  locationsLabel: localizedTextSchema.optional(),
+  locations: z.array(locationSchema),
+})
+
+export const caseStudySchema = z.object({
+  slug: z
+    .string()
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'slug chỉ gồm chữ thường, số và dấu gạch ngang'),
+  title: localizedTextSchema,
+  subtitle: localizedTextSchema,
+  /** Phải khớp danh sách MAU_NHAN trong src/collections/CaseStudies.ts. */
+  accent: z.enum(['dat-nung', 'xanh-reu', 'chi-lam', 'tim-man', 'vang-dat']),
+  heroImage: imageAssetSchema,
+  /** Ảnh thẻ ở trang chủ. Ánh xạ rơi về heroImage khi người nhập bỏ trống. */
+  thumbnail: imageAssetSchema,
+  highlights: z.array(localizedTextSchema).min(1),
+  ourRole: z.array(localizedTextSchema).min(1),
+  days: z.array(caseDaySchema).min(1),
+  seo: seoSchema,
+})
 
 export const testimonialSchema = z.object({
   name: z.string().min(1),
@@ -108,6 +197,18 @@ export const homeContentSchema = z.object({
       .min(2),
   }),
   testimonials: z.array(testimonialSchema),
+  /**
+   * Hai khối dưới đây thêm ở GĐ3 và đều KHÔNG bắt buộc. Đó là quyết định có
+   * chủ đích: bản ghi `home` đang chạy ngoài production được nhập từ trước khi
+   * hai trường này tồn tại. Để chúng bắt buộc thì lần build kế tiếp sẽ vỡ ở
+   * parseOrThrow với một thông báo về "dữ liệu CMS không hợp lệ", trong khi
+   * thật ra chẳng ai làm sai gì cả.
+   *
+   * Component tương ứng (Faq, Guide) tự ẩn khi rỗng, nên trang vẫn hoàn chỉnh
+   * trong lúc chờ người nhập bổ sung.
+   */
+  faq: z.array(faqItemSchema).default([]),
+  guide: guideSchema.optional(),
   contact: z.object({
     phone: z.string().min(1),
     zaloUrl: z.url(),
@@ -121,7 +222,13 @@ export type VideoAsset = z.infer<typeof videoAssetSchema>
 export type MediaAsset = z.infer<typeof mediaAssetSchema>
 export type ItineraryDay = z.infer<typeof itineraryDaySchema>
 export type Testimonial = z.infer<typeof testimonialSchema>
+export type FaqItem = z.infer<typeof faqItemSchema>
+export type Guide = z.infer<typeof guideSchema>
 export type Tour = z.infer<typeof tourSchema>
+export type Location = z.infer<typeof locationSchema>
+export type CaseDay = z.infer<typeof caseDaySchema>
+export type CaseStudy = z.infer<typeof caseStudySchema>
+export type Accent = CaseStudy['accent']
 export type HomeContent = z.infer<typeof homeContentSchema>
 
 // isVideoAsset sống ở './guards' (không phải ở đây) vì nó là giá trị runtime

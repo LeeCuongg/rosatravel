@@ -1,6 +1,7 @@
-import type { Field, GlobalAfterChangeHook, GlobalConfig, TextFieldValidation } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig, TextFieldValidation } from 'payload'
 
 import { revalidateMoiTrangCoLocale } from '../lib/revalidate'
+import { viTextGroup } from '../collections/fields'
 
 /**
  * Global Home — nội dung trang chủ, nhập một lần và luôn chỉ có một bản ghi
@@ -27,17 +28,6 @@ import { revalidateMoiTrangCoLocale } from '../lib/revalidate'
  * người nhập biết ngay trong lúc còn đang mở form, không phải đợi tới khi
  * xem trang mới phát hiện màn hình bị khoá.
  */
-
-/** Nhóm văn bản song ngữ, hiện chỉ có tiếng Việt — tiếng Anh để dành cho GĐ sau. */
-function viTextGroup(label: string, required?: boolean): Field
-function viTextGroup(label: string, fieldType: 'textarea', required?: boolean): Field
-function viTextGroup(label: string, fieldTypeOrRequired?: 'textarea' | boolean, maybeRequired = true): Field {
-  const isTextarea = fieldTypeOrRequired === 'textarea'
-  const required = isTextarea ? maybeRequired : (fieldTypeOrRequired ?? true)
-  return isTextarea
-    ? { name: 'vi', type: 'textarea', label, required }
-    : { name: 'vi', type: 'text', label, required }
-}
 
 /** homeContentSchema.contact.zaloUrl dùng z.url() — kiểm định dạng URL ngay tại form. */
 const validateZaloUrl: TextFieldValidation = (value) => {
@@ -231,6 +221,71 @@ export const Home: GlobalConfig = {
           type: 'relationship',
           relationTo: 'media',
           label: 'Ảnh đại diện',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'faq',
+      type: 'array',
+      label: 'Câu hỏi thường gặp',
+      // KHÔNG required, KHÔNG minRows — trái với whyUs/journey.stops ở trên.
+      // Bản ghi `home` đang chạy được nhập trước khi có trường này, nên bắt
+      // buộc là chặn luôn thao tác lưu của một biểu mẫu vốn đang hợp lệ. Phía
+      // hiển thị (Faq.tsx) tự ẩn khi mảng rỗng.
+      admin: {
+        description:
+          'Số thứ tự (01, 02...) tự sinh theo thứ tự trong danh sách — kéo thả để sắp lại, không cần đánh số.',
+      },
+      fields: [
+        {
+          name: 'question',
+          type: 'group',
+          label: 'Câu hỏi',
+          fields: [viTextGroup('Tiếng Việt')],
+        },
+        {
+          name: 'answer',
+          type: 'group',
+          label: 'Trả lời',
+          fields: [viTextGroup('Tiếng Việt', 'textarea')],
+        },
+      ],
+    },
+    {
+      name: 'guide',
+      type: 'group',
+      label: 'Người dẫn đường',
+      admin: {
+        description:
+          'Khối tự giới thiệu hiện dưới biểu mẫu ở trang chủ. Bỏ trống ô Họ tên là cả khối không hiện.',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          label: 'Họ tên',
+          // Không required: bỏ trống ô này CHÍNH LÀ cách tắt khối. Đặt required
+          // thì không còn cách nào gỡ khối xuống ngoài việc xoá cả nhóm.
+          required: false,
+        },
+        {
+          name: 'role',
+          type: 'group',
+          label: 'Vai trò',
+          fields: [viTextGroup('Tiếng Việt', false)],
+        },
+        {
+          name: 'bio',
+          type: 'group',
+          label: 'Giới thiệu ngắn',
+          fields: [viTextGroup('Tiếng Việt', 'textarea', false)],
+        },
+        {
+          name: 'photo',
+          type: 'relationship',
+          relationTo: 'media',
+          label: 'Ảnh chân dung',
           required: false,
         },
       ],

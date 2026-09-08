@@ -69,7 +69,9 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    locations: Location;
     tours: Tour;
+    'case-studies': CaseStudy;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -79,7 +81,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    locations: LocationsSelect<false> | LocationsSelect<true>;
     tours: ToursSelect<false> | ToursSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -215,6 +219,63 @@ export interface Media {
   };
 }
 /**
+ * Những nơi cụ thể được nhắc tới trong bài viết — quán ăn, homestay, chợ phiên. Mỗi địa điểm có trang riêng và dùng lại được ở nhiều tour.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations".
+ */
+export interface Location {
+  id: string;
+  slug: string;
+  name: {
+    vi: string;
+  };
+  /**
+   * Tự động lấy từ "Tên địa điểm" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách và trên đầu trang quản trị.
+   */
+  displayTitle?: string | null;
+  category: 'an-uong' | 'luu-tru' | 'thien-nhien' | 'van-hoa' | 'cho-mua-sam';
+  /**
+   * Một hoặc hai câu, hiện trên THẺ địa điểm nhúng trong bài viết. Giữ ngắn — thẻ chỉ đủ chỗ cho khoảng hai dòng.
+   */
+  excerpt: {
+    vi: string;
+  };
+  /**
+   * Mỗi dòng là một đoạn văn.
+   */
+  body: {
+    vi: string;
+    id?: string | null;
+  }[];
+  address?: string | null;
+  /**
+   * URL đầy đủ, ví dụ: https://... — để trống nếu nơi này không có web.
+   */
+  website?: string | null;
+  /**
+   * Ảnh đầu tiên được dùng làm ảnh trên thẻ.
+   */
+  images: (string | Media)[];
+  seo: {
+    /**
+     * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn.
+     */
+    title: {
+      vi: string;
+    };
+    /**
+     * Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link lên Zalo/Facebook.
+     */
+    description: {
+      vi: string;
+    };
+    ogImage: string | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tours".
  */
@@ -225,7 +286,7 @@ export interface Tour {
     vi: string;
   };
   /**
-   * Tự động lấy từ "Tên tour" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách tour và trên đầu trang quản trị.
+   * Tự động lấy từ "Tên tour" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách và trên đầu trang quản trị.
    */
   displayTitle?: string | null;
   tagline: {
@@ -253,7 +314,20 @@ export interface Tour {
         description: {
           vi: string;
         };
-        media?: (string | null) | Media;
+        /**
+         * Chọn 2 ảnh thì chúng xếp thành hai cột. Nhiều hơn 3 ảnh sẽ bị cắt bớt khi hiển thị.
+         */
+        images?: (string | Media)[] | null;
+        /**
+         * Hiện thành khối thẻ có ảnh dưới phần mô tả. Chọn từ danh sách Địa điểm đã tạo.
+         */
+        locations?: (string | Location)[] | null;
+        /**
+         * Ví dụ: "Ăn ở đâu", "Ngủ ở đâu". Bỏ trống thì dùng nhãn mặc định.
+         */
+        locationsLabel?: {
+          vi?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -278,13 +352,109 @@ export interface Tour {
   };
   seo: {
     /**
-     * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn, chứa tên tour.
+     * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn.
      */
     title: {
       vi: string;
     };
     /**
-     * Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link tour lên Zalo/Facebook.
+     * Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link lên Zalo/Facebook.
+     */
+    description: {
+      vi: string;
+    };
+    ogImage: string | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Những chuyến đã tổ chức xong, kể lại theo ngày. Đây là phần chứng minh năng lực — không phải sản phẩm đang bán.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: string;
+  slug: string;
+  /**
+   * Ngắn, thường là tên nơi đến. Ví dụ: "Hà Giang cho một nhóm 9 người".
+   */
+  title: {
+    vi: string;
+  };
+  /**
+   * Tự động lấy từ "Tên chuyến đi" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách và trên đầu trang quản trị.
+   */
+  displayTitle?: string | null;
+  /**
+   * Một dòng in nghiêng dưới tên. Ví dụ: "Sáu ngày cuối tháng Mười".
+   */
+  subtitle: {
+    vi: string;
+  };
+  /**
+   * Màu riêng của bài này. Chọn khác nhau cho từng chuyến để bốn bài không trông giống hệt nhau.
+   */
+  accent: 'dat-nung' | 'xanh-reu' | 'chi-lam' | 'tim-man' | 'vang-dat';
+  heroImage: string | Media;
+  /**
+   * Ảnh này bị cắt thành hình TRÒN nên chủ thể phải nằm giữa khung. Bỏ trống thì dùng Ảnh đầu bài — ảnh ngang cắt tròn thường mất hai đầu, nên tốt nhất là chọn riêng một ảnh dọc.
+   */
+  thumbnail?: (string | null) | Media;
+  /**
+   * Mỗi dòng là một đoạn văn.
+   */
+  highlights: {
+    vi: string;
+    id?: string | null;
+  }[];
+  /**
+   * Mỗi dòng là một việc. Viết ngắn, ở thì quá khứ.
+   */
+  ourRole: {
+    vi: string;
+    id?: string | null;
+  }[];
+  /**
+   * Số thứ tự ngày tự sinh theo vị trí trong danh sách — kéo thả để sắp lại, không cần đánh số.
+   */
+  days: {
+    /**
+     * Không cần ghi "Ngày 1" — phần đó tự thêm.
+     */
+    title: {
+      vi: string;
+    };
+    /**
+     * Mỗi dòng là một đoạn văn.
+     */
+    body: {
+      vi: string;
+      id?: string | null;
+    }[];
+    /**
+     * Chọn 2 ảnh thì chúng xếp thành hai cột; 1 hoặc 3 ảnh cũng hiển thị được. Nhiều hơn 3 sẽ bị cắt bớt.
+     */
+    images?: (string | Media)[] | null;
+    /**
+     * Ví dụ: "Ăn ở đâu", "Ngủ ở đâu", "Những nơi đã ghé". Bỏ trống thì dùng nhãn mặc định.
+     */
+    locationsLabel?: {
+      vi?: string | null;
+    };
+    locations?: (string | Location)[] | null;
+    id?: string | null;
+  }[];
+  seo: {
+    /**
+     * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn.
+     */
+    title: {
+      vi: string;
+    };
+    /**
+     * Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link lên Zalo/Facebook.
      */
     description: {
       vi: string;
@@ -327,8 +497,16 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'locations';
+        value: string | Location;
+      } | null)
+    | ({
         relationTo: 'tours';
         value: string | Tour;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: string | CaseStudy;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -475,6 +653,51 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations_select".
+ */
+export interface LocationsSelect<T extends boolean = true> {
+  slug?: T;
+  name?:
+    | T
+    | {
+        vi?: T;
+      };
+  displayTitle?: T;
+  category?: T;
+  excerpt?:
+    | T
+    | {
+        vi?: T;
+      };
+  body?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  address?: T;
+  website?: T;
+  images?: T;
+  seo?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        description?:
+          | T
+          | {
+              vi?: T;
+            };
+        ogImage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tours_select".
  */
 export interface ToursSelect<T extends boolean = true> {
@@ -518,7 +741,13 @@ export interface ToursSelect<T extends boolean = true> {
           | {
               vi?: T;
             };
-        media?: T;
+        images?: T;
+        locations?: T;
+        locationsLabel?:
+          | T
+          | {
+              vi?: T;
+            };
         id?: T;
       };
   inclusions?:
@@ -537,6 +766,79 @@ export interface ToursSelect<T extends boolean = true> {
     | T
     | {
         vi?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        description?:
+          | T
+          | {
+              vi?: T;
+            };
+        ogImage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  slug?: T;
+  title?:
+    | T
+    | {
+        vi?: T;
+      };
+  displayTitle?: T;
+  subtitle?:
+    | T
+    | {
+        vi?: T;
+      };
+  accent?: T;
+  heroImage?: T;
+  thumbnail?: T;
+  highlights?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  ourRole?:
+    | T
+    | {
+        vi?: T;
+        id?: T;
+      };
+  days?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              vi?: T;
+            };
+        body?:
+          | T
+          | {
+              vi?: T;
+              id?: T;
+            };
+        images?: T;
+        locationsLabel?:
+          | T
+          | {
+              vi?: T;
+            };
+        locations?: T;
+        id?: T;
       };
   seo?:
     | T
@@ -661,6 +963,33 @@ export interface Home {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Số thứ tự (01, 02...) tự sinh theo thứ tự trong danh sách — kéo thả để sắp lại, không cần đánh số.
+   */
+  faq?:
+    | {
+        question: {
+          vi: string;
+        };
+        answer: {
+          vi: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Khối tự giới thiệu hiện dưới biểu mẫu ở trang chủ. Bỏ trống ô Họ tên là cả khối không hiện.
+   */
+  guide?: {
+    name?: string | null;
+    role?: {
+      vi?: string | null;
+    };
+    bio?: {
+      vi?: string | null;
+    };
+    photo?: (string | null) | Media;
+  };
   contact: {
     phone: string;
     /**
@@ -740,6 +1069,37 @@ export interface HomeSelect<T extends boolean = true> {
         tour?: T;
         avatar?: T;
         id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?:
+          | T
+          | {
+              vi?: T;
+            };
+        answer?:
+          | T
+          | {
+              vi?: T;
+            };
+        id?: T;
+      };
+  guide?:
+    | T
+    | {
+        name?: T;
+        role?:
+          | T
+          | {
+              vi?: T;
+            };
+        bio?:
+          | T
+          | {
+              vi?: T;
+            };
+        photo?: T;
       };
   contact?:
     | T

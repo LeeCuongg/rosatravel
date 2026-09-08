@@ -1,10 +1,14 @@
 import type { MetadataRoute } from 'next'
-import { getTourSlugs } from '@/lib/content'
+import { getCaseStudySlugs, getLocationSlugs, getTourSlugs } from '@/lib/content'
 import { routing } from '@/i18n/routing'
 import { SITE_URL } from '@/lib/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getTourSlugs()
+  const [slugs, caseSlugs, locationSlugs] = await Promise.all([
+    getTourSlugs(),
+    getCaseStudySlugs(),
+    getLocationSlugs(),
+  ])
 
   const staticPaths = ['', '/lien-he']
   const entries: MetadataRoute.Sitemap = []
@@ -25,6 +29,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entries.push({
         url: `${SITE_URL}/${locale}/tour/${slug}`,
         priority: 0.8,
+      })
+    }
+    // Chuyến đã đi xếp dưới tour: nó không bán được gì, nhiệm vụ của nó là
+    // thuyết phục người đã vào site. Địa điểm xếp thấp nhất nhưng vẫn phải có
+    // mặt — chúng là những trang duy nhất xếp hạng được cho truy vấn tên riêng
+    // ("quán X ở Đồng Văn"), và đó là cửa vào tự nhiên nhất của site.
+    for (const slug of caseSlugs) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/chuyen-di/${slug}`,
+        priority: 0.7,
+      })
+    }
+    for (const slug of locationSlugs) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/dia-diem/${slug}`,
+        priority: 0.5,
       })
     }
   }

@@ -3,13 +3,11 @@ import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   CollectionConfig,
-  Field,
-  FieldHook,
   NumberFieldSingleValidation,
-  TextFieldValidation,
 } from 'payload'
 
 import { revalidateMoiTrangCoLocale, revalidatePathAnToan } from '../lib/revalidate'
+import { displayTitleField, seoGroup, validateSlug, viTextGroup } from './fields'
 
 /**
  * Collection Tours — nơi nhân viên nhập nội dung một tour du lịch.
@@ -40,27 +38,6 @@ import { revalidateMoiTrangCoLocale, revalidatePathAnToan } from '../lib/revalid
  * người nhập gõ tên tour hai lần.
  */
 
-/** Nhóm văn bản song ngữ, hiện chỉ có tiếng Việt — tiếng Anh để dành cho GĐ sau. */
-function viTextGroup(label: string, required?: boolean): Field
-function viTextGroup(label: string, fieldType: 'textarea', required?: boolean): Field
-function viTextGroup(label: string, fieldTypeOrRequired?: 'textarea' | boolean, maybeRequired = true): Field {
-  const isTextarea = fieldTypeOrRequired === 'textarea'
-  const required = isTextarea ? maybeRequired : (fieldTypeOrRequired ?? true)
-  return isTextarea
-    ? { name: 'vi', type: 'textarea', label, required }
-    : { name: 'vi', type: 'text', label, required }
-}
-
-const validateSlug: TextFieldValidation = (value) => {
-  if (!value) {
-    return 'Đường dẫn là bắt buộc'
-  }
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)) {
-    return 'Đường dẫn chỉ gồm chữ thường, số và dấu gạch ngang (ví dụ: sa-pa-3-ngay-2-dem)'
-  }
-  return true
-}
-
 const validateDurationDays: NumberFieldSingleValidation = (value) => {
   if (value === undefined || value === null) {
     return 'Số ngày là bắt buộc'
@@ -88,27 +65,6 @@ const validatePriceFrom: NumberFieldSingleValidation = (value) => {
     return 'Giá từ phải lớn hơn 0'
   }
   return true
-}
-
-/**
- * Đồng bộ `displayTitle` (field thật, dùng cho useAsTitle) từ `title.vi`.
- *
- * Phải rơi về `originalDoc?.title?.vi` khi `data` không có `title`: field này
- * có `admin.readOnly: true`, nhưng đó chỉ là ràng buộc trên giao diện admin,
- * không phải access control. Một request qua REST/Local API có thể gửi thẳng
- * `displayTitle` mà không kèm `title` trong cùng payload — nếu hook chỉ đọc
- * `data`, giá trị client gửi lên sẽ được giữ nguyên (vì `data?.title?.vi` là
- * undefined nên nhánh trả undefined, và Payload giữ giá trị cũ/giá trị gửi
- * lên tuỳ operation), khiến danh sách tour hiện một cái tên trông hợp lý
- * nhưng sai, không có gì báo hiệu. Rơi về `originalDoc` buộc field luôn được
- * suy lại từ nguồn thật (title.vi đã lưu), không bao giờ tin trực tiếp giá
- * trị displayTitle được gửi lên.
- */
-const syncDisplayTitle: FieldHook = ({ data, originalDoc }) => {
-  const dataVi = (data as { title?: { vi?: string } } | undefined)?.title?.vi
-  const originalVi = (originalDoc as { title?: { vi?: string } } | undefined)?.title?.vi
-  const vi = dataVi ?? originalVi
-  return typeof vi === 'string' && vi.length > 0 ? vi : undefined
 }
 
 /**
@@ -224,19 +180,7 @@ export const Tours: CollectionConfig = {
       label: 'Tên tour',
       fields: [viTextGroup('Tiếng Việt')],
     },
-    {
-      name: 'displayTitle',
-      type: 'text',
-      label: 'Tên hiển thị',
-      admin: {
-        readOnly: true,
-        description:
-          'Tự động lấy từ "Tên tour" ở trên — không cần nhập tay. Dùng để hiển thị trong danh sách tour và trên đầu trang quản trị.',
-      },
-      hooks: {
-        beforeChange: [syncDisplayTitle],
-      },
-    },
+    displayTitleField('title', 'Tên tour'),
     {
       name: 'tagline',
       type: 'group',
@@ -323,11 +267,41 @@ export const Tours: CollectionConfig = {
           fields: [viTextGroup('Tiếng Việt', 'textarea')],
         },
         {
-          name: 'media',
+          // ĐỔI TỪ 'media' (một ảnh) SANG 'images' (nhiều ảnh) ở GĐ3, để bố cục
+          // ngày dựng được dải ảnh hai cột như bài "Chuyến đã đi". Dữ liệu cũ
+          // được chuyển bằng scripts/chuyen-anh-lich-trinh.ts — chạy script đó
+          // TRƯỚC khi mở lại /admin, nếu không mọi ngày sẽ mất ảnh.
+          name: 'images',
           type: 'relationship',
           relationTo: 'media',
           label: 'Ảnh của ngày',
+          hasMany: true,
           required: false,
+          admin: {
+            description:
+              'Chọn 2 ảnh thì chúng xếp thành hai cột. Nhiều hơn 3 ảnh sẽ bị cắt bớt khi hiển thị.',
+          },
+        },
+        {
+          name: 'locations',
+          type: 'relationship',
+          relationTo: 'locations',
+          label: 'Địa điểm ghé trong ngày',
+          hasMany: true,
+          required: false,
+          admin: {
+            description:
+              'Hiện thành khối thẻ có ảnh dưới phần mô tả. Chọn từ danh sách Địa điểm đã tạo.',
+          },
+        },
+        {
+          name: 'locationsLabel',
+          type: 'group',
+          label: 'Tiêu đề khối địa điểm',
+          admin: {
+            description: 'Ví dụ: "Ăn ở đâu", "Ngủ ở đâu". Bỏ trống thì dùng nhãn mặc định.',
+          },
+          fields: [viTextGroup('Tiếng Việt', false)],
         },
       ],
     },
@@ -359,39 +333,6 @@ export const Tours: CollectionConfig = {
       label: 'Ghi chú',
       fields: [viTextGroup('Tiếng Việt', 'textarea', false)],
     },
-    {
-      name: 'seo',
-      type: 'group',
-      label: 'SEO',
-      fields: [
-        {
-          name: 'title',
-          type: 'group',
-          label: 'Tiêu đề SEO',
-          admin: {
-            description:
-              'Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn, chứa tên tour.',
-          },
-          fields: [viTextGroup('Tiếng Việt')],
-        },
-        {
-          name: 'description',
-          type: 'group',
-          label: 'Mô tả SEO',
-          admin: {
-            description:
-              'Đoạn tóm tắt hiện dưới tiêu đề trên kết quả tìm kiếm Google và khi chia sẻ link tour lên Zalo/Facebook.',
-          },
-          fields: [viTextGroup('Tiếng Việt', 'textarea')],
-        },
-        {
-          name: 'ogImage',
-          type: 'relationship',
-          relationTo: 'media',
-          label: 'Ảnh chia sẻ mạng xã hội',
-          required: true,
-        },
-      ],
-    },
+    seoGroup(),
   ],
 }

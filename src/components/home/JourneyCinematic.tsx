@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { Media } from '@/components/media/Media'
 import { Reveal } from '@/components/motion/Reveal'
+import { Eyebrow } from '@/components/ui/Frame'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import { scrubSmoothing, stagger } from '@/lib/motion/tokens'
 import type { HomeContent } from '@/lib/content'
@@ -13,6 +15,7 @@ interface JourneyProps {
 }
 
 export function JourneyCinematic({ journey, locale }: JourneyProps) {
+  const t = useTranslations('sections')
   const tier = useMotionTier()
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -82,17 +85,18 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
     // Tier lite/reduced: lưới dọc bình thường. Đây là một trải nghiệm hoàn chỉnh
     // riêng, không phải bản desktop bị cắt xén.
     return (
-      <section className="mx-auto max-w-7xl px-6 py-(--spacing-section)">
-        <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl">
-          {headline}
-        </h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+      <section className="mx-auto max-w-med px-gutter py-section">
+        <Eyebrow>{t('journey')}</Eyebrow>
+        <h2 className="font-display text-clay-500 mt-4 text-d2">{headline}</h2>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2">
           {journey.stops.map((stop, index) => (
             // key theo index: danh sách cố định, không sắp xếp lại — global home
             // trong Payload có thể dùng lại cùng một ảnh cho nhiều điểm dừng, nên
             // stop.label.vi làm key không đảm bảo duy nhất.
             <Reveal key={index} delay={index * stagger}>
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+              {/* Chú thích nằm NGOÀI ô ảnh. Để bên trong thì overflow-hidden của
+                  ô cắt mất nó — ô đã bị khoá tỉ lệ khung 3/4, không còn chỗ. */}
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <Media
                   media={stop.image}
                   locale={locale}
@@ -100,10 +104,10 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
                   sizes="(max-width: 640px) 100vw, 50vw"
                   className="object-cover"
                 />
-                <span className="absolute bottom-4 left-4 text-lg">
-                  {stop.label[locale] ?? stop.label.vi}
-                </span>
               </div>
+              <span className="mt-4 block text-label uppercase text-ink-500">
+                {stop.label[locale] ?? stop.label.vi}
+              </span>
             </Reveal>
           ))}
         </div>
@@ -114,26 +118,27 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
   return (
     <section ref={sectionRef} className="h-svh overflow-hidden">
       <div className="flex h-full items-center">
-        <div ref={trackRef} className="flex gap-8 pl-6 will-change-transform">
-          <div className="flex w-[40vw] shrink-0 items-center">
-            <h2 className="font-[family-name:var(--font-playfair)] text-5xl leading-tight">
-              {headline}
-            </h2>
+        <div ref={trackRef} className="flex gap-8 pl-gutter will-change-transform">
+          <div className="flex w-[40vw] shrink-0 flex-col justify-center">
+            <Eyebrow>{t('journey')}</Eyebrow>
+            <h2 className="font-display text-clay-500 mt-5 text-d1">{headline}</h2>
           </div>
           {journey.stops.map((stop, index) => (
             // key theo index: cùng lý do ở nhánh lite/reduced phía trên.
-            <figure
-              key={index}
-              className="relative h-[70vh] w-[50vw] shrink-0 overflow-hidden rounded-lg"
-            >
-              <Media
-                media={stop.image}
-                locale={locale}
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-              <figcaption className="absolute bottom-6 left-6 text-2xl">
+            <figure key={index} className="w-[45vw] shrink-0">
+              {/* Chú thích nằm NGOÀI ô ảnh — cùng lý do như nhánh lite ở trên. */}
+              <div className="relative h-[70vh] overflow-hidden">
+                <Media
+                  media={stop.image}
+                  locale={locale}
+                  fill
+                  // Ô rộng đúng 45vw, không phải 50vw. Khai dư là mọi ảnh trong
+                  // dải đều tải biến thể lớn hơn một bậc so với thứ được vẽ ra.
+                  sizes="45vw"
+                  className="object-cover"
+                />
+              </div>
+              <figcaption className="mt-4 text-label uppercase text-ink-500">
                 {stop.label[locale] ?? stop.label.vi}
               </figcaption>
             </figure>

@@ -90,7 +90,7 @@ const tourDoc = {
   gallery: [mediaDoc],
   itinerary: [
     { title: { vi: 'Ngày một' }, description: { vi: 'Khởi hành sớm.' } },
-    { title: { vi: 'Ngày hai' }, description: { vi: 'Về xuôi.' }, media: mediaDoc },
+    { title: { vi: 'Ngày hai' }, description: { vi: 'Về xuôi.' }, images: [mediaDoc, mediaDoc] },
   ],
   inclusions: [{ vi: 'Xe đưa đón' }],
   exclusions: [{ vi: 'Chi phí cá nhân' }],
@@ -118,10 +118,32 @@ describe('mapTour', () => {
     expect(result.itinerary.map((d) => d.day)).toEqual([1, 2])
   })
 
-  it('bỏ trường media của ngày khi không có ảnh', () => {
+  it('trả mảng ảnh RỖNG cho ngày không có ảnh, không phải undefined', () => {
+    // Khác hợp đồng cũ (media?: ImageAsset): giờ `images` luôn là mảng. Nhờ vậy
+    // component gọi thẳng .map() được, không phải kiểm tồn tại ở mỗi chỗ dùng.
     const result = tourSchema.parse(mapTour(tourDoc))
-    expect(result.itinerary[0].media).toBeUndefined()
-    expect(result.itinerary[1].media).toBeDefined()
+    expect(result.itinerary[0].images).toEqual([])
+    expect(result.itinerary[1].images).toHaveLength(2)
+  })
+
+  it('trả mảng địa điểm RỖNG cho ngày không gắn địa điểm nào', () => {
+    const result = tourSchema.parse(mapTour(tourDoc))
+    expect(result.itinerary[0].locations).toEqual([])
+  })
+
+  it('bỏ nhãn khối địa điểm khi người nhập để trống', () => {
+    // Payload lưu group để trống thành { vi: '' }, và object đó truthy — kiểm
+    // bằng `d.locationsLabel ? ...` sẽ để nó lọt qua rồi vỡ ở localizedTextSchema.
+    const doc = {
+      ...tourDoc,
+      itinerary: [
+        { title: { vi: 'Ngày một' }, description: { vi: 'Đi.' }, locationsLabel: { vi: '' } },
+        { title: { vi: 'Ngày hai' }, description: { vi: 'Về.' }, locationsLabel: { vi: 'Ăn ở đâu' } },
+      ],
+    }
+    const result = tourSchema.parse(mapTour(doc))
+    expect(result.itinerary[0].locationsLabel).toBeUndefined()
+    expect(result.itinerary[1].locationsLabel).toEqual({ vi: 'Ăn ở đâu' })
   })
 
   it('để zod bắt khi số ngày lịch trình không khớp durationDays', () => {

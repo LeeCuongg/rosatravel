@@ -8,6 +8,8 @@ import { vi } from '@payloadcms/translations/languages/vi'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { CaseStudies } from './collections/CaseStudies'
+import { Locations } from './collections/Locations'
 import { Media } from './collections/Media'
 import { Tours } from './collections/Tours'
 import { Users } from './collections/Users'
@@ -52,7 +54,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Tours],
+  collections: [Users, Media, Locations, Tours, CaseStudies],
   globals: [Home],
   editor: lexicalEditor(),
   // Việt hoá toàn bộ admin: nhãn, nút, điều hướng VÀ thông báo lỗi validate.

@@ -5,14 +5,31 @@
   "nav": {
     "home": "Trang chủ",
     "tours": "Tour",
+    "journeys": "Hành trình",
     "contact": "Liên hệ"
+  },
+  "sections": {
+    "whyUs": "Vì sao chọn Rosa",
+    "journeys": "Hành trình tiêu biểu",
+    "journey": "Trên đường",
+    "voices": "Khách kể lại",
+    "faq": "Câu hỏi thường gặp",
+    "plan": "Thiết kế hành trình",
+    "tourStory": "Về chuyến đi",
+    "related": "Hành trình khác",
+    "caseStudies": "Chuyến đã đi",
+    "otherCaseStudies": "Chuyến khác",
+    "otherLocations": "Địa điểm khác"
   },
   "cta": {
     "viewTour": "Xem chi tiết",
     "bookNow": "Liên hệ đặt tour",
     "callUs": "Gọi ngay",
     "zalo": "Nhắn Zalo",
+    "planTrip": "Thiết kế hành trình của bạn",
+    "heroKicker": "Bắt đầu từ một chuyến đi hình dung sẵn trong đầu bạn",
     "finalHeadline": "Sẵn sàng lên đường?",
+    "finalSub": "Gửi thư tới <email></email> hoặc điền vào mẫu dưới đây. Phần còn lại để chúng tôi lo.",
     "tourHeadline": "Quan tâm hành trình này?",
     "tourSub": "Để lại số điện thoại, chúng tôi gọi lại trong 24 giờ."
   },
@@ -33,6 +50,7 @@
     "phone": "Số điện thoại",
     "tour": "Tour quan tâm",
     "note": "Ghi chú",
+    "notePlaceholder": "Bạn muốn đi đâu, khi nào, đi mấy người?",
     "submit": "Gửi yêu cầu",
     "sending": "Đang gửi...",
     "success": "Đã nhận yêu cầu. Chúng tôi sẽ liên hệ trong 24 giờ.",
@@ -42,5 +60,22 @@
   "errors": {
     "nameRequired": "Vui lòng nhập họ tên",
     "phoneInvalid": "Số điện thoại không hợp lệ"
+  },
+  "location": {
+    "defaultLabel": "Những nơi đã ghé",
+    "address": "Địa chỉ",
+    "website": "Website",
+    "category": {
+      "an-uong": "Ăn uống",
+      "luu-tru": "Lưu trú",
+      "thien-nhien": "Thiên nhiên",
+      "van-hoa": "Văn hoá",
+      "cho-mua-sam": "Chợ và mua sắm"
+    }
+  },
+  "caseStudy": {
+    "highlights": "Điểm nhấn chuyến đi",
+    "ourRole": "Rosa đã lo những gì",
+    "close": "Đóng"
   }
 }

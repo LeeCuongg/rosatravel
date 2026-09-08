@@ -2,12 +2,23 @@
 
 import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { Media } from '@/components/media/Media'
-import { Reveal } from '@/components/motion/Reveal'
+import { Eyebrow } from '@/components/ui/Frame'
+import { DaySection } from '@/components/story/DaySection'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import { scrubSmoothing } from '@/lib/motion/tokens'
 import type { ItineraryDay } from '@/lib/content'
 
+/**
+ * Lịch trình tour — mỗi ngày là một mục bài viết, cộng thêm parallax nhẹ cho ảnh.
+ *
+ * Bố cục từng ngày nằm ở DaySection, dùng CHUNG với bài "Chuyến đã đi". Việc
+ * duy nhất còn lại ở file này là lớp GSAP: nó là client component vì cần đo
+ * cuộn, còn DaySection thì không cần và vì thế vẫn render trên server.
+ *
+ * `data-parallax` được DaySection gắn lên từng ô ảnh khi bật cờ; effect dưới
+ * đây quét chúng trong phạm vi `rootRef`. Nghĩa là số lượng ảnh mỗi ngày bao
+ * nhiêu cũng chạy đúng, không cần sửa gì ở đây.
+ */
 export function ItineraryCinematic({
   days,
   locale,
@@ -72,47 +83,31 @@ export function ItineraryCinematic({
       cancelled = true
       cleanup?.()
     }
-  }, [canParallax])
+    // Chạy lại khi số ngày đổi: effect quét [data-parallax] MỘT LẦN lúc chạy,
+    // nên các ô ảnh xuất hiện sau đó sẽ không có tween nào gắn vào.
+  }, [canParallax, days.length])
 
   return (
-    <section ref={rootRef} className="mx-auto max-w-5xl px-6 py-(--spacing-section)">
-      <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl">
-        {t('itinerary')}
-      </h2>
-      <ol className="mt-12 space-y-20">
+    <div ref={rootRef} className="mx-auto max-w-sml px-gutter py-section">
+      <Eyebrow>{t('itinerary')}</Eyebrow>
+      <ol className="mt-10">
         {days.map((day) => (
-          <li key={day.day}>
-            <Reveal>
-              <p className="text-sm uppercase tracking-widest text-clay-500">
-                {t('day', { n: day.day })}
-              </p>
-              <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-2xl">
-                {day.title[locale] ?? day.title.vi}
-              </h3>
-              <p className="mt-3 text-ink-500">
-                {day.description[locale] ?? day.description.vi}
-              </p>
-            </Reveal>
-            {day.media && (
-              <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-lg">
-                {/* yPercent dịch theo % chiều cao của CHÍNH phần tử này, không
-                    phải của cha. Biên độ thật = 0.08 × 120% = 9.6% chiều cao
-                    cha, nên phần dư mỗi bên (10%) phải lớn hơn con số đó.
-                    Đổi biên độ yPercent thì phải tính lại h: (h-100)/2 >= 0.08h */}
-                <div data-parallax className="absolute inset-x-0 -top-[10%] h-[120%]">
-                  <Media
-                    media={day.media}
-                    locale={locale}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 1024px"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            )}
-          </li>
+          <DaySection
+            key={day.day}
+            day={day.day}
+            title={day.title}
+            // Lịch trình tour lưu mô tả ngày thành MỘT đoạn (khác bài "Chuyến
+            // đã đi", vốn là mảng). Bọc lại thành mảng một phần tử để dùng
+            // chung DaySection thay vì cho nó hai kiểu prop khác nhau.
+            paragraphs={[day.description]}
+            images={day.images}
+            locations={day.locations}
+            locationsLabel={day.locationsLabel}
+            locale={locale}
+            parallax={canParallax}
+          />
         ))}
       </ol>
-    </section>
+    </div>
   )
 }
