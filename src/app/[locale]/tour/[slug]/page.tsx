@@ -67,7 +67,12 @@ export default async function TourPage({ params }: { params: Params }) {
       </section>
       <ItineraryCinematic days={tour.itinerary} locale={locale} />
       <Gallery images={tour.gallery} locale={locale} />
-      <InclusionList inclusions={tour.inclusions} exclusions={tour.exclusions} locale={locale} />
+      <InclusionList
+        inclusions={tour.inclusions}
+        exclusions={tour.exclusions}
+        notes={tour.notes}
+        locale={locale}
+      />
       <TourCta slug={tour.slug} />
       <RelatedTours tours={allTours} currentSlug={tour.slug} locale={locale} />
 
