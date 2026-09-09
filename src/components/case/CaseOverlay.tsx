@@ -163,8 +163,17 @@ export function CaseOverlay({
 
         {/* Vùng cuộn riêng của lớp phủ. `overscroll-contain` chặn nốt trường
             hợp cuộn tới đáy rồi tiếp tục lăn: không có nó, trình duyệt chuyển
-            đà cuộn sang trang nền. */}
-        <div className="grow overflow-y-auto overscroll-contain">{children}</div>
+            đà cuộn sang trang nền.
+
+            `data-lenis-prevent` là BẮT BUỘC, không phải tuỳ chọn. Lenis đang ở
+            trạng thái stop() (xem effect khoá cuộn phía trên), mà khi đã stop
+            nó gọi preventDefault() cho MỌI sự kiện wheel trên trang — kể cả
+            wheel rơi vào vùng này. Hậu quả: lớp phủ có thanh cuộn nhưng lăn
+            chuột không nhúc nhích. Thuộc tính này khiến Lenis thấy phần tử
+            trong composedPath và thoát sớm, TRƯỚC nhánh preventDefault đó. */}
+        <div data-lenis-prevent className="grow overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </motion.div>
     </div>
   )

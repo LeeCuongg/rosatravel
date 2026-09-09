@@ -8,7 +8,24 @@ import { SubmitButton } from '@/components/ui/TextLink'
 
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
-export function ContactForm({ tours }: { tours: { slug: string; label: string }[] }) {
+/**
+ * @param tours  Danh sách tour cho ô chọn. ĐỂ TRỐNG ở những chỗ không có danh
+ *   sách trong tay — ví dụ popup "Lên kế hoạch" mở từ ngăn kéo địa điểm, nơi
+ *   trang chỉ nạp địa điểm chứ không nạp tour. Khi trống thì ô chọn ẩn hẳn,
+ *   KHÔNG render một <select> chỉ có mỗi dấu gạch: một ô điều khiển không chọn
+ *   được gì là thứ người dùng phải thử mới biết là vô dụng.
+ * @param defaultNote  Chữ điền sẵn cho ô ghi chú, dùng để mang ngữ cảnh của
+ *   nơi mở biểu mẫu vào email gửi đi. API chỉ nhận đúng bốn trường (xem
+ *   lib/contact/validate.ts) và zod loại bỏ trường lạ, nên KHÔNG thể lén gửi
+ *   ngữ cảnh qua một input ẩn — nó phải nằm trong ghi chú.
+ */
+export function ContactForm({
+  tours = [],
+  defaultNote = '',
+}: {
+  tours?: { slug: string; label: string }[]
+  defaultNote?: string
+}) {
   const t = useTranslations('contact')
   const te = useTranslations('errors')
   const params = useSearchParams()
@@ -107,30 +124,33 @@ export function ContactForm({ tours }: { tours: { slug: string; label: string }[
         </label>
       </div>
 
-      <label className="block">
-        <span className={labelClass}>{t('tour')}</span>
-        {/* appearance-none để bỏ nền và mũi tên mặc định của hệ điều hành —
-            không bỏ thì trên Windows ô select hiện ra một khối xám đặc giữa
-            các ô chỉ có đường kẻ. */}
-        <select
-          name="tourSlug"
-          defaultValue={params.get('tour') ?? ''}
-          className={`${inputClass} appearance-none`}
-        >
-          <option value="">—</option>
-          {tours.map((tour) => (
-            <option key={tour.slug} value={tour.slug}>
-              {tour.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {tours.length > 0 && (
+        <label className="block">
+          <span className={labelClass}>{t('tour')}</span>
+          {/* appearance-none để bỏ nền và mũi tên mặc định của hệ điều hành —
+              không bỏ thì trên Windows ô select hiện ra một khối xám đặc giữa
+              các ô chỉ có đường kẻ. */}
+          <select
+            name="tourSlug"
+            defaultValue={params.get('tour') ?? ''}
+            className={`${inputClass} appearance-none`}
+          >
+            <option value="">—</option>
+            {tours.map((tour) => (
+              <option key={tour.slug} value={tour.slug}>
+                {tour.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <label className="block">
         <span className={labelClass}>{t('note')}</span>
         <textarea
           name="note"
           rows={3}
+          defaultValue={defaultNote}
           placeholder={t('notePlaceholder')}
           className={`${inputClass} resize-none placeholder:text-ink-700`}
         />

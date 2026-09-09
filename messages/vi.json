@@ -72,7 +72,10 @@
       "van-hoa": "Văn hoá",
       "cho-mua-sam": "Chợ và mua sắm"
     },
-    "viewFull": "Xem trang đầy đủ",
+    "planTrip": "Lên kế hoạch cho bạn",
+    "planTitle": "Lên kế hoạch cho bạn",
+    "planSub": "Để lại thông tin, chúng tôi gọi lại trong 24 giờ và dựng lịch trình có {name} trong đó.",
+    "planNote": "Quan tâm địa điểm: {name}. ",
     "goToImage": "Xem ảnh {n}"
   },
   "caseStudy": {

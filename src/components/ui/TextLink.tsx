@@ -33,11 +33,22 @@ function laLienKetNgoai(href: string): boolean {
   return /^(https?:|tel:|mailto:|#)/.test(href)
 }
 
-export function TextLink({ children, href, size = 'md', className = '' }: TextLinkProps) {
-  const classes =
+/**
+ * Bộ class dùng chung cho TextLink và TextButton. Tách ra vì hai thành phần
+ * PHẢI trông giống hệt nhau: người đọc không phân biệt được đâu là liên kết
+ * đâu là nút, và cũng không cần phân biệt — họ chỉ thấy một dòng chữ gạch chân
+ * bấm được. Chép class sang chỗ khác là chắc chắn có ngày lệch nhau.
+ */
+function lopChuGachChan(size: keyof typeof SIZES, className: string): string {
+  return (
     `${SIZES[size]} underline decoration-rule-strong decoration-1 underline-offset-[0.3em] ` +
     `transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] ` +
     `hover:decoration-clay-500 hover:text-clay-500 ${className}`
+  )
+}
+
+export function TextLink({ children, href, size = 'md', className = '' }: TextLinkProps) {
+  const classes = lopChuGachChan(size, className)
 
   if (laLienKetNgoai(href)) {
     return (
@@ -50,6 +61,28 @@ export function TextLink({ children, href, size = 'md', className = '' }: TextLi
     <Link href={href} className={classes}>
       {children}
     </Link>
+  )
+}
+
+/**
+ * CÙNG DÁNG với TextLink nhưng là <button> thật.
+ *
+ * Dùng khi thao tác KHÔNG đi đâu cả — mở hộp thoại, bật/tắt một khối. Chỗ đó
+ * mà đặt <a> thì trình đọc màn hình thông báo "liên kết", người dùng chờ được
+ * chuyển trang; chuột giữa mở tab mới ra một URL vô nghĩa; và Space không kích
+ * hoạt được. Ngược lại, <button> cho một điều hướng thật thì mất Ctrl+click,
+ * mất preview đường dẫn ở thanh trạng thái, và Google không lần theo được.
+ */
+export function TextButton({
+  children,
+  size = 'md',
+  className = '',
+  ...props
+}: ComponentPropsWithoutRef<'button'> & { size?: keyof typeof SIZES }) {
+  return (
+    <button type="button" {...props} className={lopChuGachChan(size, className)}>
+      {children}
+    </button>
   )
 }
 
