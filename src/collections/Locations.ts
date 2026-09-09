@@ -90,6 +90,15 @@ export const Locations: CollectionConfig = {
     },
     doanVanArray('body', 'Bài viết'),
     {
+      name: 'city',
+      type: 'text',
+      label: 'Thành phố / vùng',
+      admin: {
+        description:
+          'Nhãn ngắn hiện trên THẺ địa điểm giữa bài — "Hà Giang", "New York". Không phải địa chỉ: địa chỉ là dòng dài để tìm đường, cái này chỉ để phân biệt hai nơi trùng tên ở hai vùng khi lướt danh sách. Chỉ làm một vùng thì bỏ trống.',
+      },
+    },
+    {
       name: 'address',
       type: 'text',
       label: 'Địa chỉ',

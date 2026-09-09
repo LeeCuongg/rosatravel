@@ -32,7 +32,7 @@ export function TourGrid({ tours, locale }: { tours: Tour[]; locale: 'vi' | 'en'
             // lo khoảng cách của mình thì bố cục đúng ở mọi số lượng tour.
             className="p-8 sm:p-10"
           >
-            <TourCard tour={tour} locale={locale} />
+            <TourCard tour={tour} locale={locale} index={index} />
           </Reveal>
         ))}
       </div>

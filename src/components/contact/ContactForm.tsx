@@ -87,74 +87,98 @@ export function ContactForm({
   }
 
   /**
-   * Ô nhập chỉ có MỘT đường kẻ dưới, nét đứt, nền trong suốt.
+   * Ô NHẬP LÀ MỘT HỘP VIỀN NÉT ĐỨT, không phải một đường kẻ dưới.
    *
-   * Bản GĐ2 dùng ô viền kín bo góc trên nền kem đậm — mẫu chuẩn của bảng điều
-   * khiển quản trị, và nó kéo cả biểu mẫu ra khỏi tông biên tập của trang.
-   * Đường kẻ dưới là cùng một ngôn ngữ với khung Frame và vách ngăn cột, nên
-   * biểu mẫu trông như một phần của trang chứ không phải một tiện ích gắn vào.
+   * Bản trước dùng kẻ dưới, dựa trên lập luận rằng "ô viền kín bo góc là ngôn
+   * ngữ của bảng điều khiển quản trị". Lập luận đó đúng với ô viền LIỀN, nền
+   * xám, bo góc lớn — nhưng đã đo lại spotstravel.co và họ không làm thế: ô của
+   * họ là viền NÉT ĐỨT 1px, bo 4px, nền trong suốt. Nét đứt chính là ngôn ngữ
+   * đã dùng cho mọi khung trên site này, nên hộp nét đứt hoà vào hệ thống chứ
+   * không phá nó — còn kẻ dưới thì để mắt tự đoán đâu là mép phải của ô.
    *
-   * Màu là rule-strong (3.02:1) chứ KHÔNG phải rule (1.55:1): đây là ranh giới
-   * của một thành phần điều khiển, WCAG đòi tối thiểu 3:1. Đường kẻ trang trí
-   * mới được phép nhạt.
+   * Số đo lấy nguyên từ họ: `1px dashed`, `border-radius 4px`, đệm 12.5/16px,
+   * cao 45px, nền trong suốt.
    *
-   * Khi focus, kẻ chuyển sang nét liền màu đất nung — đổi cả kiểu nét chứ
-   * không chỉ đổi màu, để người phân biệt màu kém vẫn thấy được ô đang chọn.
+   * Màu viền là sand-100 (#403232) — ĐÚNG màu chữ chính, cũng đúng màu họ
+   * dùng. Đậm hơn hẳn `rule` (#d5cbb5) của các khung trang trí, và đó là chủ
+   * đích: khung là đồ trang trí, ô nhập là thứ phải bấm vào được.
+   *
+   * Khi focus, viền chuyển sang NÉT LIỀN màu đất nung — đổi cả kiểu nét chứ
+   * không chỉ đổi màu, để người phân biệt màu kém vẫn thấy ô đang chọn.
    */
   const inputClass =
-    'w-full rounded-none border-b border-dashed border-rule-strong bg-transparent py-3 ' +
-    'text-body outline-none transition-colors duration-[var(--duration-fast)] ' +
+    'h-[45px] w-full rounded border border-dashed border-sand-100 bg-transparent px-4 ' +
+    'text-body text-sand-100 outline-none transition-colors ' +
+    'duration-[var(--duration-base)] ease-[var(--ease-hover)] ' +
     'focus:border-solid focus:border-clay-500'
 
-  const labelClass = 'block text-label uppercase text-ink-500'
+  /**
+   * Nhãn KHÔNG viết hoa toàn bộ.
+   *
+   * Nhãn chữ hoa nhỏ (Eyebrow) là để đặt tên cho cả một KHỐI nội dung. Dùng nó
+   * cho từng ô nhập thì một biểu mẫu bốn ô có bốn dòng chữ hoa chen nhau, và
+   * chữ hoa giãn 0.12em ở cỡ 12px đọc chậm hơn hẳn chữ thường — đúng thứ không
+   * nên có ở nơi người ta đang phải điền. Spots cũng tách bạch đúng như vậy:
+   * nhãn khối viết hoa, nhãn ô nhập viết thường 14px.
+   */
+  const labelClass = 'mb-2 block text-meta text-sand-100'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Họ tên và điện thoại đứng cạnh nhau: hai ô ngắn xếp dọc làm biểu mẫu
-          dài ra vô ích, và người đọc cảm nhận biểu mẫu dài là biểu mẫu phiền. */}
-      <div className="grid gap-8 sm:grid-cols-2">
-        <label className="block">
+    // Bề rộng 576px, bám theo cột biểu mẫu 600px của Spots. Rộng hơn thì hai ô
+    // ngắn ở hàng giữa kéo dài ra thành hai thanh mỏng, và cả khối mất dáng.
+    <form onSubmit={handleSubmit} className="mx-auto max-w-xl">
+      {/* Lưới SÁU cột với khoảng hở 10px — đúng bố cục đã đo bên Spots. Sáu cột
+          chứ không phải hai: nó chia được cả 2 (3+3) lẫn 3 (2+2+2) mà không
+          phải đổi lưới, nên thêm một ô nữa sau này không phải dựng lại. */}
+      <div className="grid grid-cols-6 gap-2.5">
+        {tours.length > 0 && (
+          // Ô rộng cả hàng, đứng đầu — cùng vai trò với ô "Where" của họ: câu
+          // hỏi lớn nhất hỏi trước, thông tin liên hệ hỏi sau.
+          <label className="col-span-6">
+            <span className={labelClass}>{t('tour')}</span>
+            {/* appearance-none để bỏ nền và mũi tên mặc định của hệ điều hành —
+                không bỏ thì trên Windows ô select hiện ra một khối xám đặc
+                giữa các ô còn lại. */}
+            <select
+              name="tourSlug"
+              defaultValue={params.get('tour') ?? ''}
+              className={`${inputClass} appearance-none`}
+            >
+              <option value="">—</option>
+              {tours.map((tour) => (
+                <option key={tour.slug} value={tour.slug}>
+                  {tour.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* Hai ô ngắn đứng cạnh nhau, mỗi ô nửa hàng — đúng cặp "When / Who".
+            Trên điện thoại chúng tự xuống dòng thành hai hàng đầy. */}
+        <label className="col-span-6 sm:col-span-3">
           <span className={labelClass}>{t('name')}</span>
           <input name="name" required className={inputClass} />
         </label>
 
-        <label className="block">
+        <label className="col-span-6 sm:col-span-3">
           <span className={labelClass}>{t('phone')}</span>
           <input name="phone" type="tel" required inputMode="tel" className={inputClass} />
         </label>
-      </div>
 
-      {tours.length > 0 && (
-        <label className="block">
-          <span className={labelClass}>{t('tour')}</span>
-          {/* appearance-none để bỏ nền và mũi tên mặc định của hệ điều hành —
-              không bỏ thì trên Windows ô select hiện ra một khối xám đặc giữa
-              các ô chỉ có đường kẻ. */}
-          <select
-            name="tourSlug"
-            defaultValue={params.get('tour') ?? ''}
-            className={`${inputClass} appearance-none`}
-          >
-            <option value="">—</option>
-            {tours.map((tour) => (
-              <option key={tour.slug} value={tour.slug}>
-                {tour.label}
-              </option>
-            ))}
-          </select>
+        <label className="col-span-6">
+          <span className={labelClass}>{t('note')}</span>
+          {/* h-auto ghi đè chiều cao 45px cố định của inputClass: ô ghi chú là
+              chỗ duy nhất người ta gõ nhiều dòng. */}
+          <textarea
+            name="note"
+            rows={3}
+            defaultValue={defaultNote}
+            placeholder={t('notePlaceholder')}
+            className={`${inputClass} h-auto resize-none py-3 placeholder:text-ink-700`}
+          />
         </label>
-      )}
-
-      <label className="block">
-        <span className={labelClass}>{t('note')}</span>
-        <textarea
-          name="note"
-          rows={3}
-          defaultValue={defaultNote}
-          placeholder={t('notePlaceholder')}
-          className={`${inputClass} resize-none placeholder:text-ink-700`}
-        />
-      </label>
+      </div>
 
       {/* Honeypot: ẩn khỏi người dùng và khỏi trình đọc màn hình, bot vẫn điền. */}
       <input
@@ -165,8 +189,22 @@ export function ContactForm({
         className="absolute left-[-9999px] h-0 w-0"
       />
 
-      <div className="flex flex-col items-center gap-4 pt-2">
+      <div className="mt-8 flex flex-col items-center gap-4">
         <SubmitButton type="submit" disabled={status === 'sending'}>
+          {/* Biểu tượng phong bì vẽ tay bằng hai nét, không dùng thư viện icon:
+              kéo cả một gói icon về cho đúng một hình là đổi vài KB bundle lấy
+              một chiếc phong bì. `aria-hidden` vì chữ ngay bên cạnh đã nói rồi. */}
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="h-4 w-4 shrink-0"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
           {status === 'sending' ? t('sending') : t('submit')}
         </SubmitButton>
 

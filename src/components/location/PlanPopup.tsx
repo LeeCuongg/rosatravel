@@ -96,7 +96,7 @@ export function PlanPopup({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: thoiLuong, ease: easingArray.enter }}
-        className="relative max-h-full w-full max-w-xl overflow-y-auto overscroll-contain border border-dashed border-rule bg-ink-950 p-6 outline-none sm:p-10"
+        className="relative max-h-full w-full max-w-xl overflow-y-auto overscroll-contain rounded-lg border border-dashed border-rule bg-ink-950 p-6 outline-none sm:p-10"
       >
         <div className="flex justify-end">
           <button

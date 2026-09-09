@@ -105,7 +105,7 @@ export default async function LocationPage({ params }: { params: Params }) {
         ))}
       </div>
 
-      <div className="px-gutter pt-section text-center">
+      <div className="px-gutter mt-section text-center">
         <Eyebrow>{t(`category.${location.category}`)}</Eyebrow>
         <h1 className="font-display text-clay-500 mx-auto mt-6 max-w-3xl text-d2 sm:text-d1">
           {location.name[locale] ?? location.name.vi}
@@ -135,7 +135,7 @@ export default async function LocationPage({ params }: { params: Params }) {
         </dl>
       )}
 
-      <section className="mx-auto max-w-sml px-gutter py-section">
+      <section className="mx-auto max-w-sml px-gutter my-section">
         <Reveal>
           <div className="space-y-5">
             {/* key theo index: mảng đoạn văn cố định, hai đoạn trùng chữ vẫn là

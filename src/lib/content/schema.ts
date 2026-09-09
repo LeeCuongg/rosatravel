@@ -22,6 +22,23 @@ export const imageAssetSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
   blurDataURL: z.string().startsWith('data:image/'),
+  /**
+   * Chú thích in dưới ảnh. KHÁC `alt` và không thay thế được cho nhau: `alt`
+   * mô tả ảnh cho người không nhìn thấy nó ("con đường vắt ngang sườn núi"),
+   * còn `caption` nói thêm điều mà người NHÌN THẤY ảnh vẫn không biết ("chụp
+   * lúc 5h sáng, trước khi sương tan"). Trình đọc màn hình đọc cả hai, nên
+   * chép alt sang caption là bắt người dùng nghe hai lần cùng một câu.
+   */
+  caption: localizedTextSchema.optional(),
+  /**
+   * Nguồn ảnh — "© Tên tác giả / Hãng". Không bọc locale: tên riêng và ký hiệu
+   * bản quyền không dịch.
+   *
+   * Nằm ở bản ghi ẢNH chứ không ở chỗ dùng ảnh, vì bản quyền thuộc về bức ảnh
+   * chứ không thuộc về trang đăng nó. Cùng một ảnh mượn xuất hiện ở ba bài thì
+   * cả ba đều phải ghi nguồn, và ghi ở ba nơi là ba cơ hội để quên một chỗ.
+   */
+  credit: z.string().min(1).optional(),
 })
 
 // CHƯA CÓ DỮ LIỆU NÀO ĐI QUA ĐÂY: collection `media` của Payload chỉ sinh ra
@@ -68,6 +85,13 @@ export const locationSchema = z.object({
   category: z.enum(['an-uong', 'luu-tru', 'thien-nhien', 'van-hoa', 'cho-mua-sam']),
   excerpt: localizedTextSchema,
   body: z.array(localizedTextSchema).min(1),
+  /**
+   * Tên thành phố/vùng hiện trên THẺ địa điểm, ngắn gọn ("Hà Giang", "New
+   * York"). Không thay thế `address`: địa chỉ là dòng dài để người ta tìm
+   * đường tới, còn cái này là một nhãn để phân biệt hai quán trùng tên ở hai
+   * vùng khi lướt qua danh sách. Site một vùng thì bỏ trống được.
+   */
+  city: z.string().min(1).optional(),
   address: z.string().min(1).optional(),
   website: z.url().optional(),
   images: z.array(imageAssetSchema).min(1),
@@ -152,6 +176,22 @@ export const caseDaySchema = z.object({
   title: localizedTextSchema,
   body: z.array(localizedTextSchema).min(1),
   images: z.array(imageAssetSchema),
+  /**
+   * Ảnh xếp thành DẢI trên đầu ngày (`dai`), hay XEN vào giữa các đoạn văn
+   * (`xen`).
+   *
+   * `xen` là nhịp của bài phóng sự: đoạn — ảnh — đoạn — ảnh, người đọc dừng
+   * mắt đúng chỗ câu chữ vừa nhắc tới. `dai` là nhịp của bài có kèm album:
+   * xem hết ảnh rồi mới đọc. Cả hai đều dùng được, nhưng chúng đọc ra khác
+   * nhau và phải là lựa chọn của người viết chứ không phải mặc định của
+   * component.
+   *
+   * VỊ TRÍ xen là tự động, chia đều theo số đoạn — người viết chọn KIỂU, không
+   * chọn từng chỗ. Đó là giới hạn có ý thức: điều khiển từng vị trí đòi một
+   * trình soạn thảo khối, và cái giá của nó (di trú dữ liệu, ánh xạ cây JSON
+   * không cố định hình dạng) lớn hơn nhiều so với thứ nó mang lại ở đây.
+   */
+  imageLayout: z.enum(['dai', 'xen']).default('dai'),
   locationsLabel: localizedTextSchema.optional(),
   locations: z.array(locationSchema),
 })
@@ -170,6 +210,19 @@ export const caseStudySchema = z.object({
   highlights: z.array(localizedTextSchema).min(1),
   ourRole: z.array(localizedTextSchema).min(1),
   days: z.array(caseDaySchema).min(1),
+  /**
+   * Chỗ ở gợi ý — khối RIÊNG, đặt sau tất cả các ngày.
+   *
+   * Vì sao không nhét vào `locations` của một ngày như trước: chỗ ở không
+   * thuộc về một ngày cụ thể. Một khách sạn ở suốt bốn đêm mà bị gắn vào ngày
+   * 2 thì người đọc lướt tới ngày 5 sẽ tưởng đoàn đã chuyển chỗ. Và đây là thứ
+   * khách hỏi nhiều nhất — chôn nó giữa bài là bắt họ đọc lại từ đầu để tìm.
+   *
+   * Mặc định rỗng: bài kể về một chuyến trong ngày thì không có gì để gợi ý.
+   */
+  accommodations: z.array(locationSchema).default([]),
+  /** Nhãn của khối chỗ ở. Bỏ trống thì dùng nhãn mặc định. */
+  accommodationsLabel: localizedTextSchema.optional(),
   seo: seoSchema,
 })
 

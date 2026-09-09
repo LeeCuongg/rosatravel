@@ -28,7 +28,12 @@ export function Guide({
   className?: string
 }) {
   return (
-    <div className={`flex flex-col items-center gap-6 bg-ink-900 p-8 sm:flex-row sm:p-10 ${className}`}>
+    // Bo 16px: đây là khối DUY NHẤT trên site có nền đặc, và Spots bo đúng
+    // con số đó cho thẻ tác giả của họ. Góc vuông ở một khối đổ nền giữa một
+    // trang toàn khung nét đứt đọc ra như một mảng màu bị dán vào.
+    <div
+      className={`flex flex-col items-center gap-6 rounded-2xl bg-ink-900 p-8 sm:flex-row sm:p-10 ${className}`}
+    >
       {guide.photo && (
         <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full">
           <Media media={guide.photo} locale={locale} fill sizes="96px" className="object-cover" />

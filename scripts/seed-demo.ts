@@ -385,10 +385,10 @@ if (((home.faq as unknown[] | undefined) ?? []).length === 0) {
 const guideHienTai = home.guide as Record<string, unknown> | undefined
 if (typeof guideHienTai?.name !== 'string' || guideHienTai.name.trim() === '') {
   capNhat.guide = {
-    name: 'Lê Minh Rosa',
+    name: 'Rosa Nailah',
     role: vi('Người sáng lập'),
     bio: vi(
-      'Tôi lái chuyến đầu tiên lên Hà Giang năm 2016 và chưa năm nào bỏ. Mỗi lịch trình ở đây tôi đều tự đi lại trước khi bán, và phần lớn homestay trong danh sách là nhà của những người tôi đã ăn cơm cùng.',
+      'Lên plan cho bạn',
     ),
   }
   console.log('  điền thông tin người dẫn đường')

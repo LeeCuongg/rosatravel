@@ -85,7 +85,7 @@ export function JourneyCinematic({ journey, locale }: JourneyProps) {
     // Tier lite/reduced: lưới dọc bình thường. Đây là một trải nghiệm hoàn chỉnh
     // riêng, không phải bản desktop bị cắt xén.
     return (
-      <section className="mx-auto max-w-med px-gutter py-section">
+      <section className="mx-auto max-w-med px-gutter my-section">
         <Eyebrow>{t('journey')}</Eyebrow>
         <h2 className="font-display text-clay-500 mt-4 text-d2">{headline}</h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-2">

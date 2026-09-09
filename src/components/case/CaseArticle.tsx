@@ -6,6 +6,7 @@ import { Rule } from '@/components/ui/Frame'
 import { TextLink } from '@/components/ui/TextLink'
 import { DaySection } from '@/components/story/DaySection'
 import { LocationDrawer } from '@/components/location/LocationDrawer'
+import { LocationList } from '@/components/location/LocationList'
 import { gomDiaDiem } from '@/components/location/gom-dia-diem'
 import type { CaseStudy } from '@/lib/content'
 
@@ -86,7 +87,7 @@ export function CaseArticle({
       </div>
 
       {/* ── Điểm nhấn + Rosa đã lo những gì ────────────────────────────────── */}
-      <div className="mx-auto max-w-sml px-gutter pt-section">
+      <div className="mx-auto max-w-sml px-gutter mt-section">
         <Reveal>
           <div className="grid gap-12 sm:grid-cols-[1.6fr_1fr]">
             <div>
@@ -122,7 +123,7 @@ export function CaseArticle({
       </div>
 
       {/* ── Kể theo ngày ───────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-sml px-gutter pt-section pb-section">
+      <div className="mx-auto max-w-sml px-gutter my-section">
         <ol>
           {caseStudy.days.map((ngay) => (
             <DaySection
@@ -131,6 +132,7 @@ export function CaseArticle({
               title={ngay.title}
               paragraphs={ngay.body}
               images={ngay.images}
+              imageLayout={ngay.imageLayout}
               locations={ngay.locations}
               locationsLabel={ngay.locationsLabel}
               locale={locale}
@@ -138,12 +140,34 @@ export function CaseArticle({
           ))}
         </ol>
         <Rule />
+
+        {/* ── Chỗ ở gợi ý ───────────────────────────────────────────────────
+            Khối RIÊNG sau tất cả các ngày, không nằm trong ngày nào. Một khách
+            sạn ở suốt bốn đêm mà gắn vào ngày 2 thì người đọc tới ngày 5 sẽ
+            tưởng đoàn đã chuyển chỗ — xem giải thích ở caseStudySchema. */}
+        {caseStudy.accommodations.length > 0 && (
+          <Reveal className="mt-14">
+            <LocationList
+              locations={caseStudy.accommodations}
+              label={caseStudy.accommodationsLabel}
+              nhanMacDinh={t('accommodations')}
+              hienSoLuong
+              locale={locale}
+            />
+          </Reveal>
+        )}
       </div>
 
       {/* Ngăn kéo nằm TRONG article để thừa hưởng data-accent ở trên. Nó tự ẩn
           khi URL không có tham số `?dia-diem=`, nên đặt ở đây không tốn gì. */}
       <Suspense>
-        <LocationDrawer locations={gomDiaDiem(caseStudy.days)} locale={locale} />
+        {/* Chỗ ở phải nằm trong danh sách của ngăn kéo, nếu không bấm vào thẻ
+            khách sạn sẽ đổi URL mà không có gì mở ra: ngăn kéo tra địa điểm
+            theo slug trong đúng mảng này. */}
+        <LocationDrawer
+          locations={gomDiaDiem([...caseStudy.days, { locations: caseStudy.accommodations }])}
+          locale={locale}
+        />
       </Suspense>
     </article>
   )

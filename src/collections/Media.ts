@@ -128,6 +128,28 @@ export const Media: CollectionConfig = {
       ],
     },
     {
+      name: 'caption',
+      type: 'group',
+      label: 'Chú thích in dưới ảnh',
+      admin: {
+        description:
+          'KHÔNG phải mô tả ảnh. Mô tả ở trên là cho người không nhìn thấy ảnh; chú thích là câu in dưới ảnh, nói thêm điều mà người nhìn thấy ảnh vẫn không biết — "chụp lúc 5h sáng, trước khi sương tan". Chép lại mô tả vào đây là bắt người dùng trình đọc màn hình nghe hai lần cùng một câu. Bỏ trống thì không in gì.',
+      },
+      fields: [
+        { name: 'vi', type: 'text', label: 'Tiếng Việt', required: false },
+        { name: 'en', type: 'text', label: 'Tiếng Anh' },
+      ],
+    },
+    {
+      name: 'credit',
+      type: 'text',
+      label: 'Nguồn ảnh',
+      admin: {
+        description:
+          'Ảnh mượn, ảnh mua, ảnh của khách gửi thì BẮT BUỘC ghi. Dạng "© Tên tác giả" hoặc "© Tên / Hãng ảnh". Ảnh tự chụp thì bỏ trống. Ghi ở đây một lần là mọi bài dùng ảnh này đều có nguồn — bản quyền thuộc về bức ảnh, không thuộc về trang đăng nó.',
+      },
+    },
+    {
       name: 'blurDataURL',
       type: 'text',
       admin: {

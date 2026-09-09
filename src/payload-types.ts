@@ -162,6 +162,17 @@ export interface Media {
     vi: string;
     en?: string | null;
   };
+  /**
+   * KHÔNG phải mô tả ảnh. Mô tả ở trên là cho người không nhìn thấy ảnh; chú thích là câu in dưới ảnh, nói thêm điều mà người nhìn thấy ảnh vẫn không biết — "chụp lúc 5h sáng, trước khi sương tan". Chép lại mô tả vào đây là bắt người dùng trình đọc màn hình nghe hai lần cùng một câu. Bỏ trống thì không in gì.
+   */
+  caption?: {
+    vi?: string | null;
+    en?: string | null;
+  };
+  /**
+   * Ảnh mượn, ảnh mua, ảnh của khách gửi thì BẮT BUỘC ghi. Dạng "© Tên tác giả" hoặc "© Tên / Hãng ảnh". Ảnh tự chụp thì bỏ trống. Ghi ở đây một lần là mọi bài dùng ảnh này đều có nguồn — bản quyền thuộc về bức ảnh, không thuộc về trang đăng nó.
+   */
+  credit?: string | null;
   blurDataURL?: string | null;
   canhBaoKichThuoc?: string | null;
   updatedAt: string;
@@ -248,6 +259,10 @@ export interface Location {
     vi: string;
     id?: string | null;
   }[];
+  /**
+   * Nhãn ngắn hiện trên THẺ địa điểm giữa bài — "Hà Giang", "New York". Không phải địa chỉ: địa chỉ là dòng dài để tìm đường, cái này chỉ để phân biệt hai nơi trùng tên ở hai vùng khi lướt danh sách. Chỉ làm một vùng thì bỏ trống.
+   */
+  city?: string | null;
   address?: string | null;
   /**
    * URL đầy đủ, ví dụ: https://... — để trống nếu nơi này không có web.
@@ -438,6 +453,10 @@ export interface CaseStudy {
      */
     images?: (string | Media)[] | null;
     /**
+     * "Xen" là nhịp của bài phóng sự: đoạn — ảnh — đoạn — ảnh, mắt người đọc dừng đúng chỗ câu chữ vừa nhắc tới. "Dải" là nhịp của bài có kèm album: xem hết ảnh rồi mới đọc. Vị trí xen được chia đều tự động theo số đoạn — bạn chọn kiểu, không chọn từng chỗ.
+     */
+    imageLayout?: ('dai' | 'xen') | null;
+    /**
      * Ví dụ: "Ăn ở đâu", "Ngủ ở đâu", "Những nơi đã ghé". Bỏ trống thì dùng nhãn mặc định.
      */
     locationsLabel?: {
@@ -446,6 +465,16 @@ export interface CaseStudy {
     locations?: (string | Location)[] | null;
     id?: string | null;
   }[];
+  /**
+   * Ví dụ: "Gợi ý chỗ ở", "Đoàn đã ngủ ở đâu". Bỏ trống thì dùng nhãn mặc định.
+   */
+  accommodationsLabel?: {
+    vi?: string | null;
+  };
+  /**
+   * Khối riêng đặt SAU tất cả các ngày. Đừng gắn khách sạn vào "Địa điểm nhắc tới trong ngày": một khách sạn ở suốt bốn đêm mà gắn vào ngày 2 thì người đọc tới ngày 5 sẽ tưởng đoàn đã chuyển chỗ. Đây cũng là thứ khách hỏi nhiều nhất nên nó cần một chỗ đứng riêng, không chôn giữa bài.
+   */
+  accommodations?: (string | Location)[] | null;
   seo: {
     /**
      * Dòng chữ hiện trên tab trình duyệt và trên kết quả tìm kiếm Google. Nên ngắn gọn.
@@ -583,6 +612,13 @@ export interface MediaSelect<T extends boolean = true> {
         vi?: T;
         en?: T;
       };
+  caption?:
+    | T
+    | {
+        vi?: T;
+        en?: T;
+      };
+  credit?: T;
   blurDataURL?: T;
   canhBaoKichThuoc?: T;
   updatedAt?: T;
@@ -675,6 +711,7 @@ export interface LocationsSelect<T extends boolean = true> {
         vi?: T;
         id?: T;
       };
+  city?: T;
   address?: T;
   website?: T;
   images?: T;
@@ -832,6 +869,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
               id?: T;
             };
         images?: T;
+        imageLayout?: T;
         locationsLabel?:
           | T
           | {
@@ -840,6 +878,12 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         locations?: T;
         id?: T;
       };
+  accommodationsLabel?:
+    | T
+    | {
+        vi?: T;
+      };
+  accommodations?: T;
   seo?:
     | T
     | {

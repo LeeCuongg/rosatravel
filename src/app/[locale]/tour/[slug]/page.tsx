@@ -56,7 +56,7 @@ export default async function TourPage({ params }: { params: Params }) {
   return (
     <main>
       <TourHero tour={tour} locale={locale} />
-      <section className="mx-auto max-w-sml px-gutter py-section text-center">
+      <section className="mx-auto max-w-sml px-gutter my-section text-center">
         <Reveal>
           <Eyebrow>{t('tourStory')}</Eyebrow>
           {/* Tóm tắt để cỡ d3 bằng chữ serif, KHÔNG phải cỡ thân bài: đây là

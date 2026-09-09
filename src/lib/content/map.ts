@@ -72,6 +72,11 @@ export function mapMedia(doc: unknown): ImageAsset {
     width: Number(m.width),
     height: Number(m.height),
     blurDataURL: String(m.blurDataURL),
+    // Cả hai đều tuỳ chọn, và cả hai đều phải kiểm NỘI DUNG chứ không kiểm sự
+    // tồn tại: Payload lưu group để trống thành { vi: '' } và ô text để trống
+    // thành '', cả hai đều lọt qua một phép kiểm truthy rồi vỡ ở zod .min(1).
+    ...(coNoiDung(m.caption) ? { caption: m.caption as ImageAsset['caption'] } : {}),
+    ...(typeof m.credit === 'string' && m.credit.trim() ? { credit: m.credit.trim() } : {}),
   }
 }
 
@@ -146,6 +151,7 @@ export function mapLocation(doc: unknown): unknown {
     // `.min(1)` cho address và `z.url()` cho website, nên một ô để trống trong
     // admin sẽ làm vỡ build với thông báo về "địa chỉ không hợp lệ" — trong khi
     // ý người nhập chỉ là "nơi này không có địa chỉ".
+    ...(typeof l.city === 'string' && l.city.trim() ? { city: l.city.trim() } : {}),
     ...(typeof l.address === 'string' && l.address.trim() ? { address: l.address.trim() } : {}),
     ...(typeof l.website === 'string' && l.website.trim() ? { website: l.website.trim() } : {}),
     images: mangQuanHe(l.images).map(mapMedia),
@@ -223,10 +229,19 @@ export function mapCaseStudy(doc: unknown): unknown {
         title: d.title,
         body: doanVan(d.body),
         images: mangQuanHe(d.images).map(mapMedia),
+        // Bản ghi tạo TRƯỚC khi có trường này không có giá trị nào cả — để zod
+        // áp mặc định 'dai' thay vì chốt cứng ở đây, nên chỉ truyền khi thật
+        // sự có. Đó là lý do trường mới được thêm theo kiểu này chứ không phải
+        // kiểu bắt buộc: bốn bài đang chạy ngoài production không phải sửa gì.
+        ...(d.imageLayout === 'xen' || d.imageLayout === 'dai' ? { imageLayout: d.imageLayout } : {}),
         ...nhanKhoiDiaDiem(d.locationsLabel),
         locations: mangQuanHe(d.locations).map(mapLocation),
       }
     }),
+    accommodations: mangQuanHe(c.accommodations).map(mapLocation),
+    ...(coNoiDung(c.accommodationsLabel)
+      ? { accommodationsLabel: c.accommodationsLabel as LocalizedText }
+      : {}),
     seo: {
       title: (c.seo as Record<string, unknown>)?.title,
       description: (c.seo as Record<string, unknown>)?.description,

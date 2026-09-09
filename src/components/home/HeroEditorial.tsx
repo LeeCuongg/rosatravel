@@ -34,7 +34,10 @@ export function HeroEditorial({
   const anh = 'kind' in hero.media ? hero.media.poster : hero.media
 
   return (
-    <section className="pt-16 pb-section text-center sm:pt-24">
+    // `mb-section` chứ không `pb-section`: lề dưới của hero phải GỘP được với
+    // lề trên của khối kế tiếp (xem Frame.tsx). Để là đệm thì hero tự tạo một
+    // khoảng 250px với khối dưới trong khi mọi khối khác cách nhau 125px.
+    <section className="pt-16 mb-section text-center sm:pt-24">
       <div className="px-gutter">
         <Reveal>
           <h1 className="font-display text-clay-500 mx-auto max-w-5xl text-d2 sm:text-d1">

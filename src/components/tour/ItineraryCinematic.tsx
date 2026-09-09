@@ -88,7 +88,7 @@ export function ItineraryCinematic({
   }, [canParallax, days.length])
 
   return (
-    <div ref={rootRef} className="mx-auto max-w-sml px-gutter py-section">
+    <div ref={rootRef} className="mx-auto max-w-sml px-gutter my-section">
       <Eyebrow>{t('itinerary')}</Eyebrow>
       <ol className="mt-10">
         {days.map((day) => (

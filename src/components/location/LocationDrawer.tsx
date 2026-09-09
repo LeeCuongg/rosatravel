@@ -277,14 +277,14 @@ function Panel({ diaDiem, locale }: { diaDiem: Location; locale: 'vi' | 'en' }) 
 
         <div className="space-y-6 px-6 pb-12">
           {diaDiem.address && (
-            <div className="border border-dashed border-rule p-5">
+            <div className="rounded-lg border border-dashed border-rule p-5">
               <Eyebrow className="text-accent">{t('address')}</Eyebrow>
               <p className="mt-3 text-meta">{diaDiem.address}</p>
             </div>
           )}
 
           {diaDiem.website && (
-            <div className="border border-dashed border-rule p-5">
+            <div className="rounded-lg border border-dashed border-rule p-5">
               <Eyebrow className="text-accent">{t('website')}</Eyebrow>
               <p className="mt-3 text-meta">
                 <TextLink href={diaDiem.website} size="sm">
@@ -294,7 +294,7 @@ function Panel({ diaDiem, locale }: { diaDiem: Location; locale: 'vi' | 'en' }) 
             </div>
           )}
 
-          <div className="border border-dashed border-rule p-5">
+          <div className="rounded-lg border border-dashed border-rule p-5">
             <div className="space-y-4">
               {/* key theo index: mảng đoạn văn cố định, hai đoạn trùng chữ vẫn
                   là hai đoạn riêng. */}

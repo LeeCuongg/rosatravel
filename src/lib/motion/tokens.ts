@@ -6,6 +6,22 @@
  * PHẢI khớp nhau; đổi một bên thì đổi cả hai. Tách làm hai vì Tailwind không
  * đọc được file TypeScript.
  */
+/**
+ * MỘT CỬ CHỈ = MỘT THỜI LƯỢNG.
+ *
+ * Khi hover một thẻ làm đổi nhiều thứ cùng lúc (bóng đổ, ảnh, màu tiêu đề,
+ * nhãn hiện ra), TẤT CẢ phải dùng chung một mốc. Trộn nhiều mốc trong cùng một
+ * thao tác không cho ra "nhiều lớp chuyển động" — nó cho ra cảm giác GIẬT CỤC,
+ * vì các phần của cùng một cử chỉ về đích ở những thời điểm khác nhau.
+ *
+ * Đây là lỗi đã xảy ra thật và đã đo được: một thẻ tour từng chạy ba tốc độ
+ * cùng lúc — thẻ nghiêng 0.3s, ảnh phóng 0.9s, tiêu đề đổi màu 0.15s. Không có
+ * khung hình nào bị rớt (trace đo được 0 khung trễ trên 767 khung), nhưng vẫn
+ * trông hỏng. Vấn đề nằm ở thiết kế chuyển động, không ở hiệu năng.
+ *
+ * `fast` chỉ dành cho thao tác đổi ĐÚNG MỘT thuộc tính và không có gì để đồng
+ * bộ cùng: liên kết trên header, nút đóng, viền ô nhập khi focus.
+ */
 export const duration = {
   fast: 0.15,
   base: 0.3,

@@ -59,22 +59,44 @@ export function LocationCard({
     <a
       href={`/${localeHienTai}/dia-diem/${location.slug}`}
       onClick={bam}
-      className="group grid grid-cols-[7.5rem_1fr] items-stretch gap-0 border border-dashed border-rule transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:border-rule-strong sm:grid-cols-[13rem_1fr]"
+      // NỀN TRẮNG trên nền kem — thẻ nổi lên bằng chính màu nền của nó, không
+      // cần viền đậm. Trước đây thẻ trong suốt nên nó chìm vào khung bao ngoài
+      // và cả khối đọc ra như một danh sách gạch đầu dòng có ảnh, chứ không ra
+      // những tấm thẻ rời.
+      //
+      // `p-0.5` (2px) là viền trắng mảnh chạy quanh ảnh — số của Spots, và nó
+      // kéo theo bán kính LỒNG: hộp ngoài 8px, ảnh bên trong 6px (8 trừ 2).
+      // Cho ảnh cùng 8px như hộp thì đường cong hai lớp lệch nhau, nhìn ra
+      // ngay dù không chỉ được tên.
+      //
+      // `overflow-hidden` ở đây thì được — thẻ này không nhô gì ra ngoài lúc
+      // hover (chỉ đổi bóng và màu viền).
+      className="group grid grid-cols-[7.5rem_1fr] items-stretch gap-0 overflow-hidden rounded-lg border border-dashed border-rule bg-paper p-0.5 shadow-card-off transition-[color,border-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-hover)] hover:border-rule-strong hover:shadow-card sm:grid-cols-[13rem_1fr]"
     >
-      <div className="relative aspect-[4/3] h-full w-full overflow-hidden">
+      <div className="relative aspect-[4/3] h-full w-full overflow-hidden rounded-l-md">
         <Media
           media={location.images[0]}
           locale={locale}
           fill
           // Thẻ nằm trong cột chữ rộng tối đa 900px trừ đệm; ô ảnh dừng ở 208px.
           sizes="(max-width: 640px) 120px, 208px"
-          className="object-cover transition-transform duration-[var(--duration-slower)] ease-[var(--ease-hover)] group-hover:scale-105"
+          className="object-cover transition-transform duration-[var(--duration-base)] ease-[var(--ease-hover)] group-hover:scale-105"
         />
       </div>
 
       <div className="flex flex-col gap-2 p-4 sm:p-6">
-        <p className="text-label uppercase text-ink-500">{t(`category.${location.category}`)}</p>
-        <h4 className="font-display text-d4 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] group-hover:text-accent">
+        {/* Phân loại là một VIÊN PILL, không phải một dòng chữ trần.
+            Trên nền trắng, một dòng chữ hoa nhỏ đọc ra như phần mở đầu của
+            đoạn văn bên dưới; đóng khung nó lại thì nó tách hẳn ra thành nhãn
+            phân loại. Số đo của Spots: cao 24px, bo 12px, đệm ngang 10px.
+            Thành phố nối vào cùng viên đó thay vì xuống dòng riêng — nó là
+            thông tin PHÂN BIỆT, không phải thông tin chính, và một dòng meta
+            thứ hai sẽ đẩy tên địa điểm xuống thấp hơn cả ảnh trên thẻ hẹp. */}
+        <p className="inline-flex h-6 w-fit items-center rounded-xl bg-ink-900 px-2.5 text-label uppercase text-ink-500">
+          {t(`category.${location.category}`)}
+          {location.city && ` · ${location.city}`}
+        </p>
+        <h4 className="font-display text-d4 transition-colors duration-[var(--duration-base)] ease-[var(--ease-hover)] group-hover:text-accent">
           {ten}
         </h4>
         {/* line-clamp-2: phần tóm tắt do người nhập gõ, không có gì chặn độ dài.

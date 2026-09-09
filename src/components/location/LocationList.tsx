@@ -18,10 +18,23 @@ export function LocationList({
   locations,
   label,
   locale,
+  nhanMacDinh,
+  hienSoLuong = false,
 }: {
   locations: Location[]
   label?: LocalizedText
   locale: 'vi' | 'en'
+  /**
+   * Nhãn dùng khi người nhập bỏ trống. Bỏ qua thì rơi về "Những nơi đã ghé" —
+   * đúng cho khối giữa bài, SAI cho khối chỗ ở ở cuối bài.
+   */
+  nhanMacDinh?: string
+  /**
+   * Hiện số lượng bên phải nhãn ("2 lựa chọn"). Bật ở khối chỗ ở: người đọc
+   * cần biết ngay là có mấy phương án trước khi quyết định đọc tiếp hay không.
+   * Tắt ở khối giữa bài — ở đó số thẻ không phải thông tin, chỉ là số thẻ.
+   */
+  hienSoLuong?: boolean
 }) {
   const t = useTranslations('location')
 
@@ -29,9 +42,14 @@ export function LocationList({
   if (locations.length === 0) return null
 
   return (
-    <div className="mt-10 border border-dashed border-rule">
-      <div className="border-b border-dashed border-rule px-5 py-3">
-        <Eyebrow>{label ? (label[locale] ?? label.vi) : t('defaultLabel')}</Eyebrow>
+    <div className="mt-10 rounded-lg border border-dashed border-rule">
+      <div className="flex items-center justify-between gap-4 border-b border-dashed border-rule px-5 py-3">
+        <Eyebrow>{label ? (label[locale] ?? label.vi) : (nhanMacDinh ?? t('defaultLabel'))}</Eyebrow>
+        {hienSoLuong && (
+          <span className="text-label uppercase text-ink-500">
+            {t('optionCount', { n: locations.length })}
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-4 p-4 sm:p-5">
         {locations.map((location) => (

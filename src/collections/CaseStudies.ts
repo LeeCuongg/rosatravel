@@ -164,6 +164,20 @@ export const CaseStudies: CollectionConfig = {
           },
         },
         {
+          name: 'imageLayout',
+          type: 'select',
+          label: 'Cách xếp ảnh',
+          defaultValue: 'dai',
+          options: [
+            { label: 'Thành dải trên đầu ngày', value: 'dai' },
+            { label: 'Xen giữa các đoạn văn', value: 'xen' },
+          ],
+          admin: {
+            description:
+              '"Xen" là nhịp của bài phóng sự: đoạn — ảnh — đoạn — ảnh, mắt người đọc dừng đúng chỗ câu chữ vừa nhắc tới. "Dải" là nhịp của bài có kèm album: xem hết ảnh rồi mới đọc. Vị trí xen được chia đều tự động theo số đoạn — bạn chọn kiểu, không chọn từng chỗ.',
+          },
+        },
+        {
           name: 'locationsLabel',
           type: 'group',
           label: 'Tiêu đề khối địa điểm',
@@ -182,6 +196,27 @@ export const CaseStudies: CollectionConfig = {
           required: false,
         },
       ],
+    },
+    {
+      name: 'accommodationsLabel',
+      type: 'group',
+      label: 'Tiêu đề khối chỗ ở',
+      admin: {
+        description: 'Ví dụ: "Gợi ý chỗ ở", "Đoàn đã ngủ ở đâu". Bỏ trống thì dùng nhãn mặc định.',
+      },
+      fields: [viTextGroup('Tiếng Việt', false)],
+    },
+    {
+      name: 'accommodations',
+      type: 'relationship',
+      relationTo: 'locations',
+      label: 'Chỗ ở gợi ý',
+      hasMany: true,
+      required: false,
+      admin: {
+        description:
+          'Khối riêng đặt SAU tất cả các ngày. Đừng gắn khách sạn vào "Địa điểm nhắc tới trong ngày": một khách sạn ở suốt bốn đêm mà gắn vào ngày 2 thì người đọc tới ngày 5 sẽ tưởng đoàn đã chuyển chỗ. Đây cũng là thứ khách hỏi nhiều nhất nên nó cần một chỗ đứng riêng, không chôn giữa bài.',
+      },
     },
     seoGroup(),
   ],

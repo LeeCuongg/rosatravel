@@ -38,7 +38,10 @@ export function PlanTrip({
   const tc = useTranslations('cta')
 
   return (
-    <Frame id="thiet-ke" label={t('plan')} width="sml" bodyClassName="p-8 sm:p-14">
+    // `tone="giay"` — khối DUY NHẤT trên site có nền trắng. Đệm 80px ở màn
+    // hình lớn, cũng là số của Spots: biểu mẫu cần nhiều khoảng thở hơn một
+    // khối chữ vì mắt phải nhảy giữa nhãn, ô nhập và nút.
+    <Frame id="thiet-ke" label={t('plan')} width="sml" tone="giay" bodyClassName="p-8 sm:p-20">
       <h2 className="font-display text-clay-500 text-center text-d2">{tc('finalHeadline')}</h2>
       <p className="font-display mx-auto mt-5 max-w-md text-center text-d4 text-sand-200">
         {tc.rich('finalSub', {

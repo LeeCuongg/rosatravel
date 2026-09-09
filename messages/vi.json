@@ -23,6 +23,7 @@
   },
   "cta": {
     "viewTour": "Xem chi tiết",
+    "viewCase": "Chi tiết",
     "bookNow": "Liên hệ đặt tour",
     "callUs": "Gọi ngay",
     "zalo": "Nhắn Zalo",
@@ -76,9 +77,11 @@
     "planTitle": "Lên kế hoạch cho bạn",
     "planSub": "Để lại thông tin, chúng tôi gọi lại trong 24 giờ và dựng lịch trình có {name} trong đó.",
     "planNote": "Quan tâm địa điểm: {name}. ",
+    "optionCount": "{n} lựa chọn",
     "goToImage": "Xem ảnh {n}"
   },
   "caseStudy": {
+    "accommodations": "Gợi ý chỗ ở",
     "highlights": "Điểm nhấn chuyến đi",
     "ourRole": "Rosa đã lo những gì",
     "close": "Đóng"

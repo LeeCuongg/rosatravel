@@ -64,7 +64,7 @@ export function TourHero({ tour, locale }: { tour: Tour; locale: 'vi' | 'en' }) 
         ))}
       </div>
 
-      <div className="px-gutter pt-section text-center">
+      <div className="px-gutter mt-section text-center">
         <Eyebrow>{diemDen.join(' / ')}</Eyebrow>
         <h1 className="font-display text-clay-500 mx-auto mt-6 max-w-3xl text-d2 sm:text-d1">
           {tour.title[locale] ?? tour.title.vi}

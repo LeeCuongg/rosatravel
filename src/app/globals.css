@@ -39,6 +39,15 @@
   /* Chữ nằm trên nền nút clay-600. 6.42:1. */
   --color-on-clay: #fdf8ec;
 
+  /* TRẮNG THẬT — chỉ dùng cho nền THẺ nổi trên nền kem.
+     Không phải màu thứ ba trong bảng: nó là công cụ tách lớp. Nền trang là kem
+     (#fdf8ec), nên một thẻ trắng nổi lên trước mà không cần viền đậm hay bóng
+     đổ — đúng cách spotstravel.co làm cho thẻ địa điểm (đã đo: rgb(255,255,255)
+     trên nền kem của họ).
+     Mọi màu chữ hiện có đều ĐẬM HƠN trên trắng so với trên kem, nên không có
+     cặp nào tụt chuẩn tương phản khi đặt lên nền này. */
+  --color-paper: #ffffff;
+
   /* ĐƯỜNG KẺ NÉT ĐỨT — xương sống thị giác của bố cục.
      Spots dựng toàn bộ cảm giác "tạp chí" bằng lưới nét đứt 1px bao quanh mọi
      khối, chứ không bằng đổ bóng hay bo góc. Hai mốc: `rule` cho khung và vách
@@ -139,6 +148,23 @@
   --duration-slower: 900ms;
   --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-hover: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /* ══════════════════════════════════════════════════════════════════════
+     BÓNG ĐỔ — LUÔN ĐI THEO CẶP
+
+     `shadow-card-off` KHÔNG phải `shadow-none`, và đó là toàn bộ ý nghĩa của
+     nó: cùng hình học (0 3px 3px 3px), chỉ khác mỗi màu trong suốt. Nhờ vậy
+     `transition: box-shadow` chỉ nội suy MÀU.
+
+     Chuyển từ `none` sang một bóng thật thì trình duyệt phải nội suy cả bán
+     kính lẫn độ lan, và bóng bung ra từ số không — thấy rõ là giật ở khung
+     hình đầu. Mẹo cặp sinh đôi này lấy từ spotstravel.co (--shadow-2 /
+     --shadow-2-transparent), và nó là lý do bóng bên họ hiện ra êm.
+
+     Màu là sand-100 (#403232, nâu mực của site) pha loãng, KHÔNG phải đen:
+     bóng đen trên nền kem ấm ngả xám và trông bẩn. */
+  --shadow-card: 0 3px 3px 3px rgba(64, 50, 50, 0.12);
+  --shadow-card-off: 0 3px 3px 3px rgba(64, 50, 50, 0);
 }
 
 /* Bảng màu nhấn cho từng bài "Chuyến đã đi".
@@ -188,6 +214,92 @@ body {
 .font-display,
 [class*="font-display"] {
   font-variation-settings: "SOFT" 0, "WONK" 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HIỆU ỨNG HOVER
+
+   Cả ba lớp dưới đây đều bọc trong `@media (hover: hover)`. Trên màn hình cảm
+   ứng, một lần chạm để lại trạng thái :hover DÍNH cho tới khi chạm chỗ khác —
+   nên thứ đáng lẽ là phản hồi thoáng qua lại thành một thẻ nghiêng vĩnh viễn.
+   (Các tiện ích `hover:` của Tailwind v4 đã tự bọc sẵn; CSS viết tay thì phải
+   tự bọc.)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * GẠCH CHÂN QUÉT — dùng cho TextLink và TextButton.
+ *
+ * HAI đường chồng nhau, không phải một: `::before` là nét tĩnh màu rule-strong
+ * (luôn thấy, cho biết đây là thứ bấm được), `::after` là nét đất nung quét
+ * ngang đè lên. Chỉ có một đường mà đổi màu khi hover thì không có chuyển động
+ * nào cả; chỉ có đường quét mà không có nét tĩnh thì link trông như chữ thường
+ * cho tới khi chuột chạm vào.
+ *
+ * Mấu chốt là transform-origin ĐỔI BÊN: nghỉ ở `right`, hover sang `left`. Nên
+ * nét quét vào từ trái, và khi rời chuột nó RÚT VỀ PHÍA PHẢI thay vì chạy
+ * ngược lại — cùng một hướng đọc cho cả hai chiều. Giữ nguyên origin thì nó
+ * co lại đúng đường vừa đi và trông như tua ngược băng.
+ *
+ * `inline-block` là bắt buộc: với phần tử inline trải trên hai dòng, khối chứa
+ * của ::after là hợp của các hộp dòng và nét gạch rơi vào chỗ vô nghĩa.
+ */
+.gach-chan-quet {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.gach-chan-quet::before,
+.gach-chan-quet::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -0.3em;
+  left: 0;
+  border-top: 1px solid;
+  pointer-events: none;
+}
+
+.gach-chan-quet::before {
+  border-top-color: var(--color-rule-strong);
+}
+
+.gach-chan-quet::after {
+  border-top-color: var(--color-clay-500);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-base) var(--ease-hover);
+}
+
+@media (hover: hover) {
+  .gach-chan-quet:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/**
+ * THẺ NGHIÊNG — ảnh ghim trên bảng, không phải ô trong bảng tính.
+ *
+ * Góc do component đặt qua `--goc-nghieng` chứ không cố định ở đây: bốn thẻ
+ * cùng nghiêng đúng 2deg đọc ra như một lỗi in, còn góc lệch nhau đọc ra như
+ * người ta vừa đặt chúng xuống. Spots đạt hiệu quả này bằng nth-child; ta
+ * truyền theo chỉ số vì mỗi thẻ nằm trong một ô riêng nên nth-child không với
+ * tới được.
+ *
+ * `position: relative` + `z-index` để thẻ đang nghiêng nổi lên trên các thẻ
+ * bên cạnh — thiếu nó, góc thẻ chui xuống dưới thẻ kế tiếp.
+ */
+@media (hover: hover) {
+  .the-nghieng {
+    transition: transform var(--duration-base) var(--ease-hover);
+  }
+
+  .the-nghieng:hover {
+    position: relative;
+    z-index: 1;
+    transform: rotate(var(--goc-nghieng, 2deg));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

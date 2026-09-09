@@ -46,7 +46,7 @@ export function RelatedTours({
       <div className="grid divide-y divide-dashed divide-rule sm:grid-cols-2 sm:divide-x lg:grid-cols-4">
         {khac.map((tour, index) => (
           <Reveal key={tour.slug} delay={index * stagger} className="p-6 sm:p-8">
-            <TourCard tour={tour} locale={locale} />
+            <TourCard tour={tour} locale={locale} index={index} />
           </Reveal>
         ))}
       </div>

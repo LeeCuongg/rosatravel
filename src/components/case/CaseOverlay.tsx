@@ -130,7 +130,19 @@ export function CaseOverlay({
           // ra được.
           if (dangDong) router.back()
         }}
-        className="relative mx-auto mt-6 flex h-[calc(100svh-1.5rem)] w-[calc(100%-1.5rem)] max-w-med flex-col overflow-hidden bg-ink-950 outline-none sm:mt-10 sm:h-[calc(100svh-2.5rem)] sm:w-[calc(100%-5rem)]"
+        // KHÔNG chừa lề trên: lớp phủ ăn trọn chiều cao màn hình.
+        //
+        // Bản trước để 40px hở trên đỉnh (đúng con số của spotstravel.co). Nhưng
+        // họ không có thanh điều hướng dính ở đó, còn mình có: dải hở 40px cắt
+        // ngang giữa header, để lộ logo bên trái và menu bên phải trong khi
+        // phần giữa bị che. Nó không đọc ra là "một lớp phủ chừa mép", nó đọc
+        // ra là một khối bị đặt lệch.
+        //
+        // Bề ngang thì lấy đúng luật của họ, đã đo ở hai khổ màn hình:
+        // 1440px → panel 1296px (90%), 1920px → panel 1360px. Tức là
+        // `min(90%, 1360px)` — rộng theo màn hình nhưng có trần, vì một dòng
+        // chữ dài quá 1360px thì mắt lạc dòng khi xuống hàng.
+        className="relative mx-auto flex h-svh w-[90%] max-w-[85rem] flex-col overflow-hidden bg-ink-950 outline-none"
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-dashed border-rule px-4 py-3 sm:px-6">
           <button

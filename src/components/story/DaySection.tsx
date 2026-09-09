@@ -38,6 +38,70 @@ const BO_CUC_ANH = {
 /** Quá ba ảnh thì mỗi tấm bé đến mức không nhận ra gì — cắt bớt. */
 const TOI_DA_ANH = 3
 
+/**
+ * Với mỗi ảnh, trả về CHỈ SỐ ĐOẠN VĂN mà nó đứng ngay sau.
+ *
+ * Chia đều, không dồn về đầu: `(i+1) * soDoan / (soAnh+1)` đặt các ảnh vào
+ * những mốc cách nhau bằng nhau trong chuỗi đoạn văn. Ba đoạn + hai ảnh cho ra
+ * đoạn → ảnh → đoạn → ảnh → đoạn, đúng nhịp cần.
+ *
+ * Không nhận vị trí từ người nhập, và đó là giới hạn có ý thức — xem giải thích
+ * ở `imageLayout` trong src/lib/content/schema.ts.
+ */
+function viTriXen(soDoan: number, soAnh: number): number[] {
+  return Array.from({ length: soAnh }, (_, i) => Math.ceil(((i + 1) * soDoan) / (soAnh + 1)) - 1)
+}
+
+/**
+ * MỘT Ô ẢNH, kèm chú thích và nguồn nếu có.
+ *
+ * `<figure>` chứ không phải `<div>`: chú thích phải được nối với đúng bức ảnh
+ * nó mô tả, và `<figcaption>` là cách duy nhất trình đọc màn hình hiểu được
+ * quan hệ đó. Một `<p>` đặt cạnh ảnh thì với chúng chỉ là một đoạn văn lạc.
+ */
+function OAnh({
+  image,
+  locale,
+  aspect,
+  sizes,
+  parallax,
+}: {
+  image: ImageAsset
+  locale: 'vi' | 'en'
+  aspect: string
+  sizes: string
+  parallax: boolean
+}) {
+  const chuThich = image.caption?.[locale] ?? image.caption?.vi
+
+  return (
+    <figure>
+      <div className={`relative ${aspect} overflow-hidden`}>
+        {/* yPercent dịch theo % chiều cao của CHÍNH phần tử này, không phải
+            của cha. Biên độ thật = 0.08 × 120% = 9.6% chiều cao cha, nên phần
+            dư mỗi bên (10%) phải lớn hơn con số đó. Đổi biên độ yPercent trong
+            ItineraryCinematic thì phải tính lại h ở đây: (h - 100) / 2 >= 0.08h */}
+        <div
+          {...(parallax ? { 'data-parallax': '' } : {})}
+          className={parallax ? 'absolute inset-x-0 -top-[10%] h-[120%]' : 'absolute inset-0'}
+        >
+          <Media media={image} locale={locale} fill sizes={sizes} className="object-cover" />
+        </div>
+      </div>
+
+      {/* Nguồn ảnh in ra kể cả khi không có chú thích: đó là ràng buộc bản
+          quyền, không phải một chi tiết biên tập tuỳ chọn. */}
+      {(chuThich || image.credit) && (
+        <figcaption className="mt-2 text-meta text-ink-500">
+          {chuThich}
+          {chuThich && image.credit && ' '}
+          {image.credit && <span className="text-ink-700">{image.credit}</span>}
+        </figcaption>
+      )}
+    </figure>
+  )
+}
+
 interface DaySectionProps {
   day: number
   title: LocalizedText
@@ -47,6 +111,14 @@ interface DaySectionProps {
   locations: Location[]
   locationsLabel?: LocalizedText
   locale: 'vi' | 'en'
+  /**
+   * `dai` (mặc định): ảnh gom thành một dải trên đầu ngày.
+   * `xen`: ảnh chia đều vào giữa các đoạn văn.
+   *
+   * Lịch trình tour luôn dùng `dai` — ở đó mỗi ngày chỉ có một đoạn mô tả, nên
+   * không có gì để xen vào giữa.
+   */
+  imageLayout?: 'dai' | 'xen'
   /**
    * Gắn `data-parallax` lên từng ô ảnh. CHỈ bật ở trang tour, nơi
    * ItineraryCinematic có sẵn ScrollTrigger đọc thuộc tính này. Bật trong lớp
@@ -64,11 +136,18 @@ export function DaySection({
   locations,
   locationsLabel,
   locale,
+  imageLayout = 'dai',
   parallax = false,
 }: DaySectionProps) {
   const t = useTranslations('tour')
   const anh = images.slice(0, TOI_DA_ANH)
   const boCuc = BO_CUC_ANH[(anh.length || 1) as 1 | 2 | 3]
+
+  // Ảnh xen luôn nằm một mình hết chiều ngang cột chữ: nó đang đóng vai một
+  // nhịp nghỉ giữa hai đoạn, và hai tấm nhỏ cạnh nhau thì đọc ra thành một
+  // khối album chen vào giữa bài, đúng thứ chế độ này sinh ra để tránh.
+  const xen = imageLayout === 'xen' && anh.length > 0 && paragraphs.length > 0
+  const moc = xen ? viTriXen(paragraphs.length, anh.length) : []
 
   return (
     <li className="pt-10 pb-14">
@@ -78,28 +157,17 @@ export function DaySection({
         <h3 className="font-display mt-3 text-d3 sm:text-d2">{title[locale] ?? title.vi}</h3>
       </Reveal>
 
-      {anh.length > 0 && (
+      {!xen && anh.length > 0 && (
         <div className={`mt-8 grid gap-3 ${boCuc.grid}`}>
           {anh.map((image, index) => (
-            <div key={`${image.src}-${index}`} className={`relative ${boCuc.aspect} overflow-hidden`}>
-              {/* yPercent dịch theo % chiều cao của CHÍNH phần tử này, không phải
-                  của cha. Biên độ thật = 0.08 × 120% = 9.6% chiều cao cha, nên
-                  phần dư mỗi bên (10%) phải lớn hơn con số đó. Đổi biên độ
-                  yPercent trong ItineraryCinematic thì phải tính lại h ở đây:
-                  (h - 100) / 2 >= 0.08h */}
-              <div
-                {...(parallax ? { 'data-parallax': '' } : {})}
-                className={parallax ? 'absolute inset-x-0 -top-[10%] h-[120%]' : 'absolute inset-0'}
-              >
-                <Media
-                  media={image}
-                  locale={locale}
-                  fill
-                  sizes={boCuc.sizes}
-                  className="object-cover"
-                />
-              </div>
-            </div>
+            <OAnh
+              key={`${image.src}-${index}`}
+              image={image}
+              locale={locale}
+              aspect={boCuc.aspect}
+              sizes={boCuc.sizes}
+              parallax={parallax}
+            />
           ))}
         </div>
       )}
@@ -109,9 +177,22 @@ export function DaySection({
           {/* key theo index: mảng đoạn văn cố định, không sắp xếp lại, và hai
               đoạn trùng chữ vẫn phải là hai đoạn riêng. */}
           {paragraphs.map((doan, index) => (
-            <p key={index} className="text-body text-sand-200">
-              {doan[locale] ?? doan.vi}
-            </p>
+            <div key={index} className="space-y-4">
+              <p className="text-body text-sand-200">{doan[locale] ?? doan.vi}</p>
+              {xen &&
+                anh
+                  .filter((_, i) => moc[i] === index)
+                  .map((image, i) => (
+                    <OAnh
+                      key={`${image.src}-xen-${i}`}
+                      image={image}
+                      locale={locale}
+                      aspect={BO_CUC_ANH[1].aspect}
+                      sizes={BO_CUC_ANH[1].sizes}
+                      parallax={parallax}
+                    />
+                  ))}
+            </div>
           ))}
         </div>
         <LocationList locations={locations} label={locationsLabel} locale={locale} />
