@@ -283,6 +283,34 @@ export const Tours: CollectionConfig = {
           },
         },
         {
+          name: 'schedule',
+          type: 'array',
+          label: 'Các mốc trong ngày',
+          required: false,
+          admin: {
+            description:
+              'Mỗi dòng là một mốc: giờ (hoặc buổi) và việc diễn ra lúc đó. Phần mô tả ở trên là đoạn tóm tắt để người đang cân nhắc đọc; phần này là để người đã đặt tour dò xem mấy giờ có mặt ở đâu. Bỏ trống cả khối thì ngày hiển thị như cũ.',
+          },
+          fields: [
+            {
+              name: 'time',
+              type: 'text',
+              label: 'Giờ hoặc buổi',
+              required: false,
+              admin: {
+                description:
+                  'Ví dụ: "05h00", "12h00", "Chiều", "Chiều muộn". Để trống nếu việc này không gắn với mốc nào — đừng bịa một con số cho đủ.',
+              },
+            },
+            {
+              name: 'text',
+              type: 'group',
+              label: 'Nội dung',
+              fields: [viTextGroup('Tiếng Việt', 'textarea')],
+            },
+          ],
+        },
+        {
           name: 'locations',
           type: 'relationship',
           relationTo: 'locations',

@@ -13,6 +13,7 @@ import { Locations } from './collections/Locations'
 import { Media } from './collections/Media'
 import { Tours } from './collections/Tours'
 import { Users } from './collections/Users'
+import { CaiDatEmail } from './globals/CaiDatEmail'
 import { Home } from './globals/Home'
 
 /**
@@ -55,7 +56,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Locations, Tours, CaseStudies],
-  globals: [Home],
+  globals: [Home, CaiDatEmail],
   editor: lexicalEditor(),
   // Việt hoá toàn bộ admin: nhãn, nút, điều hướng VÀ thông báo lỗi validate.
   // Không có khối này thì người nhập thấy nhãn tiếng Việt (đặt riêng ở từng

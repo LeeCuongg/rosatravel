@@ -56,13 +56,22 @@ export default async function TourPage({ params }: { params: Params }) {
   return (
     <main>
       <TourHero tour={tour} locale={locale} />
-      <section className="mx-auto max-w-sml px-gutter my-section text-center">
+      <section className="mx-auto max-w-sml px-gutter my-section">
         <Reveal>
           <Eyebrow>{t('tourStory')}</Eyebrow>
-          {/* Tóm tắt để cỡ d3 bằng chữ serif, KHÔNG phải cỡ thân bài: đây là
-              đoạn duy nhất trên trang có nhiệm vụ thuyết phục, phần còn lại
-              (lịch trình, bao gồm) là thông tin tra cứu. */}
-          <p className="font-display mt-6 text-d3">{tour.summary[locale] ?? tour.summary.vi}</p>
+          {/* Serif 24px, MÀU ĐẤT NUNG, CĂN TRÁI — cùng bộ mặt với khối "Điểm
+              nhấn chuyến đi" trong bài "Chuyến đã đi". Hai chỗ này làm đúng một
+              việc (đoạn duy nhất trên trang có nhiệm vụ thuyết phục, phần còn
+              lại là thông tin tra cứu) nên phải trông giống nhau.
+
+              Bản trước canh giữa và để màu chữ thường: canh giữa buộc mắt phải
+              tìm lại mép trái ở mỗi dòng, và với đoạn bốn dòng trở lên thì đó
+              là ma sát thật chứ không phải chuyện thẩm mỹ. Nhấn mạnh giờ do
+              MÀU gánh, không do cỡ chữ — số đo lấy của spotstravel.co: 24px,
+              rgb(163,54,0), text-align start. */}
+          <p className="font-display mt-6 text-d4 text-accent">
+            {tour.summary[locale] ?? tour.summary.vi}
+          </p>
         </Reveal>
       </section>
       <ItineraryCinematic days={tour.itinerary} locale={locale} />

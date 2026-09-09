@@ -95,9 +95,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     home: Home;
+    'cai-dat-email': CaiDatEmail;
   };
   globalsSelect: {
     home: HomeSelect<false> | HomeSelect<true>;
+    'cai-dat-email': CaiDatEmailSelect<false> | CaiDatEmailSelect<true>;
   };
   locale: null;
   widgets: {
@@ -333,6 +335,21 @@ export interface Tour {
          * Chọn 2 ảnh thì chúng xếp thành hai cột. Nhiều hơn 3 ảnh sẽ bị cắt bớt khi hiển thị.
          */
         images?: (string | Media)[] | null;
+        /**
+         * Mỗi dòng là một mốc: giờ (hoặc buổi) và việc diễn ra lúc đó. Phần mô tả ở trên là đoạn tóm tắt để người đang cân nhắc đọc; phần này là để người đã đặt tour dò xem mấy giờ có mặt ở đâu. Bỏ trống cả khối thì ngày hiển thị như cũ.
+         */
+        schedule?:
+          | {
+              /**
+               * Ví dụ: "05h00", "12h00", "Chiều", "Chiều muộn". Để trống nếu việc này không gắn với mốc nào — đừng bịa một con số cho đủ.
+               */
+              time?: string | null;
+              text: {
+                vi: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
         /**
          * Hiện thành khối thẻ có ảnh dưới phần mô tả. Chọn từ danh sách Địa điểm đã tạo.
          */
@@ -779,6 +796,17 @@ export interface ToursSelect<T extends boolean = true> {
               vi?: T;
             };
         images?: T;
+        schedule?:
+          | T
+          | {
+              time?: T;
+              text?:
+                | T
+                | {
+                    vi?: T;
+                  };
+              id?: T;
+            };
         locations?: T;
         locationsLabel?:
           | T
@@ -1046,6 +1074,29 @@ export interface Home {
   createdAt?: string | null;
 }
 /**
+ * Ba giá trị để form liên hệ gửi được email. Bỏ trống cả ba thì hệ thống dùng biến môi trường trên máy chủ; điền vào đây thì giá trị ở đây được ưu tiên.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cai-dat-email".
+ */
+export interface CaiDatEmail {
+  id: string;
+  /**
+   * Lấy tại resend.com → API Keys → Create API Key. Chuỗi bắt đầu bằng "re_", và Resend CHỈ hiện nó đúng một lần lúc tạo — đóng cửa sổ đi là phải tạo khoá mới. Đây là mật khẩu: ai có nó thì gửi email dưới tên domain của bạn được.
+   */
+  apiKey?: string | null;
+  /**
+   * Hộp thư sẽ nhận yêu cầu đặt tour của khách. Gmail thường cũng được, không cần gì đặc biệt.
+   */
+  emailTo?: string | null;
+  /**
+   * PHẢI thuộc domain đã xác thực trong Resend → Domains, nếu không Resend từ chối gửi. Chưa có domain riêng thì điền onboarding@resend.dev — nhưng bản dùng thử đó chỉ gửi được tới đúng email đã đăng ký tài khoản Resend.
+   */
+  emailFrom?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home_select".
  */
@@ -1152,6 +1203,18 @@ export interface HomeSelect<T extends boolean = true> {
         zaloUrl?: T;
         email?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cai-dat-email_select".
+ */
+export interface CaiDatEmailSelect<T extends boolean = true> {
+  apiKey?: T;
+  emailTo?: T;
+  emailFrom?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

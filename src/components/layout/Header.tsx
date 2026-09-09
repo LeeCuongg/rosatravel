@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { TextLink } from '@/components/ui/TextLink'
+import { NutLienHe } from '@/components/contact/NutLienHe'
 import type { HomeContent } from '@/lib/content'
 
 /**
@@ -55,12 +56,9 @@ export function Header({ contact }: { contact: HomeContent['contact'] }) {
             >
               {t('journeys')}
             </Link>
-            <Link
-              href="/lien-he"
-              className="hidden transition-colors duration-[var(--duration-fast)] ease-[var(--ease-hover)] hover:text-clay-500 sm:inline"
-            >
-              {t('contact')}
-            </Link>
+            {/* Mở popup ngay tại chỗ thay vì sang /lien-he — xem NutLienHe.
+                Trang /lien-he vẫn còn nguyên cho link chia sẻ và tìm kiếm. */}
+            <NutLienHe className="hidden sm:inline" />
           </nav>
 
           {/* Vách ngăn dọc nét đứt — cùng ngôn ngữ với khung Frame. Chạy hết

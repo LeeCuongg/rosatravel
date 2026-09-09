@@ -101,6 +101,7 @@ export function ItineraryCinematic({
             // chung DaySection thay vì cho nó hai kiểu prop khác nhau.
             paragraphs={[day.description]}
             images={day.images}
+            schedule={day.schedule}
             locations={day.locations}
             locationsLabel={day.locationsLabel}
             locale={locale}

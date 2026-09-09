@@ -92,10 +92,17 @@ export function CaseArticle({
           <div className="grid gap-12 sm:grid-cols-[1.6fr_1fr]">
             <div>
               <p className="text-label uppercase text-accent">{t('highlights')}</p>
+              {/* Serif 24px màu đất nung, không phải chữ thân bài màu nâu.
+                  Đây là phần DUY NHẤT của bài có nhiệm vụ thuyết phục; phần kể
+                  theo ngày bên dưới mới là chữ thân bài. Cho hai phần cùng một
+                  kiểu chữ thì người lướt nhanh không phân biệt được đâu là
+                  luận điểm, đâu là tường thuật.
+                  Số đo của spotstravel.co: 24px serif, rgb(163,54,0) — trùng
+                  đúng `clay-500` trong bảng màu của mình. */}
               <div className="mt-6 space-y-4">
                 {/* key theo index: mảng cố định, hai đoạn trùng chữ vẫn là hai đoạn. */}
                 {caseStudy.highlights.map((doan, index) => (
-                  <p key={index} className="text-body text-sand-200">
+                  <p key={index} className="font-display text-d4 text-accent">
                     {doan[locale] ?? doan.vi}
                   </p>
                 ))}
@@ -106,7 +113,7 @@ export function CaseArticle({
               <p className="text-label uppercase text-accent">{t('ourRole')}</p>
               <ul className="mt-6 divide-y divide-dashed divide-rule">
                 {caseStudy.ourRole.map((viec, index) => (
-                  <li key={index} className="py-3 text-meta text-ink-500">
+                  <li key={index} className="py-3 text-body text-accent">
                     {viec[locale] ?? viec.vi}
                   </li>
                 ))}

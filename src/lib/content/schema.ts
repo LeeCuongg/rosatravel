@@ -108,6 +108,29 @@ export const itineraryDaySchema = z.object({
    * có ảnh vẫn là một ngày hợp lệ.
    */
   images: z.array(imageAssetSchema),
+  /**
+   * Các mốc trong ngày: giờ (hoặc buổi) kèm việc diễn ra lúc đó.
+   *
+   * `description` phía trên là MỘT đoạn tóm tắt cả ngày; mảng này là phần tra
+   * cứu. Hai thứ khác nhau về mục đích nên không gộp làm một: người đang cân
+   * nhắc đặt tour đọc đoạn tóm tắt, còn người đã đặt rồi thì dò từng mốc giờ
+   * để biết mấy giờ phải có mặt ở đâu. Nhồi cả hai vào một đoạn văn dài thì
+   * không ai đọc được nhóm nào cho ra hồn.
+   *
+   * `time` để trống được — nhiều việc trong ngày chỉ định vị bằng "Sáng",
+   * "Chiều muộn" chứ không có giờ chính xác, và bịa ra một con số giả để lấp
+   * chỗ trống là nói dối khách.
+   *
+   * Mặc định rỗng: tour cũ không có mốc nào vẫn hợp lệ và hiển thị như trước.
+   */
+  schedule: z
+    .array(
+      z.object({
+        time: z.string().min(1).optional(),
+        text: localizedTextSchema,
+      }),
+    )
+    .default([]),
   /** Nhãn của khối địa điểm ("Ăn ở đâu"). Bỏ trống thì dùng nhãn mặc định. */
   locationsLabel: localizedTextSchema.optional(),
   locations: z.array(locationSchema),

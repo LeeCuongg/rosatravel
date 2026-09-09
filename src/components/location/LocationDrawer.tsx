@@ -10,7 +10,7 @@ import { khoaCuonTrang, moKhoaCuonTrang } from '@/lib/motion/lenis'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import { duration, easingArray } from '@/lib/motion/tokens'
 import { docSlugTuUrl, dongNganKeo, theoDoiNganKeo } from './ngan-keo'
-import { PlanPopup } from './PlanPopup'
+import { PlanPopup } from '@/components/contact/PlanPopup'
 import type { Location } from '@/lib/content'
 
 /**

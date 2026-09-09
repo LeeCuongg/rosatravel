@@ -3,7 +3,7 @@ import { Media } from '@/components/media/Media'
 import { Reveal } from '@/components/motion/Reveal'
 import { Rule } from '@/components/ui/Frame'
 import { LocationList } from '@/components/location/LocationList'
-import type { ImageAsset, LocalizedText, Location } from '@/lib/content'
+import type { ImageAsset, ItineraryDay, LocalizedText, Location } from '@/lib/content'
 
 /**
  * MỘT NGÀY trong bài kể — dùng CHUNG cho lịch trình tour và cho bài "Chuyến đã đi".
@@ -108,6 +108,12 @@ interface DaySectionProps {
   /** Mảng đoạn văn. Lịch trình tour hiện chỉ có một đoạn; bài kể thì nhiều. */
   paragraphs: LocalizedText[]
   images: ImageAsset[]
+  /**
+   * Các mốc giờ trong ngày. Chỉ lịch trình TOUR có; bài "Chuyến đã đi" thì
+   * không — bài kể lại một chuyến đã xong, và ở đó mốc giờ là thông tin vô
+   * dụng: chuyến đó đã diễn ra rồi, không ai cần biết mấy giờ phải có mặt.
+   */
+  schedule?: ItineraryDay['schedule']
   locations: Location[]
   locationsLabel?: LocalizedText
   locale: 'vi' | 'en'
@@ -133,6 +139,7 @@ export function DaySection({
   title,
   paragraphs,
   images,
+  schedule,
   locations,
   locationsLabel,
   locale,
@@ -195,6 +202,24 @@ export function DaySection({
             </div>
           ))}
         </div>
+        {/* CÁC MỐC TRONG NGÀY — bảng hai cột, giờ bên trái.
+            Dùng <dl> chứ không phải <ul>: đây là quan hệ mốc-giờ ↔ việc, đúng
+            nghĩa danh sách định nghĩa, và trình đọc màn hình đọc ra được cặp
+            đó thay vì hai mẩu chữ rời.
+            Cột giờ rộng cố định 5rem và canh trên: nhiều mốc chỉ có một từ
+            ("Chiều") trong khi nội dung dài ba dòng, canh giữa thì con số trôi
+            xuống giữa đoạn và mất tác dụng làm mốc để mắt bám vào. */}
+        {schedule && schedule.length > 0 && (
+          <dl className="mt-8 divide-y divide-dashed divide-rule border-t border-dashed border-rule">
+            {schedule.map((moc, index) => (
+              <div key={index} className="grid gap-1 py-4 sm:grid-cols-[5rem_1fr] sm:gap-6">
+                <dt className="text-label uppercase text-accent">{moc.time}</dt>
+                <dd className="text-body text-sand-200">{moc.text[locale] ?? moc.text.vi}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         <LocationList locations={locations} label={locationsLabel} locale={locale} />
       </Reveal>
     </li>

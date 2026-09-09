@@ -115,6 +115,16 @@
   --text-label: 0.75rem;
   --text-label--line-height: 1;
   --text-label--letter-spacing: 0.12em;
+  /* Đậm hơn chữ thường một bậc. Nhãn khối là thứ NEO mắt người đọc khi lướt
+     dọc trang — cùng độ đậm với chữ thân bài thì nó chìm vào nền và mất tác
+     dụng làm mốc.
+     spotstravel.co đặt 550 cho token nhãn của họ; ta để 500 vì Inter ở đây nạp
+     tĩnh đúng hai độ đậm 400 và 500 (xem layout.tsx). Lấy 550 hay 600 là phải
+     tải thêm một file font cho một chênh lệch mắt gần như không thấy ở cỡ 12px.
+     Đặt vào TOKEN chứ không thêm `font-medium` ở từng chỗ: mọi nhãn nhỏ chữ
+     hoa trên site — Eyebrow, "NGÀY 1", viên phân loại, nút đóng, chân trang —
+     đều đọc token này, nên chúng không thể trôi dạt khỏi nhau. */
+  --text-label--font-weight: 500;
 
   /* ══════════════════════════════════════════════════════════════════════
      BỐ CỤC
@@ -165,6 +175,56 @@
      bóng đen trên nền kem ấm ngả xám và trông bẩn. */
   --shadow-card: 0 3px 3px 3px rgba(64, 50, 50, 0.12);
   --shadow-card-off: 0 3px 3px 3px rgba(64, 50, 50, 0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THANG CHỮ THEO KHỔ MÀN HÌNH
+
+   Thang ở @theme phía trên là thang MÀN HÌNH LỚN. Để nguyên nó cho điện thoại
+   thì tiêu đề 68px chiếm gần hết chiều ngang một máy 390px và bài đọc ra như
+   bị phóng to nhầm.
+
+   Ba mốc dưới đây lấy nguyên của spotstravel.co — đã đọc trong CSS của họ, họ
+   khai lại chính các biến này ở `max-width: 1080px` và `max-width: 600px`:
+
+     token   >=1081   <=1080   <=639
+     d1        68       50       42
+     d2        42       35       30
+     d3        30       25       24
+     d4        24       20       18
+     body      17       16       16
+
+   VÌ SAO ĐỔI BIẾN chứ không thêm `sm:text-*` ở từng chỗ: tiện ích Tailwind đọc
+   `var(--text-d1)`, nên sửa một chỗ là mọi tiêu đề trên site co lại theo. Đi
+   sửa từng component thì chắc chắn sót, và mỗi lần thêm component mới lại phải
+   nhớ làm lại.
+
+   Mốc nhỏ đặt ở 639.98px chứ không phải 600px như họ: đúng ngay dưới `sm` của
+   Tailwind (640px). Nhờ vậy hai cơ chế trùng mốc với nhau — dưới 640 là thang
+   nhỏ nhất VÀ các lớp gốc, từ 640 trở lên là thang giữa VÀ các lớp `sm:`. Đặt
+   lệch nhau sẽ tạo một dải 40px nơi chữ đã to lên mà bố cục thì chưa đổi.
+
+   Khoảng nghỉ giữa các khối cũng co: 125px trên màn hình lớn là thoáng, trên
+   điện thoại là hai màn hình cuộn qua chỗ trống. Họ hạ xuống 80px, ta theo. */
+
+@media (max-width: 1080px) {
+  :root {
+    --text-d1: 3.125rem; /* 50px */
+    --text-d2: 2.1875rem; /* 35px */
+    --text-d3: 1.5625rem; /* 25px */
+    --text-d4: 1.25rem; /* 20px */
+    --text-body: 1rem; /* 16px */
+  }
+}
+
+@media (max-width: 639.98px) {
+  :root {
+    --text-d1: 2.625rem; /* 42px */
+    --text-d2: 1.875rem; /* 30px */
+    --text-d3: 1.5rem; /* 24px */
+    --text-d4: 1.125rem; /* 18px */
+    --spacing-section: 5rem; /* 80px */
+  }
 }
 
 /* Bảng màu nhấn cho từng bài "Chuyến đã đi".

@@ -92,10 +92,25 @@ export function LocationCard({
             Thành phố nối vào cùng viên đó thay vì xuống dòng riêng — nó là
             thông tin PHÂN BIỆT, không phải thông tin chính, và một dòng meta
             thứ hai sẽ đẩy tên địa điểm xuống thấp hơn cả ảnh trên thẻ hẹp. */}
-        <p className="inline-flex h-6 w-fit items-center rounded-xl bg-ink-900 px-2.5 text-label uppercase text-ink-500">
-          {t(`category.${location.category}`)}
-          {location.city && ` · ${location.city}`}
-        </p>
+        {/* Phân loại nằm TRONG viên pill, thành phố nằm NGOÀI.
+            Nhồi cả hai vào một viên là hỏng trên điện thoại: cột chữ của thẻ
+            chỉ rộng khoảng 165px ở máy 390px, nên "CHỢ VÀ MUA SẮM · QUẢNG CHÂU"
+            xuống hai dòng trong khi viên pill bị khoá cao 24px — chữ tràn ra
+            ngoài nền bo tròn và trông như lỗi dựng.
+            Tách ra thì mỗi phần tự xuống dòng độc lập, và nó cũng đúng cách
+            spotstravel.co làm: viên pill của họ chỉ chứa phân loại.
+
+            `min-h-6` thay cho `h-6`: chiều cao vẫn 24px như đã đo bên họ, nhưng
+            là chiều cao TỐI THIỂU — một phân loại dài tự xuống dòng thì viên
+            pill cao lên theo thay vì cắt cụt chữ. */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="inline-flex min-h-6 items-center rounded-xl bg-ink-900 px-2.5 py-1 text-label uppercase text-ink-500">
+            {t(`category.${location.category}`)}
+          </span>
+          {location.city && (
+            <span className="text-label uppercase text-ink-500">{location.city}</span>
+          )}
+        </div>
         <h4 className="font-display text-d4 transition-colors duration-[var(--duration-base)] ease-[var(--ease-hover)] group-hover:text-accent">
           {ten}
         </h4>

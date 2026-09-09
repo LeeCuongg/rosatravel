@@ -273,13 +273,20 @@ const DIA_DIEM: DiaDiemMau[] = [
 
 // ── LỊCH TRÌNH ──────────────────────────────────────────────────────────────
 //
-// Mỗi ngày trong Tour chỉ chứa ĐÚNG MỘT đoạn mô tả (xem itineraryDaySchema),
-// nên nội dung chi tiết theo mốc giờ trong file gốc phải gom lại thành một
-// đoạn. Giữ nguyên mốc giờ vì đó là thứ khách đọc kỹ nhất khi so tour.
+// HAI TẦNG, hai người đọc khác nhau:
+//
+//   description — một đoạn tóm tắt cả ngày, cho người đang cân nhắc đặt tour.
+//   schedule    — từng mốc giờ, cho người đã đặt rồi và cần biết mấy giờ phải
+//                 có mặt ở đâu.
+//
+// Bản trước nhồi cả hai vào `description` thành một đoạn dài đặc, và kết quả là
+// không nhóm nào đọc được cho ra hồn.
 
 interface NgayMau {
   title: string
   description: string
+  /** Mốc giờ. `gio` để trống khi việc đó chỉ định vị bằng buổi. */
+  schedule?: { gio?: string; viec: string }[]
   images?: string[]
   locationsLabel?: string
   locations?: string[]
@@ -289,13 +296,46 @@ const LICH_TRINH: NgayMau[] = [
   {
     title: 'Hà Nội – Hữu Nghị – Nam Ninh – Quảng Châu',
     description:
-      '05h00 xe và hướng dẫn viên đón đoàn tại Nhà hát lớn Hà Nội, đi cửa khẩu Hữu Nghị Quan (Lạng Sơn); ăn sáng dọc đường, chi phí tự túc. 12h00 ăn trưa tại Bằng Tường, cách cửa khẩu 18km, rồi đi Nam Ninh theo cao tốc Trung Quốc – ASEAN. Chiều tới ga Nam Ninh Đông, ăn tối rồi lên tàu cao tốc D3647 (20:33–23:40) về ga Quảng Đông Nam. Xe đón đoàn về khách sạn Quảng Châu nhận phòng.',
+      'Ngày di chuyển dài nhất chuyến: qua cửa khẩu Hữu Nghị Quan, chạy cao tốc Trung Quốc – ASEAN tới Nam Ninh, rồi nối tàu cao tốc đêm về Quảng Châu.',
+    schedule: [
+      {
+        gio: '05h00',
+        viec: 'Xe và hướng dẫn viên đón đoàn tại Nhà hát lớn Hà Nội, khởi hành đi cửa khẩu Hữu Nghị Quan, tỉnh Lạng Sơn. Ăn sáng dọc đường, chi phí tự túc.',
+      },
+      {
+        gio: '12h00',
+        viec: 'Ăn trưa tại Bằng Tường, cách cửa khẩu 18km. Sau đó đi Nam Ninh theo cao tốc Trung Quốc – ASEAN.',
+      },
+      { gio: 'Chiều', viec: 'Tới ga Nam Ninh Đông, dùng bữa tối tại nhà hàng.' },
+      {
+        gio: '20h33',
+        viec: 'Lên tàu cao tốc D3647 đi Quảng Châu, tới ga Quảng Đông Nam lúc 23h40.',
+      },
+      { gio: 'Tối', viec: 'Xe đưa đoàn về khách sạn tại Quảng Châu nhận phòng, nghỉ đêm.' },
+    ],
     images: ['ct-chau-giang-dem.jpg'],
   },
   {
     title: 'Quảng Châu – Chu Hải – Thâm Quyến',
     description:
-      '06h15 ăn sáng, trả phòng, lên xe đi Chu Hải. Trên đường ngắm cầu vượt biển Trung Sơn – Chu Hải, hệ thống cầu và hầm vượt biển dài nhất thế giới, rồi tham quan Nhà hát Nhật Nguyệt Bối. 12h00 ăn trưa tại nhà hàng. Chiều sang Thâm Quyến: Trung tâm thương mại điện tử Hoa Cường Bắc và Thành cổ Nam Đầu ở quận Nam Sơn. 19h00 ăn tối, nhận phòng khách sạn tại Thâm Quyến.',
+      'Ba thành phố trong một ngày, nối bằng cầu vượt biển dài nhất thế giới. Buổi sáng dành cho biểu tượng của Chu Hải, buổi chiều cho hai mặt của Thâm Quyến: chợ điện tử hiện đại và thành cổ gần 1.700 năm.',
+    schedule: [
+      { gio: '06h15', viec: 'Ăn sáng, trả phòng và lên xe đi Chu Hải.' },
+      {
+        gio: 'Trên đường',
+        viec: 'Tham quan cầu vượt biển Trung Sơn – Chu Hải, hệ thống cầu và hầm vượt biển dài nhất thế giới.',
+      },
+      {
+        viec: 'Nhà hát Nhật Nguyệt Bối — hai khối nhà hình vỏ sò trên đảo nhân tạo ven biển, biểu tượng của thành phố.',
+      },
+      { gio: '12h00', viec: 'Ăn trưa tại nhà hàng.' },
+      {
+        gio: 'Chiều',
+        viec: 'Sang Thâm Quyến, tham quan và mua sắm tại Trung tâm thương mại điện tử Hoa Cường Bắc.',
+      },
+      { viec: 'Thành cổ Nam Đầu ở quận Nam Sơn, di tích lịch sử tiêu biểu nhất của Thâm Quyến.' },
+      { gio: '19h00', viec: 'Ăn tối tại nhà hàng, nhận phòng khách sạn tại Thâm Quyến.' },
+    ],
     images: ['ct-nhat-nguyet-boi-dem.jpg', 'ct-hoa-cuong-bac.jpg'],
     locationsLabel: 'Điểm tham quan',
     locations: ['nha-hat-nhat-nguyet-boi', 'hoa-cuong-bac', 'thanh-co-nam-dau'],
@@ -303,7 +343,29 @@ const LICH_TRINH: NgayMau[] = [
   {
     title: 'Thâm Quyến – Canton Fair Quảng Châu',
     description:
-      'Sáng ăn sáng, trả phòng, ghé thương hiệu Đông y có lịch sử hơn 350 năm — từng là Ngự dược phòng triều Thanh — bắt mạch và tư vấn sức khoẻ. Tiếp tục Quảng trường Văn hoá Thâm Quyến và Công viên Nhân Tài, rồi về Quảng Châu. Trưa ăn dimsum. Chiều vào Hội chợ Canton Fair lần thứ 140, thư mời đã bao gồm trong giá tour. Chiều muộn ra Quảng trường Hoa Thành ngắm Tháp Quảng Châu, sau đó là phố đi bộ Bắc Kinh Lộ và Chùa Đại Phật. Bữa tối tự túc tại phố đi bộ.',
+      'Ngày chính của chuyến đi: buổi chiều vào Hội chợ Canton Fair lần thứ 140. Buổi sáng khép lại phần Thâm Quyến, buổi tối dành cho trung tâm Quảng Châu.',
+    schedule: [
+      { gio: 'Sáng', viec: 'Ăn sáng và làm thủ tục trả phòng tại khách sạn.' },
+      {
+        viec: 'Thương hiệu Đông y hơn 350 năm, từng là Ngự dược phòng cho các triều đại nhà Thanh. Khách có thể bắt mạch và nghe tư vấn sức khoẻ.',
+      },
+      {
+        viec: 'Quảng trường Văn hoá Thâm Quyến và Công viên Nhân Tài, sau đó di chuyển về Quảng Châu.',
+      },
+      { gio: 'Trưa', viec: 'Thưởng thức dimsum tại nhà hàng.' },
+      {
+        gio: 'Chiều',
+        viec: 'Vào Hội chợ Canton Fair Quảng Châu lần thứ 140. Thư mời tham quan đã bao gồm trong giá tour.',
+      },
+      {
+        gio: 'Chiều muộn',
+        viec: 'Rời hội chợ, ra Quảng trường Hoa Thành — quảng trường lớn nhất Quảng Châu — ngắm Tháp Quảng Châu từ xa.',
+      },
+      {
+        gio: 'Tối',
+        viec: 'Phố đi bộ Bắc Kinh Lộ và Chùa Đại Phật. Bữa tối tự túc tại phố đi bộ, nghỉ đêm tại Quảng Châu.',
+      },
+    ],
     images: ['ct-canton-fair-gian-hang.jpg', 'ct-dimsum.jpg'],
     locationsLabel: 'Điểm tham quan',
     locations: ['canton-fair-quang-chau', 'thap-quang-chau', 'pho-di-bo-bac-kinh'],
@@ -311,7 +373,17 @@ const LICH_TRINH: NgayMau[] = [
   {
     title: 'Quảng Châu – Nam Ninh – Hữu Nghị Quan – Hà Nội',
     description:
-      'Sáng ăn sáng tại khách sạn, ra ga Quảng Châu Nam lên tàu cao tốc D4234 (09:00–11:48) về ga Nam Ninh Đông. Ăn trưa tại Nam Ninh với món lẩu sữa đặc sản Quảng Tây. Chiều về cửa khẩu Hữu Nghị Quan, ghé siêu thị Gia Lợi mua sắm rồi làm thủ tục xuất cảnh. Xe đón đoàn từ cửa khẩu về Hà Nội, dự kiến 21h00 tới nơi.',
+      'Ngày về, đi ngược cung đường hôm đầu nhưng bằng chuyến tàu ban ngày. Điểm dừng đáng nhớ nhất nằm ở bữa trưa: món lẩu sữa đặc sản Quảng Tây.',
+    schedule: [
+      { gio: 'Sáng', viec: 'Ăn sáng tại khách sạn, lên xe ra ga Quảng Châu Nam.' },
+      { gio: '09h00', viec: 'Tàu cao tốc D4234 về ga Nam Ninh Đông, tới nơi lúc 11h48.' },
+      { gio: 'Trưa', viec: 'Ăn trưa tại Nam Ninh với món lẩu sữa đặc sản Quảng Tây.' },
+      {
+        gio: 'Chiều',
+        viec: 'Xe về cửa khẩu Hữu Nghị Quan, ghé mua sắm tại siêu thị Gia Lợi rồi làm thủ tục xuất cảnh.',
+      },
+      { gio: '21h00', viec: 'Dự kiến về tới Hà Nội. Kết thúc chương trình.' },
+    ],
     images: ['ct-lau-sua.jpg'],
   },
 ]
@@ -536,6 +608,14 @@ let idTour: string | null = null
         itinerary: LICH_TRINH.map((ngay) => ({
           title: vi(ngay.title),
           description: vi(ngay.description),
+          ...(ngay.schedule
+            ? {
+                schedule: ngay.schedule.map((m) => ({
+                  ...(m.gio ? { time: m.gio } : {}),
+                  text: vi(m.viec),
+                })),
+              }
+            : {}),
           ...(ngay.images ? { images: ngay.images.map(anh) } : {}),
           ...(ngay.locationsLabel ? { locationsLabel: vi(ngay.locationsLabel) } : {}),
           ...(ngay.locations ? { locations: diaDiem(...ngay.locations) } : {}),

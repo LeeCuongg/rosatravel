@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { ContactForm } from '@/components/contact/ContactForm'
+import { ContactForm } from './ContactForm'
 import { khoaCuonTrang, moKhoaCuonTrang } from '@/lib/motion/lenis'
 import { useMotionTier } from '@/lib/motion/MotionTierProvider'
 import { duration, easingArray } from '@/lib/motion/tokens'
@@ -29,11 +29,19 @@ export function PlanPopup({
   tenDiaDiem,
   onClose,
 }: {
-  tenDiaDiem: string
+  /**
+   * Tên địa điểm đang xem, nếu popup mở từ một ngăn kéo địa điểm.
+   *
+   * BỎ TRỐNG khi mở từ chỗ không gắn với địa điểm nào — ví dụ nút "Liên hệ"
+   * trên thanh điều hướng. Khi đó phụ đề chuyển sang câu chung và ô ghi chú
+   * để trống, chứ không điền sẵn "Quan tâm địa điểm: undefined".
+   */
+  tenDiaDiem?: string
   onClose: () => void
 }) {
   const t = useTranslations('location')
   const tc = useTranslations('caseStudy')
+  const tl = useTranslations('contact')
   const tier = useMotionTier()
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -96,7 +104,15 @@ export function PlanPopup({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: thoiLuong, ease: easingArray.enter }}
-        className="relative max-h-full w-full max-w-xl overflow-y-auto overscroll-contain rounded-lg border border-dashed border-rule bg-ink-950 p-6 outline-none sm:p-10"
+        // CÙNG BỘ MẶT với khối biểu mẫu ở cuối trang chủ (Frame tone="giay"):
+        // nền trắng, bo 16px, viền nét đứt. Đây là CÙNG MỘT biểu mẫu, cùng một
+        // việc phải làm — hai bộ mặt khác nhau cho cùng một thao tác khiến người
+        // đã điền ở trang chủ tưởng đây là thứ khác.
+        //
+        // Rộng 800px và đệm 64px lấy theo modal của spotstravel.co (800px, đệm
+        // 80px). Khung 576px cũ bóp hai ô "Họ và tên / Số điện thoại" thành hai
+        // thanh mỏng vì bên trong biểu mẫu còn tự giới hạn 576px nữa.
+        className="relative max-h-full w-full max-w-[50rem] overflow-y-auto overscroll-contain rounded-2xl border border-dashed border-rule bg-paper p-8 outline-none sm:p-16"
       >
         <div className="flex justify-end">
           <button
@@ -115,16 +131,21 @@ export function PlanPopup({
           </button>
         </div>
 
-        <h2 className="font-display text-accent mt-2 text-center text-d3">{t('planTitle')}</h2>
-        <p className="mx-auto mt-4 max-w-sm text-center text-meta text-sand-200">
-          {t('planSub', { name: tenDiaDiem })}
+        {/* Cỡ chữ và nhịp giãn khớp với khối biểu mẫu trên trang chủ: tiêu đề
+            d2, phụ đề serif d4 trong cột hẹp. Giữ `text-accent` chứ không đổi
+            thành `text-clay-500` — ngoài phạm vi một bài "Chuyến đã đi" thì hai
+            màu đó BẰNG NHAU, còn bên trong bài thì popup phải mang màu riêng
+            của bài, giống mọi thứ khác trong đó. */}
+        <h2 className="font-display text-accent mt-2 text-center text-d2">{t('planTitle')}</h2>
+        <p className="font-display mx-auto mt-5 max-w-md text-center text-d4 text-sand-200">
+          {tenDiaDiem ? t('planSub', { name: tenDiaDiem }) : tl('popupSub')}
         </p>
 
-        <div className="mt-10">
+        <div className="mt-12">
           {/* Không truyền `tours`: trang đang mở chỉ nạp địa điểm, không nạp
               danh sách tour — ô chọn tự ẩn. Ngữ cảnh "đang hỏi về nơi nào" đi
               theo đường ghi chú, xem giải thích ở ContactForm. */}
-          <ContactForm defaultNote={t('planNote', { name: tenDiaDiem })} />
+          <ContactForm defaultNote={tenDiaDiem ? t('planNote', { name: tenDiaDiem }) : ''} />
         </div>
       </motion.div>
     </div>

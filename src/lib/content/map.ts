@@ -188,6 +188,16 @@ export function mapTour(doc: unknown): unknown {
         title: d.title,
         description: d.description,
         images: mangQuanHe(d.images).map(mapMedia),
+        // Lọc dòng thiếu nội dung: nút "Thêm dòng" của admin tạo ngay một dòng
+        // trống, và bấm nhầm rồi lưu là chuyện thường ngày — cùng lý do đã ghi
+        // ở `doanVan`. Giờ thì để trống được nên chỉ kiểm phần nội dung.
+        schedule: mangQuanHe(d.schedule)
+          .map((m) => m as Record<string, unknown>)
+          .filter((m) => coNoiDung(m.text))
+          .map((m) => ({
+            ...(typeof m.time === 'string' && m.time.trim() ? { time: m.time.trim() } : {}),
+            text: m.text,
+          })),
         ...nhanKhoiDiaDiem(d.locationsLabel),
         locations: mangQuanHe(d.locations).map(mapLocation),
       }
