@@ -1,10 +1,10 @@
 import { defineRouting } from 'next-intl/routing'
 
+// Thêm ngôn ngữ: bổ sung vào `locales`, tạo messages/<locale>.json và thêm
+// locale tương ứng trong `localization` của payload.config.ts.
 export const routing = defineRouting({
-  // GĐ1 chỉ ship tiếng Việt. Thêm 'en' vào đây là bật được ngôn ngữ thứ hai.
   locales: ['vi'],
   defaultLocale: 'vi',
-  localePrefix: 'always',
+  // Tiếng Việt không có tiền tố (/tour/ha-giang); ngôn ngữ khác là /en/tour/...
+  localePrefix: 'as-needed',
 })
-
-export type Locale = (typeof routing.locales)[number]

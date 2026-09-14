@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" role="img" aria-labelledby="rosa-logo-title">
+  <title id="rosa-logo-title">Rosa Travel</title>
+  <path d="M32 3C18.7 3 8 13.5 8 26.5 8 44 32 61 32 61S56 44 56 26.5C56 13.5 45.3 3 32 3Z" fill="#FF4F00"/>
+  <g fill="#FFFEFB">
+    <circle cx="32" cy="19" r="6.4"/>
+    <circle cx="38.66" cy="23.84" r="6.4"/>
+    <circle cx="36.11" cy="31.66" r="6.4"/>
+    <circle cx="27.89" cy="31.66" r="6.4"/>
+    <circle cx="25.34" cy="23.84" r="6.4"/>
+    <circle cx="32" cy="26" r="6"/>
+  </g>
+  <circle cx="32" cy="26" r="3.2" fill="#FF4F00"/>
+  <text x="70" y="41" font-family="'Be Vietnam Pro', Inter, system-ui, sans-serif" font-size="30" letter-spacing="-0.5">
+    <tspan font-weight="700" fill="#201515">Rosa</tspan><tspan dx="7" font-weight="500" fill="#605D52">Travel</tspan>
+  </text>
+</svg>

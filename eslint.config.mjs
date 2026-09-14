@@ -1,41 +1,37 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextVitals from 'eslint-config-next/core-web-vitals'
+import nextTs from 'eslint-config-next/typescript'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
+// eslint-config-next 16 xuất sẵn flat config, không cần FlatCompat/@eslint/eslintrc.
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTs,
   {
     rules: {
-      // ignoreRestSiblings: bỏ qua các biến sinh ra chỉ để LOẠI một khoá khỏi
-      // object (`const { blurDataURL, ...thieu } = mediaDoc` trong
-      // src/lib/content/__tests__/map.test.ts). Ở đó biến bị bỏ đi chính là
-      // mục đích, không phải chỗ quên dùng. Không có cờ này, mỗi lần chạy lint
-      // đều in vài cảnh báo cố định — và cảnh báo cố định dạy người ta thôi
-      // đọc output của lint, đúng lúc một cảnh báo thật xuất hiện.
-      "@typescript-eslint/no-unused-vars": ["warn", { ignoreRestSiblings: true }],
+      '@typescript-eslint/ban-ts-comment': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: false,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^(_|ignore)',
+        },
+      ],
     },
   },
   {
     ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      // Thư mục nháp của quy trình (ledger, số đo, script dùng một lần). Đã bị
-      // .gitignore chặn, không bao giờ được ship. Không lint ở đây — nếu không
-      // một script nháp viết vội sẽ làm đỏ lint của cả dự án, và người ta sẽ đi
-      // sửa file nháp thay vì sửa chỗ đáng sửa.
-      ".superpowers/**",
+      '.next/',
+      'src/payload-types.ts',
+      'src/payload-generated-schema.ts',
+      'src/app/(payload)/admin/importMap.js',
     ],
   },
-];
+]
 
-export default eslintConfig;
+export default eslintConfig

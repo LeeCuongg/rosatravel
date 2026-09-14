@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — nguồn: docs/DESIGN-zapier.md, điều chỉnh cho du lịch theo
+ * docs/ke-hoach-trien-khai.md mục 2.1. Chỉ một màu nhấn (primary); màu trạng
+ * thái chỉ dùng trong form và thông báo.
+ */
+@theme {
+  --color-primary: #ff4f00;
+  --color-on-primary: #fffefb;
+  --color-ink: #201515;
+  --color-ink-soft: #2f2a26;
+  --color-ink-mid: #36342e;
+  --color-body: #605d52;
+  --color-body-mid: #939084;
+  --color-mute: #c5c0b1;
+  --color-canvas: #fffefb;
+  --color-canvas-soft: #f8f4f0;
+
+  --color-success: #1f7a4d;
+  --color-error: #b42318;
+  --color-warning: #b54708;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-pill: 9999px;
+
+  --text-display-xl: 3.5rem;
+  --text-display-xl--line-height: 1;
+  --text-display-lg: 3rem;
+  --text-display-lg--line-height: 1;
+  --text-display-md: 2rem;
+  --text-display-md--line-height: 2.25rem;
+  --text-display-sub-sm: 1.5rem;
+  --text-display-sub-sm--line-height: 1.875rem;
+  --text-display-sub-sm--letter-spacing: -0.6px;
+  --text-display-xs: 1.25rem;
+  --text-display-xs--line-height: 1.5625rem;
+  --text-display-xs--letter-spacing: -0.5px;
+  --text-body-lg: 1.25rem;
+  --text-body-lg--line-height: 1.875rem;
+  --text-body-md: 1.125rem;
+  --text-body-md--line-height: 1.6875rem;
+  --text-body-sm: 1rem;
+  --text-body-sm--line-height: 1.5rem;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.3125rem;
+
+  --ease-brand: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Biến font do next/font gắn lên <html>, nên phải dùng `inline`. */
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-be-vietnam-pro), var(--font-inter), system-ui, sans-serif;
+}
+
+:root {
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+  --duration-zoom: 1000ms;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-body-sm text-ink antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

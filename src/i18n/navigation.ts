@@ -1,4 +1,6 @@
 import { createNavigation } from 'next-intl/navigation'
+
 import { routing } from './routing'
 
-export const { Link, useRouter, usePathname, redirect, getPathname } = createNavigation(routing)
+// Dùng các hàm này thay cho next/link, next/navigation để URL tự mang locale.
+export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing)
