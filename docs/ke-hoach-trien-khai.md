@@ -83,7 +83,7 @@ Người dùng ──> Next.js (App Router, Vercel)
 | Phiên bản Next | Bản ổn định mới nhất **mà Payload 3 hỗ trợ chính thức** (kiểm tra lúc init) | Lệch phiên bản là nguồn lỗi hay gặp nhất |
 | Styling | **Tailwind CSS v4**, token lấy từ DESIGN-zapier.md khai trong `@theme` | Một nguồn token duy nhất |
 | Font | **Be Vietnam Pro** (display, 500/600/700) + **Inter** (body, UI) qua `next/font`, subset `vietnamese` | Degular Display là font độc quyền và không có dấu tiếng Việt. Be Vietnam Pro có tỷ lệ ấm, dựng dấu tiếng Việt chuẩn |
-| Animation | **Motion** (`AnimatePresence`) | Mega menu, drawer, panel gợi ý, modal, menu kênh liên hệ đều **có animation thoát** |
+| Animation | **CSS keyframes + Radix Presence** (không cần Motion) | Radix đợi animation `*-out` chạy xong mới gỡ phần tử, nên mega menu, drawer, sheet, modal đều **có animation thoát**. Menu kênh liên hệ luôn nằm trong DOM, dùng transition + `inert`. Token nằm trong `globals.css` (`animate-*-in/out`). Chỉ thêm Motion khi có hiệu ứng CSS không làm được |
 | Primitive UI | **Radix UI** (NavigationMenu, Dialog, Popover, Accordion) | Có sẵn a11y, focus trap, phím tắt; tự style hoàn toàn |
 | Carousel | **Embla Carousel** | Nhẹ, snap tự nhiên trên mobile |
 | Form | **react-hook-form + zod** | Dùng chung schema giữa client, Server Action và Payload |
@@ -274,12 +274,14 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 **Xong khi:** trang trắng có logo, font, token; `/admin` đăng nhập được trên preview.
 
 ### Giai đoạn 1 · Design system & component lõi
-- [ ] `Logo`, `Container`, `SectionHeader` (eyebrow + tiêu đề + link), `Button` (4 biến thể), `Chip`, `Badge`, `Price`, `Rating`, `Input`, `Select`
-- [ ] `TourCard` + `Carousel`
-- [ ] `Header` + `MegaMenu` (vào/ra có animation) + `StickyHeader` + `LocaleSwitcher` (ẩn khi 1 ngôn ngữ)
-- [ ] `MobileHeader` + `Drawer` + `FloatingContact` (desktop bung 5 kênh / mobile thanh đáy)
-- [ ] `Footer` nền `ink`
-- [ ] Trang `/_ui` nội bộ hiển thị mọi component và trạng thái
+- [x] `Logo`, `Container`, `SectionHeader` (eyebrow + tiêu đề + link), `Button` (4 biến thể), `Chip`, `Badge`, `Price`, `Rating`, `Input`, `BrandIcon`
+- [ ] `Select`: để sang giai đoạn 3, làm cùng bộ lọc danh mục tour
+- [x] `TourCard` (cả thẻ chỉ một link) + `TourMiniCard` + `Carousel` (Embla; desktop có mũi tên, mobile vuốt)
+- [x] `Header` sticky (đổ bóng khi cuộn) + mega menu Radix có animation vào/ra + `LocaleSwitcher` (ẩn khi 1 ngôn ngữ)
+- [x] `MobileNav` (drawer, mục con xổ xuống có chuyển động) + `FloatingContact` (desktop bung kênh / mobile thanh đáy Gọi · Zalo · Đặt tour · Thêm + sheet)
+- [x] `Footer` nền `ink`
+- [x] Trang `/ui-kit` nội bộ (tự 404 trên production). Không đặt `/_ui` vì Next bỏ qua thư mục bắt đầu bằng `_`
+- [x] Test: 21 test cho tiện ích (giá, link liên hệ), `TourCard`, `FloatingContact`, `LocaleSwitcher`
 
 **Xong khi:** mọi component có test render + trạng thái, dùng được bằng bàn phím, tôn trọng `prefers-reduced-motion`.
 

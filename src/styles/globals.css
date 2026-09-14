@@ -49,6 +49,101 @@
   --ease-brand: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/*
+ * Bóng chỉ dành cho lớp phủ (header khi cuộn, mega menu, drawer, sheet, nút nổi).
+ * Card không dùng bóng mà dùng nền canvas-soft (DESIGN-zapier: Soft Card).
+ */
+@theme {
+  --shadow-header: 0 8px 24px -16px rgb(32 21 21 / 0.25);
+  --shadow-panel: 0 24px 48px -16px rgb(32 21 21 / 0.28);
+
+  /*
+   * Mọi lớp phủ phải có animation vào VÀ ra (yêu cầu của chủ dự án). Radix
+   * (Dialog, NavigationMenu) đợi animation `*-out` chạy xong mới gỡ phần tử,
+   * nên chỉ cần gắn class theo data-state; `forwards` giữ trạng thái cuối
+   * trong lúc chờ gỡ.
+   */
+  --animate-overlay-in: rosa-fade-in 200ms var(--ease-brand);
+  --animate-overlay-out: rosa-fade-out 150ms var(--ease-brand) forwards;
+  --animate-pop-in: rosa-pop-in 200ms var(--ease-brand);
+  --animate-pop-out: rosa-pop-out 150ms var(--ease-brand) forwards;
+  --animate-content-in: rosa-fade-in 150ms var(--ease-brand);
+  --animate-content-out: rosa-fade-out 100ms var(--ease-brand) forwards;
+  --animate-drawer-in: rosa-drawer-in 300ms var(--ease-brand);
+  --animate-drawer-out: rosa-drawer-out 250ms var(--ease-brand) forwards;
+  --animate-sheet-in: rosa-sheet-in 300ms var(--ease-brand);
+  --animate-sheet-out: rosa-sheet-out 250ms var(--ease-brand) forwards;
+
+  @keyframes rosa-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes rosa-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes rosa-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes rosa-pop-out {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+  }
+  @keyframes rosa-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes rosa-drawer-out {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes rosa-sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes rosa-sheet-out {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+}
+
 /* Biến font do next/font gắn lên <html>, nên phải dùng `inline`. */
 @theme inline {
   --font-sans: var(--font-inter), system-ui, sans-serif;

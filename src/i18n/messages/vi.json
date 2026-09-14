@@ -7,5 +7,50 @@
     "eyebrow": "Sắp ra mắt",
     "title": "Những hành trình mới đang được chuẩn bị",
     "description": "Rosa Travel đang hoàn thiện website. Hẹn gặp bạn trong những chuyến đi sắp tới."
+  },
+  "Common": {
+    "viewMore": "Xem thêm",
+    "viewAll": "Xem tất cả",
+    "bookTour": "Đặt tour",
+    "previous": "Xem mục trước",
+    "next": "Xem mục tiếp theo"
+  },
+  "Nav": {
+    "main": "Điều hướng chính",
+    "home": "Về trang chủ Rosa Travel",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "menuTitle": "Menu",
+    "hotline": "Hotline",
+    "language": "Chọn ngôn ngữ",
+    "featuredTours": "Tour nổi bật"
+  },
+  "Tour": {
+    "duration": "{days} ngày {nights} đêm",
+    "departure": "Khởi hành từ {place}",
+    "price": "Giá",
+    "originalPrice": "Giá gốc",
+    "from": "Chỉ từ",
+    "rating": "{average} điểm từ {count} đánh giá",
+    "booked": "{count}+ đã đặt chỗ"
+  },
+  "Contact": {
+    "open": "Mở các kênh liên hệ",
+    "close": "Đóng các kênh liên hệ",
+    "barLabel": "Liên hệ nhanh",
+    "call": "Gọi",
+    "more": "Thêm",
+    "sheetTitle": "Kết nối với Rosa Travel",
+    "channels": {
+      "zalo": "Zalo",
+      "messenger": "Messenger",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "threads": "Threads"
+    }
+  },
+  "Footer": {
+    "contact": "Liên hệ",
+    "follow": "Kết nối với chúng tôi"
   }
 }

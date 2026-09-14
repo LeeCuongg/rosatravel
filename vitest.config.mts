@@ -7,6 +7,14 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    include: ['tests/int/**/*.int.spec.ts'],
+    server: {
+      deps: {
+        // next-intl import `next/navigation` không có đuôi .js; để Node tự nạp ESM thì
+        // không tìm thấy file, nên cho Vite biên dịch gói này cùng test.
+        inline: ['next-intl'],
+      },
+    },
+    // tests/int: chạm DB thật · src/**/*.test: component + tiện ích, không cần DB.
+    include: ['tests/int/**/*.int.spec.ts', 'src/**/*.test.{ts,tsx}'],
   },
 })

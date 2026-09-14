@@ -11,9 +11,15 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   images: {
+    // Next 16 chặn mọi ảnh local không khai ở đây.
     localPatterns: [
+      // Ảnh nhân viên upload qua Payload.
       {
         pathname: '/api/media/file/**',
+      },
+      // Ảnh minh họa của trang nội bộ /ui-kit.
+      {
+        pathname: '/ui-kit/**',
       },
     ],
   },
