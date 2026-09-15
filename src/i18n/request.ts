@@ -9,6 +9,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
+    // Cố định múi giờ để ngày khởi hành hiển thị giống nhau ở server và trình duyệt.
+    timeZone: 'Asia/Ho_Chi_Minh',
     messages: (await import(`./messages/${locale}.json`)).default,
   }
 })

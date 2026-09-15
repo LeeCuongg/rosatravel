@@ -82,9 +82,11 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
-    // Không có token (vd. chạy test) thì Media lưu file local thay vì lên Blob.
+    // Không có token, hoặc DISABLE_BLOB_STORAGE=true (DB QA, test), thì Media lưu file
+    // local thay vì lên Blob thật. Cần công tắc riêng vì trong PowerShell gán biến môi
+    // trường thành chuỗi rỗng là xóa biến, Payload lại đọc token từ .env.local.
     vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN) && process.env.DISABLE_BLOB_STORAGE !== 'true',
       collections: { media: true },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),

@@ -163,6 +163,55 @@
   }
 }
 
+/* Nội dung soạn trong trình soạn thảo của admin (lịch trình, chính sách, bài viết). */
+@layer components {
+  .rich-text {
+    @apply text-body-md text-body;
+  }
+  .rich-text > * + * {
+    margin-top: 1em;
+  }
+  .rich-text h2 {
+    @apply mt-8 font-display text-display-sub-sm font-semibold text-ink;
+  }
+  .rich-text h3 {
+    @apply mt-6 font-display text-display-xs font-semibold text-ink;
+  }
+  .rich-text strong {
+    @apply font-semibold text-ink;
+  }
+  .rich-text a {
+    @apply text-ink underline underline-offset-4 hover:text-primary;
+  }
+  .rich-text ul {
+    @apply list-disc space-y-1 pl-6;
+  }
+  .rich-text ol {
+    @apply list-decimal space-y-1 pl-6;
+  }
+  .rich-text blockquote {
+    @apply border-l-4 border-primary pl-4 text-ink-mid italic;
+  }
+  .rich-text img {
+    @apply rounded-md;
+  }
+}
+
+/* Câu hỏi thường gặp dùng <details>: mở và đóng đều có chuyển động (trình duyệt hỗ trợ). */
+:root {
+  interpolate-size: allow-keywords;
+}
+.faq-item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size var(--duration-base) var(--ease-brand),
+    content-visibility var(--duration-base) allow-discrete;
+}
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

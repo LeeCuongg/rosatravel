@@ -13,7 +13,10 @@
     "viewAll": "Xem tất cả",
     "bookTour": "Đặt tour",
     "previous": "Xem mục trước",
-    "next": "Xem mục tiếp theo"
+    "next": "Xem mục tiếp theo",
+    "skipToContent": "Bỏ qua, tới nội dung chính",
+    "heroLabel": "Banner nổi bật",
+    "goToSlide": "Tới banner {index}"
   },
   "Nav": {
     "main": "Điều hướng chính",
@@ -32,7 +35,45 @@
     "originalPrice": "Giá gốc",
     "from": "Chỉ từ",
     "rating": "{average} điểm từ {count} đánh giá",
-    "booked": "{count}+ đã đặt chỗ"
+    "booked": "{count}+ đã đặt chỗ",
+    "upcomingDepartures": "Lịch khởi hành sắp tới",
+    "noDepartures": "Liên hệ để nhận lịch khởi hành mới nhất.",
+    "bookThisTour": "Đặt tour này",
+    "relatedTours": "Tour liên quan",
+    "seatsLeft": "Còn {count} chỗ",
+    "departureStatus": {
+      "available": "Còn chỗ",
+      "limited": "Sắp hết chỗ",
+      "soldout": "Hết chỗ",
+      "cancelled": "Tạm hoãn"
+    }
+  },
+  "Blocks": {
+    "highlights": "Điểm nổi bật",
+    "itinerary": "Lịch trình",
+    "day": "Ngày {day}",
+    "meals": "Bữa ăn",
+    "meal": {
+      "breakfast": "Sáng",
+      "lunch": "Trưa",
+      "dinner": "Tối"
+    },
+    "included": "Giá tour bao gồm",
+    "excluded": "Không bao gồm",
+    "priceTable": "Bảng giá",
+    "priceColumns": {
+      "label": "Đối tượng",
+      "price": "Giá",
+      "note": "Ghi chú"
+    },
+    "contactForPrice": "Liên hệ",
+    "notes": "Lưu ý",
+    "faq": "Câu hỏi thường gặp",
+    "gallery": "Hình ảnh",
+    "video": "Video"
+  },
+  "Reviews": {
+    "stars": "{rating} trên 5 sao"
   },
   "Contact": {
     "open": "Mở các kênh liên hệ",
@@ -52,5 +93,14 @@
   "Footer": {
     "contact": "Liên hệ",
     "follow": "Kết nối với chúng tôi"
+  },
+  "Preview": {
+    "banner": "Bạn đang xem bản nháp. Khách chưa thấy những thay đổi này cho tới khi bấm Xuất bản.",
+    "exit": "Thoát xem nháp"
+  },
+  "NotFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn tìm có thể đã đổi địa chỉ hoặc không còn nữa.",
+    "backHome": "Về trang chủ"
   }
 }
