@@ -76,8 +76,9 @@ export default async function TourPage({ params }: Props) {
       <Container className="space-y-8 pt-6 lg:pt-10">
         <TourGallery images={images} title={tour.title} />
 
-        {/* Mobile: tiêu đề → khung đặt tour → nội dung. Desktop: khung đặt tour dính cột phải. */}
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-x-12">
+        {/* Mobile: tiêu đề → khung đặt tour → nội dung. Desktop: khung đặt tour dính cột phải.
+            minmax(0,1fr) ở mobile: cột không bị nội dung rộng (bảng giá, chữ dài) kéo tràn màn hình. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-x-12">
           <header className="space-y-4 lg:col-start-1">
             {summary?.badges?.length ? (
               <div className="flex flex-wrap gap-2">

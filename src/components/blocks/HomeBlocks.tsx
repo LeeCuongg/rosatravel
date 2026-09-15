@@ -272,7 +272,7 @@ export async function Clients({ block, locale }: { block: ClientsBlock; locale: 
 
 export function Newsletter({ block }: { block: NewsletterBlock }) {
   return (
-    <div className="grid gap-6 rounded-md bg-canvas-soft p-6 md:p-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 rounded-md bg-canvas-soft p-6 md:p-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center">
       <div className="space-y-2">
         <h2 className="font-display text-display-sub-sm font-semibold text-balance text-ink md:text-display-md">{block.title}</h2>
         {block.description ? <p className="text-body-md text-body">{block.description}</p> : null}

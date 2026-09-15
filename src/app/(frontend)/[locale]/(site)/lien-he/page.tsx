@@ -71,7 +71,7 @@ export default async function ContactPage({ params, searchParams }: Props) {
   return (
     <>
       <PageHero title={page?.title || t('title')} description={page ? null : t('description')} />
-      <Container className="grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
+      <Container className="grid grid-cols-[minmax(0,1fr)] gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
         <div className="space-y-10">
           {tourSummary ? (
             <section className="space-y-4">
