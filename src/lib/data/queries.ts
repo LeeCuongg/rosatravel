@@ -3,12 +3,12 @@ import type { TypedLocale, Where } from 'payload'
 
 import { tags } from '@/lib/cache-tags'
 import { getPayloadClient } from '@/lib/payload'
-import type { Post, TourCarouselBlock } from '@/payload-types'
+import { SORT_OPTIONS, tourFilterWhere, type TourFilters } from '@/lib/tour-filters'
+import type { Post, Tour, TourCarouselBlock } from '@/payload-types'
 import type { TourSummary } from '@/types/content'
 
 import { cached } from './cache'
 import { toTourSummaries } from './mappers'
-import type { Tour } from '@/payload-types'
 
 const asLocale = (locale: string) => locale as TypedLocale
 
@@ -51,6 +51,24 @@ export function getHome(locale: string) {
   )
 }
 
+/* ---------- Slug cho generateStaticParams (chạy lúc build, không cache) ---------- */
+
+type SluggedCollection = 'tours' | 'tour-categories' | 'destinations' | 'posts' | 'pages'
+
+export async function getSlugs(collection: SluggedCollection): Promise<string[]> {
+  const hasDrafts = collection !== 'tour-categories'
+  const { docs } = await (await getPayloadClient()).find({
+    collection,
+    where: hasDrafts ? { _status: { equals: 'published' } } : {},
+    depth: 0,
+    limit: 1000,
+    pagination: false,
+  })
+  return docs.map((doc) => (doc as { slug?: string | null }).slug).filter((slug): slug is string => Boolean(slug))
+}
+
+export const getPublishedTourSlugs = () => getSlugs('tours')
+
 /* ---------- Tour ---------- */
 
 export function getTourBySlug(slug: string, locale: string) {
@@ -70,19 +88,6 @@ export function getTourBySlug(slug: string, locale: string) {
       return docs[0] ?? null
     },
   )
-}
-
-/** Dùng cho generateStaticParams, chạy lúc build nên không cần cache. */
-export async function getPublishedTourSlugs(): Promise<string[]> {
-  const { docs } = await (await getPayloadClient()).find({
-    collection: 'tours',
-    where: { _status: { equals: 'published' } },
-    select: { slug: true },
-    depth: 0,
-    limit: 1000,
-    pagination: false,
-  })
-  return docs.map((doc) => doc.slug).filter(Boolean)
 }
 
 /** Tour liên quan do nhân viên chọn; để trống thì gợi ý tour cùng điểm đến. */
@@ -148,6 +153,180 @@ export async function getCarouselTours(block: TourCarouselBlock, locale: string)
   )
 }
 
+type TourScope = { categoryId?: string; destinationId?: string }
+
+function scopeWhere({ categoryId, destinationId }: TourScope): Where[] {
+  return [
+    ...(categoryId ? [{ categories: { in: [categoryId] } }] : []),
+    ...(destinationId ? [{ destinations: { in: [destinationId] } }] : []),
+  ]
+}
+
+export type ToursPage = {
+  tours: TourSummary[]
+  totalDocs: number
+  totalPages: number
+  page: number
+}
+
+export const TOURS_PER_PAGE = 12
+
+export function getToursPage(scope: TourScope, filters: TourFilters, locale: string): Promise<ToursPage> {
+  return cached(
+    {
+      key: ['tours-page', scope.categoryId ?? '', scope.destinationId ?? '', JSON.stringify(filters), locale],
+      tags: [tags.tours],
+      revalidate: 3600,
+    },
+    async (draft) => {
+      const result = await (await getPayloadClient()).find({
+        collection: 'tours',
+        where: all([...scopeWhere(scope), ...tourFilterWhere(filters), ...publishedOnly(draft)]),
+        sort: SORT_OPTIONS[filters.sort],
+        page: filters.page,
+        limit: TOURS_PER_PAGE,
+        depth: 1,
+        locale: asLocale(locale),
+        draft,
+      })
+      return {
+        tours: toTourSummaries(result.docs, draft),
+        totalDocs: result.totalDocs,
+        totalPages: result.totalPages,
+        page: result.page ?? filters.page,
+      }
+    },
+  )
+}
+
+/** Các điểm khởi hành có trong phạm vi (danh mục / điểm đến) để làm lựa chọn lọc. */
+export function getDepartureCities(scope: TourScope, locale: string): Promise<string[]> {
+  return cached(
+    { key: ['departure-cities', scope.categoryId ?? '', scope.destinationId ?? '', locale], tags: [tags.tours] },
+    async (draft) => {
+      const { docs } = await (await getPayloadClient()).find({
+        collection: 'tours',
+        where: all([...scopeWhere(scope), ...publishedOnly(draft)]),
+        depth: 0,
+        limit: 500,
+        pagination: false,
+        locale: asLocale(locale),
+        draft,
+      })
+      const cities = new Set(docs.map((doc) => doc.departureFrom?.trim()).filter(Boolean))
+      return [...cities].sort((a, b) => a.localeCompare(b, 'vi'))
+    },
+  )
+}
+
+/* ---------- Danh mục, điểm đến, trang tĩnh ---------- */
+
+export function getCategoryBySlug(slug: string, locale: string) {
+  return cached({ key: ['category', slug, locale], tags: [tags.categories, tags.category(slug)] }, async () => {
+    const { docs } = await (await getPayloadClient()).find({
+      collection: 'tour-categories',
+      where: { slug: { equals: slug } },
+      locale: asLocale(locale),
+      depth: 1,
+      limit: 1,
+      pagination: false,
+    })
+    return docs[0] ?? null
+  })
+}
+
+export function getDestinationBySlug(slug: string, locale: string) {
+  return cached(
+    { key: ['destination', slug, locale], tags: [tags.destinations, tags.destination(slug)] },
+    async (draft) => {
+      const { docs } = await (await getPayloadClient()).find({
+        collection: 'destinations',
+        where: all([{ slug: { equals: slug } }, ...publishedOnly(draft)]),
+        locale: asLocale(locale),
+        depth: 1,
+        limit: 1,
+        pagination: false,
+        draft,
+      })
+      return docs[0] ?? null
+    },
+  )
+}
+
+export function getPageBySlug(slug: string, locale: string) {
+  return cached(
+    // Trang tĩnh có thể chứa khối băng chuyền tour nên cũng làm mới theo tag tours.
+    { key: ['page', slug, locale], tags: [tags.pages, tags.page(slug), tags.tours] },
+    async (draft) => {
+      const { docs } = await (await getPayloadClient()).find({
+        collection: 'pages',
+        where: all([{ slug: { equals: slug } }, ...publishedOnly(draft)]),
+        locale: asLocale(locale),
+        depth: 2,
+        limit: 1,
+        pagination: false,
+        draft,
+      })
+      return docs[0] ?? null
+    },
+  )
+}
+
+/* ---------- Bài viết ---------- */
+
+export function getPostBySlug(slug: string, locale: string) {
+  return cached({ key: ['post', slug, locale], tags: [tags.posts, tags.post(slug)] }, async (draft) => {
+    const { docs } = await (await getPayloadClient()).find({
+      collection: 'posts',
+      where: all([{ slug: { equals: slug } }, ...publishedOnly(draft)]),
+      locale: asLocale(locale),
+      depth: 1,
+      limit: 1,
+      pagination: false,
+      draft,
+    })
+    return docs[0] ?? null
+  })
+}
+
+export function getPosts(options: { category?: Post['category'] | null; limit: number }, locale: string) {
+  const { category, limit } = options
+  return cached({ key: ['posts', category ?? 'all', String(limit), locale], tags: [tags.posts] }, async (draft) => {
+    const { docs } = await (await getPayloadClient()).find({
+      collection: 'posts',
+      where: all([...(category ? [{ category: { equals: category } }] : []), ...publishedOnly(draft)]),
+      locale: asLocale(locale),
+      sort: '-publishedAt',
+      depth: 1,
+      limit,
+      draft,
+    })
+    return docs
+  })
+}
+
+export const POSTS_PER_PAGE = 12
+
+export function getPostsPage(options: { category?: Post['category'] | null; page: number }, locale: string) {
+  const { category, page } = options
+  return cached(
+    { key: ['posts-page', category ?? 'all', String(page), locale], tags: [tags.posts] },
+    async (draft) => {
+      const result = await (await getPayloadClient()).find({
+        collection: 'posts',
+        where: all([...(category ? [{ category: { equals: category } }] : []), ...publishedOnly(draft)]),
+        locale: asLocale(locale),
+        sort: '-publishedAt',
+        depth: 1,
+        page,
+        limit: POSTS_PER_PAGE,
+        draft,
+      })
+      return { posts: result.docs, totalPages: result.totalPages, page: result.page ?? page }
+    },
+  )
+}
+
 /* ---------- Nội dung khác ---------- */
 
 export function getActiveBanners(placement: 'hero' | 'promo', locale: string) {
@@ -195,22 +374,6 @@ export function getClients(locale: string) {
       sort: 'order',
       depth: 1,
       limit: 30,
-    })
-    return docs
-  })
-}
-
-export function getPosts(options: { category?: Post['category'] | null; limit: number }, locale: string) {
-  const { category, limit } = options
-  return cached({ key: ['posts', category ?? 'all', String(limit), locale], tags: [tags.posts] }, async (draft) => {
-    const { docs } = await (await getPayloadClient()).find({
-      collection: 'posts',
-      where: all([...(category ? [{ category: { equals: category } }] : []), ...publishedOnly(draft)]),
-      locale: asLocale(locale),
-      sort: '-publishedAt',
-      depth: 1,
-      limit,
-      draft,
     })
     return docs
   })

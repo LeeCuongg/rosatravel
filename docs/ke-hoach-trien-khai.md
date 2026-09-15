@@ -302,10 +302,19 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 **Xong khi:** một nhân viên **không cần dev hỗ trợ** mà vẫn tự làm được: tạo tour đầy đủ (ảnh, lịch trình, giá, ngày khởi hành), xem trước, xuất bản rồi thấy lên site, đổi thứ tự khối trên trang tour, sửa hotline và 5 kênh liên hệ.
 
 ### Giai đoạn 3 · Các trang
-- [ ] Trang chủ
-- [ ] Chi tiết tour
-- [ ] Danh mục + bộ lọc
-- [ ] Điểm đến, blog, liên hệ, giới thiệu
+- [x] Lớp đọc dữ liệu `src/lib/data` (cache theo tag, bỏ qua cache khi xem nháp) + hàm chuyển dữ liệu Payload → props component
+- [x] Khung chung: Header, Footer, nút liên hệ lấy từ admin; thanh "đang xem bản nháp"; link bỏ qua tới nội dung; trang 404
+- [x] Trang chủ: hiển thị các section nhân viên chọn trong admin (chưa cấu hình thì hiện "sắp ra mắt")
+- [x] Chi tiết tour `/tour/[slug]`: bộ ảnh, thông tin, khung đặt tour dính bên phải, lịch khởi hành (tự ẩn ngày đã qua), 10 loại khối, tour liên quan
+- [x] Danh mục `/danh-muc/[slug]` + bộ lọc (điểm đi, số ngày, giá, tháng khởi hành, sắp xếp) + phân trang; form GET chạy cả khi không có JavaScript
+- [x] Điểm đến `/diem-den/[slug]`, cẩm nang `/cam-nang` (lọc chuyên mục) + bài viết `/cam-nang/[slug]`, trang tĩnh `/[slug]`, liên hệ `/lien-he` (nội dung sửa ở Trang tĩnh slug `lien-he`, hiện tour đang quan tâm khi có `?tour=`)
+- [ ] `/tim-kiem`, `/dat-tour/thanh-cong`, form đăng ký nhận ưu đãi, ô tìm kiếm trên banner, form yêu cầu đặt tour: làm ở giai đoạn 4
+- [ ] Soát giao diện điện thoại bằng ảnh chụp từng trang: làm cùng Lighthouse/Playwright ở giai đoạn 5 (component mobile đã kiểm tra ở giai đoạn 1)
+
+**Ghi chú kỹ thuật:**
+- **Cache:** không bật Cache Components của Next 16 vì nó đổi cách render toàn app, kể cả admin Payload. Dùng `unstable_cache` + tag, là mô hình cache trước đây mà Next 16 vẫn hỗ trợ. Tour, banner cache thêm theo thời gian (1 giờ / 10 phút) để ngày khởi hành đã qua và banner hết hạn tự ẩn.
+- **Lọc tháng khởi hành:** tour có trường ẩn `departureMonths`, tự tính khi lưu. Không lọc thẳng trên mảng lịch khởi hành, vì hai điều kiện rời có thể khớp hai ngày khác nhau.
+- **Xem giao diện với dữ liệu mẫu:** dùng database riêng `rosatravel_qa` + `pnpm payload run src/scripts/seed-qa.ts`, luôn đặt `DISABLE_BLOB_STORAGE=true`. Script từ chối chạy với DB thật hoặc khi Blob còn bật. Không đưa dữ liệu mẫu vào DB thật.
 
 **Xong khi:** mọi route ở mục 4 hiển thị từ dữ liệu CMS, responsive 390 → 1536.
 

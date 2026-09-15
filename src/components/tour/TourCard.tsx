@@ -74,8 +74,9 @@ export function TourCard({
           />
         ) : null}
 
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-mute/60 pt-3">
-          <ul className="space-y-1 text-caption text-body">
+        {/* Thẻ hẹp (lưới 4 cột) thì giá xuống dòng dưới, không làm ngắt chữ ở dòng thông tin. */}
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-x-3 gap-y-2 border-t border-mute/60 pt-3">
+          <ul className="space-y-1 text-caption whitespace-nowrap text-body">
             <li className="flex items-center gap-1.5">
               <Clock aria-hidden className="size-4 shrink-0 text-body-mid" />
               {t('duration', { days: tour.durationDays, nights: tour.durationNights })}

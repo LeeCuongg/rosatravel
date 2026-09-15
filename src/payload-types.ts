@@ -237,6 +237,7 @@ export interface Tour {
     description?: string | null;
     image?: (string | null) | Media;
   };
+  departureMonths?: string[] | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1052,6 +1053,7 @@ export interface ToursSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  departureMonths?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;

@@ -48,6 +48,71 @@
       "cancelled": "Tạm hoãn"
     }
   },
+  "Listing": {
+    "from": "Điểm khởi hành",
+    "duration": "Số ngày",
+    "price": "Khoảng giá",
+    "month": "Tháng khởi hành",
+    "sort": "Sắp xếp",
+    "any": "Tất cả",
+    "apply": "Lọc tour",
+    "reset": "Xóa bộ lọc",
+    "results": "{count, plural, =0 {Không có tour nào} other {# tour}}",
+    "removeFilter": "Bỏ lọc {label}",
+    "empty": "Chưa có tour phù hợp. Thử bỏ bớt bộ lọc, hoặc để Rosa Travel tư vấn hành trình cho bạn.",
+    "askConsultant": "Nhờ tư vấn",
+    "durationOptions": {
+      "1-2": "1–2 ngày",
+      "3-4": "3–4 ngày",
+      "5-7": "5–7 ngày",
+      "8+": "Từ 8 ngày"
+    },
+    "priceOptions": {
+      "duoi-5tr": "Dưới 5 triệu",
+      "5-10tr": "5–10 triệu",
+      "10-20tr": "10–20 triệu",
+      "tren-20tr": "Trên 20 triệu"
+    },
+    "sortOptions": {
+      "moi-nhat": "Mới cập nhật",
+      "gia-tang": "Giá thấp đến cao",
+      "gia-giam": "Giá cao đến thấp",
+      "ngan-ngay": "Ít ngày trước"
+    }
+  },
+  "Pagination": {
+    "label": "Phân trang",
+    "previous": "Trang trước",
+    "next": "Trang sau",
+    "page": "Trang {page}"
+  },
+  "Destination": {
+    "tours": "Tour {name}"
+  },
+  "Blog": {
+    "title": "Cẩm nang du lịch",
+    "description": "Kinh nghiệm, tin tức và ưu đãi từ Rosa Travel.",
+    "categoriesLabel": "Chuyên mục",
+    "all": "Tất cả",
+    "categories": {
+      "guide": "Cẩm nang",
+      "news": "Tin tức",
+      "promotion": "Khuyến mãi",
+      "press": "Báo chí"
+    },
+    "empty": "Chưa có bài viết trong chuyên mục này.",
+    "related": "Bài viết liên quan",
+    "source": "Xem bài gốc"
+  },
+  "ContactPage": {
+    "title": "Liên hệ",
+    "description": "Gọi hotline, nhắn Zalo hoặc để lại thông tin, Rosa Travel sẽ liên hệ lại với bạn.",
+    "interestedIn": "Tour bạn đang quan tâm",
+    "hotline": "Hotline",
+    "email": "Email",
+    "address": "Văn phòng",
+    "channels": "Nhắn tin cho chúng tôi"
+  },
   "Blocks": {
     "highlights": "Điểm nổi bật",
     "itinerary": "Lịch trình",

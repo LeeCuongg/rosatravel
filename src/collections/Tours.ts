@@ -7,6 +7,7 @@ import { viSlugField } from '../fields/slug'
 import { revalidateCollection } from '../hooks/revalidate'
 import { tags } from '../lib/cache-tags'
 import { previewPath, previewUrl } from '../lib/preview'
+import { departureMonthsOf } from '../lib/tour-filters'
 
 const positive: NumberFieldSingleValidation = (value) =>
   (typeof value === 'number' && value > 0) || 'Phải là số lớn hơn 0'
@@ -260,6 +261,20 @@ export const Tours: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      // Tự tính từ "Lịch khởi hành" mỗi lần lưu, dùng cho bộ lọc "tháng khởi hành" trên site.
+      name: 'departureMonths',
+      type: 'text',
+      hasMany: true,
+      index: true,
+      admin: { hidden: true },
+      hooks: {
+        beforeChange: [
+          ({ siblingData }) =>
+            departureMonthsOf((siblingData as { departures?: { date?: string | null }[] | null }).departures),
+        ],
+      },
     },
     viSlugField('title'),
   ],
