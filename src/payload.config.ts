@@ -7,8 +7,21 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { Users } from './collections/Users'
+import { Banners } from './collections/Banners'
+import { BookingRequests } from './collections/BookingRequests'
+import { Clients } from './collections/Clients'
+import { Destinations } from './collections/Destinations'
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Reviews } from './collections/Reviews'
+import { TourCategories } from './collections/TourCategories'
+import { Tours } from './collections/Tours'
+import { Users } from './collections/Users'
+import { Footer } from './globals/Footer'
+import { Header } from './globals/Header'
+import { Home } from './globals/Home'
+import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,8 +32,33 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: ' · Rosa Travel',
+    },
+    // Khung xem trước trực tiếp khi sửa tour, bài viết, trang, trang chủ.
+    livePreview: {
+      breakpoints: [
+        { label: 'Điện thoại', name: 'mobile', width: 390, height: 844 },
+        { label: 'Máy tính bảng', name: 'tablet', width: 768, height: 1024 },
+        { label: 'Máy tính', name: 'desktop', width: 1440, height: 900 },
+      ],
+    },
   },
-  collections: [Users, Media],
+  // Thứ tự ở đây là thứ tự trong thanh bên của admin (trong từng nhóm).
+  collections: [
+    Tours,
+    Destinations,
+    TourCategories,
+    BookingRequests,
+    Posts,
+    Pages,
+    Banners,
+    Reviews,
+    Clients,
+    Media,
+    Users,
+  ],
+  globals: [Home, Header, Footer, SiteSettings],
   editor: lexicalEditor(),
   // Giao diện admin bằng tiếng Việt cho nhân viên nhập liệu.
   i18n: {

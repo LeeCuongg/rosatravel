@@ -67,8 +67,17 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    tours: Tour;
+    destinations: Destination;
+    'tour-categories': TourCategory;
+    'booking-requests': BookingRequest;
+    posts: Post;
+    pages: Page;
+    banners: Banner;
+    reviews: Review;
+    clients: Client;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +85,17 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    tours: ToursSelect<false> | ToursSelect<true>;
+    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
+    'tour-categories': TourCategoriesSelect<false> | TourCategoriesSelect<true>;
+    'booking-requests': BookingRequestsSelect<false> | BookingRequestsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    banners: BannersSelect<false> | BannersSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    clients: ClientsSelect<false> | ClientsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,8 +105,18 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | 'vi' | 'vi'[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    home: Home;
+    header: Header;
+    footer: Footer;
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    home: HomeSelect<false> | HomeSelect<true>;
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: 'vi';
   widgets: {
     collections: CollectionsWidget;
@@ -118,11 +146,518 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Bấm "Xuất bản" để đưa lên site. Khi đang sửa, bản nháp tự lưu và khách chưa thấy cho tới lúc xuất bản.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tours".
+ */
+export interface Tour {
+  id: string;
+  title: string;
+  /**
+   * Hiện dưới tên tour và trên kết quả Google (1–2 câu).
+   */
+  summary?: string | null;
+  coverImage: string | Media;
+  /**
+   * Kéo thả để sắp xếp. Ảnh đầu tiên hiện lớn nhất.
+   */
+  gallery?: (string | Media)[] | null;
+  durationDays: number;
+  durationNights: number;
+  departureFrom: string;
+  destinations?: (string | Destination)[] | null;
+  categories?: (string | TourCategory)[] | null;
+  /**
+   * Ví dụ: HOT, Còn 5 chỗ. Tối đa 3 nhãn.
+   */
+  badges?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  price: number;
+  /**
+   * Để trống nếu không giảm giá.
+   */
+  originalPrice?: number | null;
+  /**
+   * Ngày đã qua tự ẩn trên site.
+   */
+  departures?:
+    | {
+        date: string;
+        /**
+         * Trống = giá bán chung
+         */
+        price?: number | null;
+        seatsLeft?: number | null;
+        status: 'available' | 'limited' | 'soldout' | 'cancelled';
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bấm "Thêm: Khối" để thêm phần mới; kéo thả để đổi thứ tự hiển thị trên trang.
+   */
+  layout?:
+    | (
+        | HighlightsBlock
+        | ItineraryBlock
+        | InclusionsBlock
+        | PriceTableBlock
+        | PolicyBlock
+        | NotesBlock
+        | FaqBlock
+        | GalleryBlock
+        | VideoBlock
+        | RichTextBlock
+      )[]
+    | null;
+  isFeatured?: boolean | null;
+  isTrending?: boolean | null;
+  /**
+   * Để trống thì không hiện.
+   */
+  stats?: {
+    ratingAverage?: number | null;
+    ratingCount?: number | null;
+    bookedCount?: number | null;
+  };
+  /**
+   * Để trống thì tự gợi ý tour cùng điểm đến.
+   */
+  relatedTours?: (string | Tour)[] | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Phần cuối của URL, vd. tour-ha-giang-3-ngay. Đổi slug của nội dung đã đăng sẽ làm hỏng link cũ.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Ảnh cho tour, bài viết, banner. Nhớ điền mô tả ảnh: tốt cho SEO và người khiếm thị.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  /**
+   * Tả ngắn nội dung ảnh, vd. "Ruộng bậc thang Mù Cang Chải mùa lúa chín".
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations".
+ */
+export interface Destination {
+  id: string;
+  name: string;
+  region: 'north' | 'central' | 'south' | 'asia' | 'europe' | 'americas' | 'oceania' | 'africa';
+  coverImage: string | Media;
+  summary?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Phần cuối của URL, vd. tour-ha-giang-3-ngay. Đổi slug của nội dung đã đăng sẽ làm hỏng link cũ.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Nhóm tour hiện trên menu, trang chủ và trang danh mục, vd. "Tour mùa thu", "Tour đoàn riêng".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-categories".
+ */
+export interface TourCategory {
+  id: string;
+  name: string;
+  kind: 'season' | 'collection' | 'private' | 'region';
+  /**
+   * Số nhỏ hiện trước.
+   */
+  order?: number | null;
+  coverImage?: (string | null) | Media;
+  summary?: string | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Phần cuối của URL, vd. tour-ha-giang-3-ngay. Đổi slug của nội dung đã đăng sẽ làm hỏng link cũ.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HighlightsBlock".
+ */
+export interface HighlightsBlock {
+  title?: string | null;
+  items?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'highlights';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ItineraryBlock".
+ */
+export interface ItineraryBlock {
+  title?: string | null;
+  /**
+   * Kéo thả để đổi thứ tự. Mục đầu tiên là Ngày 1.
+   */
+  days?:
+    | {
+        title: string;
+        meals?: ('breakfast' | 'lunch' | 'dinner')[] | null;
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        images?: (string | Media)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'itinerary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InclusionsBlock".
+ */
+export interface InclusionsBlock {
+  title?: string | null;
+  included?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  excluded?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'inclusions';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PriceTableBlock".
+ */
+export interface PriceTableBlock {
+  title?: string | null;
+  rows?:
+    | {
+        label: string;
+        price?: number | null;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  footnote?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'priceTable';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PolicyBlock".
+ */
+export interface PolicyBlock {
+  title: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'policy';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NotesBlock".
+ */
+export interface NotesBlock {
+  title?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'notes';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock".
+ */
+export interface FaqBlock {
+  title?: string | null;
+  items?:
+    | {
+        question: string;
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock".
+ */
+export interface GalleryBlock {
+  title?: string | null;
+  images: (string | Media)[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock".
+ */
+export interface VideoBlock {
+  title?: string | null;
+  url: string;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'video';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock".
+ */
+export interface RichTextBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richText';
+}
+/**
+ * Yêu cầu khách gửi từ website. Đổi trạng thái sau khi đã liên hệ khách.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-requests".
+ */
+export interface BookingRequest {
+  id: string;
+  status: 'new' | 'contacted' | 'won' | 'cancelled';
+  type: 'booking' | 'consultation' | 'newsletter';
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  tour?: (string | null) | Tour;
+  departureDate?: string | null;
+  adults?: number | null;
+  children?: number | null;
+  message?: string | null;
+  assignee?: (string | null) | User;
+  /**
+   * Khách không nhìn thấy.
+   */
+  internalNote?: string | null;
+  source?: {
+    page?: string | null;
+    locale?: string | null;
+    utmSource?: string | null;
+    utmMedium?: string | null;
+    utmCampaign?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  name?: string | null;
+  /**
+   * Chỉ quản trị đổi được vai trò. Người dùng đầu tiên tự động là quản trị.
+   */
+  role: 'admin' | 'editor' | 'sales';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -144,22 +679,205 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "posts".
  */
-export interface Media {
+export interface Post {
   id: string;
-  alt: string;
+  title: string;
+  category: 'guide' | 'news' | 'promotion' | 'press';
+  publishedAt?: string | null;
+  coverImage: string | Media;
+  excerpt?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  sourceUrl?: string | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Phần cuối của URL, vd. tour-ha-giang-3-ngay. Đổi slug của nội dung đã đăng sẽ làm hỏng link cũ.
+   */
+  slug: string;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Trang giới thiệu, chính sách, điều khoản… Tạo trang mới không cần dev.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  /**
+   * Kéo thả để đổi thứ tự.
+   */
+  layout?:
+    | (RichTextBlock | HighlightsBlock | FaqBlock | GalleryBlock | VideoBlock | TourCarouselBlock | NewsletterBlock)[]
+    | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Phần cuối của URL, vd. tour-ha-giang-3-ngay. Đổi slug của nội dung đã đăng sẽ làm hỏng link cũ.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TourCarouselBlock".
+ */
+export interface TourCarouselBlock {
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  source: 'manual' | 'category' | 'featured' | 'trending';
+  /**
+   * Kéo thả để đổi thứ tự.
+   */
+  tours?: (string | Tour)[] | null;
+  category?: (string | null) | TourCategory;
+  limit?: number | null;
+  /**
+   * Để trống đường dẫn thì không hiện link.
+   */
+  viewAll?: {
+    label?: string | null;
+    /**
+     * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'tourCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NewsletterBlock".
+ */
+export interface NewsletterBlock {
+  title: string;
+  description?: string | null;
+  buttonLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'newsletter';
+}
+/**
+ * Banner đầu trang chủ và hàng khuyến mãi. Đặt "Hiện từ ngày" / "Ẩn sau ngày" để banner tự hiện và tự ẩn theo lịch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banners".
+ */
+export interface Banner {
+  id: string;
+  /**
+   * Chỉ để nhận biết trong admin, khách không thấy.
+   */
+  title: string;
+  placement: 'hero' | 'promo';
+  /**
+   * Số nhỏ hiện trước.
+   */
+  order?: number | null;
+  image: string | Media;
+  /**
+   * Để trống thì dùng ảnh máy tính.
+   */
+  mobileImage?: (string | null) | Media;
+  /**
+   * Trang trong site: /danh-muc/tour-mua-thu · Trang ngoài: https://…
+   */
+  href?: string | null;
+  active?: boolean | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  /**
+   * Chỉ đánh giá được đánh dấu mới hiện cho khách.
+   */
+  approved?: boolean | null;
+  customerName: string;
+  location?: string | null;
+  tour?: (string | null) | Tour;
+  rating: number;
+  avatar?: (string | null) | Media;
+  quote: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: string;
+  name: string;
+  order?: number | null;
+  logo: string | Media;
+  href?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -186,12 +904,48 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'tours';
+        value: string | Tour;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: string | Destination;
+      } | null)
+    | ({
+        relationTo: 'tour-categories';
+        value: string | TourCategory;
+      } | null)
+    | ({
+        relationTo: 'booking-requests';
+        value: string | BookingRequest;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'banners';
+        value: string | Banner;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
+      } | null)
+    | ({
+        relationTo: 'clients';
+        value: string | Client;
       } | null)
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -237,25 +991,416 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "tours_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface ToursSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  coverImage?: T;
+  gallery?: T;
+  durationDays?: T;
+  durationNights?: T;
+  departureFrom?: T;
+  destinations?: T;
+  categories?: T;
+  badges?:
     | T
     | {
+        text?: T;
         id?: T;
-        createdAt?: T;
-        expiresAt?: T;
       };
+  price?: T;
+  originalPrice?: T;
+  departures?:
+    | T
+    | {
+        date?: T;
+        price?: T;
+        seatsLeft?: T;
+        status?: T;
+        note?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        highlights?: T | HighlightsBlockSelect<T>;
+        itinerary?: T | ItineraryBlockSelect<T>;
+        inclusions?: T | InclusionsBlockSelect<T>;
+        priceTable?: T | PriceTableBlockSelect<T>;
+        policy?: T | PolicyBlockSelect<T>;
+        notes?: T | NotesBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
+        gallery?: T | GalleryBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+        richText?: T | RichTextBlockSelect<T>;
+      };
+  isFeatured?: T;
+  isTrending?: T;
+  stats?:
+    | T
+    | {
+        ratingAverage?: T;
+        ratingCount?: T;
+        bookedCount?: T;
+      };
+  relatedTours?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HighlightsBlock_select".
+ */
+export interface HighlightsBlockSelect<T extends boolean = true> {
+  title?: T;
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ItineraryBlock_select".
+ */
+export interface ItineraryBlockSelect<T extends boolean = true> {
+  title?: T;
+  days?:
+    | T
+    | {
+        title?: T;
+        meals?: T;
+        content?: T;
+        images?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InclusionsBlock_select".
+ */
+export interface InclusionsBlockSelect<T extends boolean = true> {
+  title?: T;
+  included?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  excluded?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PriceTableBlock_select".
+ */
+export interface PriceTableBlockSelect<T extends boolean = true> {
+  title?: T;
+  rows?:
+    | T
+    | {
+        label?: T;
+        price?: T;
+        note?: T;
+        id?: T;
+      };
+  footnote?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PolicyBlock_select".
+ */
+export interface PolicyBlockSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NotesBlock_select".
+ */
+export interface NotesBlockSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock_select".
+ */
+export interface FaqBlockSelect<T extends boolean = true> {
+  title?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock_select".
+ */
+export interface GalleryBlockSelect<T extends boolean = true> {
+  title?: T;
+  images?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock_select".
+ */
+export interface VideoBlockSelect<T extends boolean = true> {
+  title?: T;
+  url?: T;
+  caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock_select".
+ */
+export interface RichTextBlockSelect<T extends boolean = true> {
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations_select".
+ */
+export interface DestinationsSelect<T extends boolean = true> {
+  name?: T;
+  region?: T;
+  coverImage?: T;
+  summary?: T;
+  description?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tour-categories_select".
+ */
+export interface TourCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  kind?: T;
+  order?: T;
+  coverImage?: T;
+  summary?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-requests_select".
+ */
+export interface BookingRequestsSelect<T extends boolean = true> {
+  status?: T;
+  type?: T;
+  fullName?: T;
+  phone?: T;
+  email?: T;
+  tour?: T;
+  departureDate?: T;
+  adults?: T;
+  children?: T;
+  message?: T;
+  assignee?: T;
+  internalNote?: T;
+  source?:
+    | T
+    | {
+        page?: T;
+        locale?: T;
+        utmSource?: T;
+        utmMedium?: T;
+        utmCampaign?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  publishedAt?: T;
+  coverImage?: T;
+  excerpt?: T;
+  content?: T;
+  sourceUrl?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        richText?: T | RichTextBlockSelect<T>;
+        highlights?: T | HighlightsBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
+        gallery?: T | GalleryBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+        tourCarousel?: T | TourCarouselBlockSelect<T>;
+        newsletter?: T | NewsletterBlockSelect<T>;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TourCarouselBlock_select".
+ */
+export interface TourCarouselBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  source?: T;
+  tours?: T;
+  category?: T;
+  limit?: T;
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NewsletterBlock_select".
+ */
+export interface NewsletterBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  buttonLabel?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banners_select".
+ */
+export interface BannersSelect<T extends boolean = true> {
+  title?: T;
+  placement?: T;
+  order?: T;
+  image?: T;
+  mobileImage?: T;
+  href?: T;
+  active?: T;
+  startsAt?: T;
+  endsAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  approved?: T;
+  customerName?: T;
+  location?: T;
+  tour?: T;
+  rating?: T;
+  avatar?: T;
+  quote?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients_select".
+ */
+export interface ClientsSelect<T extends boolean = true> {
+  name?: T;
+  order?: T;
+  logo?: T;
+  href?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -274,6 +1419,64 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +1517,539 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Chọn các section của trang chủ và thứ tự của chúng. Bấm "Xuất bản" để đưa lên site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: string;
+  /**
+   * Kéo thả để đổi thứ tự hiển thị.
+   */
+  layout?:
+    | (
+        | HeroBannersBlock
+        | UspBlock
+        | PromoBannersBlock
+        | TourCarouselBlock
+        | CategoryTilesBlock
+        | DestinationGridBlock
+        | ReviewsBlock
+        | ClientsBlock
+        | PostsBlock
+        | NewsletterBlock
+        | RichTextBlock
+      )[]
+    | null;
+  /**
+   * Để trống thì dùng tiêu đề, mô tả ngắn và ảnh bìa.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannersBlock".
+ */
+export interface HeroBannersBlock {
+  /**
+   * Ảnh lấy từ mục Banner (vị trí "Đầu trang chủ") đang trong thời gian hiển thị.
+   */
+  showSearch?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heroBanners';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UspBlock".
+ */
+export interface UspBlock {
+  title?: string | null;
+  items?:
+    | {
+        icon: 'support' | 'quality' | 'variety' | 'price' | 'safety' | 'experience';
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'usp';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromoBannersBlock".
+ */
+export interface PromoBannersBlock {
+  title?: string | null;
+  /**
+   * Để trống đường dẫn thì không hiện link.
+   */
+  viewAll?: {
+    label?: string | null;
+    /**
+     * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'promoBanners';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CategoryTilesBlock".
+ */
+export interface CategoryTilesBlock {
+  title?: string | null;
+  categories: (string | TourCategory)[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'categoryTiles';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DestinationGridBlock".
+ */
+export interface DestinationGridBlock {
+  eyebrow?: string | null;
+  title: string;
+  destinations: (string | Destination)[];
+  /**
+   * Để trống đường dẫn thì không hiện link.
+   */
+  viewAll?: {
+    label?: string | null;
+    /**
+     * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'destinationGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReviewsBlock".
+ */
+export interface ReviewsBlock {
+  title: string;
+  limit?: number | null;
+  /**
+   * Để trống đường dẫn thì không hiện link.
+   */
+  viewAll?: {
+    label?: string | null;
+    /**
+     * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'reviews';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientsBlock".
+ */
+export interface ClientsBlock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'clients';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsBlock".
+ */
+export interface PostsBlock {
+  title: string;
+  /**
+   * Để trống thì lấy bài mới nhất của mọi chuyên mục.
+   */
+  category?: ('guide' | 'news' | 'promotion' | 'press') | null;
+  limit?: number | null;
+  /**
+   * Để trống đường dẫn thì không hiện link.
+   */
+  viewAll?: {
+    label?: string | null;
+    /**
+     * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: string;
+  /**
+   * Kéo thả để đổi thứ tự. Nên để 4–6 mục.
+   */
+  navItems?:
+    | {
+        label: string;
+        /**
+         * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+         */
+        href: string;
+        highlight?: boolean | null;
+        hasMegaMenu?: boolean | null;
+        megaMenu?: {
+          groups?:
+            | {
+                title: string;
+                /**
+                 * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+                 */
+                href?: string | null;
+                links?:
+                  | {
+                      label: string;
+                      /**
+                       * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+                       */
+                      href: string;
+                      id?: string | null;
+                    }[]
+                  | null;
+                id?: string | null;
+              }[]
+            | null;
+          featuredTours?: (string | Tour)[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Các cột link ở chân trang. Thông tin liên hệ và giới thiệu công ty sửa ở "Cài đặt chung".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: string;
+  columns?:
+    | {
+        title: string;
+        links?:
+          | {
+              label: string;
+              /**
+               * Trang trong site: /tour/ha-giang · Trang ngoài: https://…
+               */
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Hotline, email, mạng xã hội, thông tin công ty. Đổi ở đây là cả site cập nhật.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: string;
+  /**
+   * Hiện trên header, nút Gọi và footer.
+   */
+  hotline?: string | null;
+  email?: string | null;
+  address?: string | null;
+  /**
+   * Số điện thoại (vd. 0973122807) hoặc link Zalo OA.
+   */
+  zalo?: string | null;
+  messenger?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  threads?: string | null;
+  bookingPath: string;
+  /**
+   * Mỗi yêu cầu mới sẽ gửi email tới các địa chỉ này.
+   */
+  bookingNotifyEmails?:
+    | {
+        email: string;
+        id?: string | null;
+      }[]
+    | null;
+  companyName?: string | null;
+  about?: string | null;
+  /**
+   * Giấy phép kinh doanh, giấy phép lữ hành…
+   */
+  legalLines?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  copyright?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  layout?:
+    | T
+    | {
+        heroBanners?: T | HeroBannersBlockSelect<T>;
+        usp?: T | UspBlockSelect<T>;
+        promoBanners?: T | PromoBannersBlockSelect<T>;
+        tourCarousel?: T | TourCarouselBlockSelect<T>;
+        categoryTiles?: T | CategoryTilesBlockSelect<T>;
+        destinationGrid?: T | DestinationGridBlockSelect<T>;
+        reviews?: T | ReviewsBlockSelect<T>;
+        clients?: T | ClientsBlockSelect<T>;
+        posts?: T | PostsBlockSelect<T>;
+        newsletter?: T | NewsletterBlockSelect<T>;
+        richText?: T | RichTextBlockSelect<T>;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannersBlock_select".
+ */
+export interface HeroBannersBlockSelect<T extends boolean = true> {
+  showSearch?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UspBlock_select".
+ */
+export interface UspBlockSelect<T extends boolean = true> {
+  title?: T;
+  items?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PromoBannersBlock_select".
+ */
+export interface PromoBannersBlockSelect<T extends boolean = true> {
+  title?: T;
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CategoryTilesBlock_select".
+ */
+export interface CategoryTilesBlockSelect<T extends boolean = true> {
+  title?: T;
+  categories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DestinationGridBlock_select".
+ */
+export interface DestinationGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  destinations?: T;
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReviewsBlock_select".
+ */
+export interface ReviewsBlockSelect<T extends boolean = true> {
+  title?: T;
+  limit?: T;
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientsBlock_select".
+ */
+export interface ClientsBlockSelect<T extends boolean = true> {
+  title?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsBlock_select".
+ */
+export interface PostsBlockSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  limit?: T;
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  navItems?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        highlight?: T;
+        hasMegaMenu?: T;
+        megaMenu?:
+          | T
+          | {
+              groups?:
+                | T
+                | {
+                    title?: T;
+                    href?: T;
+                    links?:
+                      | T
+                      | {
+                          label?: T;
+                          href?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              featuredTours?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  columns?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  hotline?: T;
+  email?: T;
+  address?: T;
+  zalo?: T;
+  messenger?: T;
+  facebook?: T;
+  instagram?: T;
+  threads?: T;
+  bookingPath?: T;
+  bookingNotifyEmails?:
+    | T
+    | {
+        email?: T;
+        id?: T;
+      };
+  companyName?: T;
+  about?: T;
+  legalLines?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

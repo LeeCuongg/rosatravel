@@ -286,15 +286,18 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 **Xong khi:** mọi component có test render + trạng thái, dùng được bằng bàn phím, tôn trọng `prefers-reduced-motion`.
 
 ### Giai đoạn 2 · Schema CMS & dữ liệu mẫu
-- [ ] Collections và globals ở mục 3 (field nội dung `localized`)
-- [ ] Trang tour, trang chủ, trang tĩnh dựng bằng **blocks** (danh sách khối ở mục 0.2), kéo thả thứ tự được
-- [ ] **Versions + drafts + autosave** cho `tours`, `posts`, `destinations`, trang tĩnh, global `home`
-- [ ] **Live Preview** trong admin cho trang tour, trang chủ, bài viết
-- [ ] Hẹn giờ xuất bản / hết hạn cho `banners`
-- [ ] Phân quyền 3 role; màn hình danh sách `booking-requests` lọc theo trạng thái
-- [ ] Nhãn, mô tả field và thông báo lỗi trong admin bằng tiếng Việt, dễ hiểu cho nhân viên không rành kỹ thuật
-- [ ] Script seed dữ liệu mẫu (gồm thông tin liên hệ ở mục 6)
-- [ ] Hook revalidate theo tag khi xuất bản
+- [x] Collections: `tours`, `destinations`, `tour-categories`, `booking-requests`, `posts`, `pages`, `banners`, `reviews`, `clients`, `media`, `users`. Globals: `home`, `header`, `footer`, `site-settings`. Field nội dung đều `localized`
+- [x] **Blocks** kéo thả được: 10 khối trang tour (`src/blocks/content.ts`), 11 section trang chủ và 7 khối trang tĩnh (`src/blocks/home.ts`)
+- [x] **Versions + drafts + autosave (2 giây)** cho `tours`, `destinations`, `posts`, `pages`, global `home`
+- [x] **Live Preview**: đã cấu hình URL + khung Điện thoại/Máy tính bảng/Máy tính, route `/next/preview` (chỉ người đã đăng nhập admin) và component `LivePreviewListener`. Chỉ xem được thật khi các trang có ở giai đoạn 3
+- [x] Banner tự hiện/ẩn theo "Hiện từ ngày" / "Ẩn sau ngày". **Không** dùng `schedulePublish` của Payload vì cần hàng đợi jobs chạy theo lịch trên Vercel
+- [x] Phân quyền: `admin` toàn quyền · `editor` sửa nội dung · `sales` chỉ xử lý `booking-requests`. Người dùng đầu tiên tự thành `admin`. API công khai không tạo được `booking-requests`
+- [x] Nhãn, mô tả, thông báo lỗi trong admin bằng tiếng Việt; slug tự sinh và bỏ dấu tiếng Việt
+- [x] Script seed `pnpm payload run src/scripts/seed.ts`: điền thông tin liên hệ mục 6 khi "Cài đặt chung" còn trống. Không tạo tour mẫu trong DB thật
+- [x] Hook làm mới cache theo tag khi xuất bản / gỡ xuất bản / xóa (bỏ qua tự lưu nháp), `revalidateTag(tag, 'max')` theo Next 16
+- [ ] Hàm đọc dữ liệu Payload → props component (`src/lib/data`): làm ở giai đoạn 3 cùng các trang
+
+**Thay đổi so với plan ban đầu:** lịch khởi hành là bảng nằm trong trang sửa tour thay vì collection `departures` riêng, để nhân viên sửa ngày, giá, số chỗ cùng một chỗ và lịch khởi hành được lưu phiên bản cùng tour.
 
 **Xong khi:** một nhân viên **không cần dev hỗ trợ** mà vẫn tự làm được: tạo tour đầy đủ (ảnh, lịch trình, giá, ngày khởi hành), xem trước, xuất bản rồi thấy lên site, đổi thứ tự khối trên trang tour, sửa hotline và 5 kênh liên hệ.
 
