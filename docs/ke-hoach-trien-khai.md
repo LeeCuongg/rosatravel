@@ -308,7 +308,7 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 - [x] Chi tiết tour `/tour/[slug]`: bộ ảnh, thông tin, khung đặt tour dính bên phải, lịch khởi hành (tự ẩn ngày đã qua), 10 loại khối, tour liên quan
 - [x] Danh mục `/danh-muc/[slug]` + bộ lọc (điểm đi, số ngày, giá, tháng khởi hành, sắp xếp) + phân trang; form GET chạy cả khi không có JavaScript
 - [x] Điểm đến `/diem-den/[slug]`, cẩm nang `/cam-nang` (lọc chuyên mục) + bài viết `/cam-nang/[slug]`, trang tĩnh `/[slug]`, liên hệ `/lien-he` (nội dung sửa ở Trang tĩnh slug `lien-he`, hiện tour đang quan tâm khi có `?tour=`)
-- [ ] `/tim-kiem`, `/dat-tour/thanh-cong`, form đăng ký nhận ưu đãi, ô tìm kiếm trên banner, form yêu cầu đặt tour: làm ở giai đoạn 4
+- [x] `/tim-kiem`, form đăng ký nhận ưu đãi, ô tìm kiếm trên banner, form yêu cầu đặt tour: xong ở giai đoạn 4
 - [ ] Soát giao diện điện thoại bằng ảnh chụp từng trang: làm cùng Lighthouse/Playwright ở giai đoạn 5 (component mobile đã kiểm tra ở giai đoạn 1)
 
 **Ghi chú kỹ thuật:**
@@ -319,11 +319,20 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 **Xong khi:** mọi route ở mục 4 hiển thị từ dữ liệu CMS, responsive 390 → 1536.
 
 ### Giai đoạn 4 · Tìm kiếm & yêu cầu đặt tour
-- [ ] `/api/search` + `SearchSuggest` (debounce, bàn phím, đóng có animation)
-- [ ] `BookingRequestForm` (chi tiết tour) + form tư vấn + nhận ưu đãi → `booking-requests` → email sales + email xác nhận khách
-- [ ] Chống spam; trang cảm ơn
+- [x] Tìm kiếm không dấu: gợi ý `/next/search` + `SearchBar` (debounce, bàn phím lên/xuống/Enter/Esc, đóng có chuyển động) trên banner trang chủ và trang `/tim-kiem` (form GET, chạy cả khi chưa có JavaScript). Chữ gợi ý trong ô sửa ở khối "Banner đầu trang"
+- [x] Form đặt tour ở `/lien-he?tour=…` (chọn ngày khởi hành còn nhận khách), form tư vấn ở `/lien-he`, khối "Đăng ký nhận ưu đãi" → Server Action → `booking-requests` (trạng thái "Mới", lưu trang gửi + UTM) → email báo sales qua Resend
+- [x] Chống spam: ô bẫy, chặn gửi quá nhanh, giới hạn 5 lần / 10 phút mỗi IP, bỏ yêu cầu trùng số điện thoại trong 2 phút
+- [x] Script `pnpm payload run src/scripts/reindex-tours.ts`: tính lại trường tự động (tìm kiếm, tháng khởi hành) cho tour đã có
+- [ ] Email xác nhận gửi khách: chờ xác minh tên miền trên Resend (hiện chỉ gửi được tới email của chính tài khoản Resend)
 
-**Xong khi:** gửi form trên preview → có bản ghi trạng thái "mới" trong admin + email về hộp thư sales.
+**Thay đổi so với plan ban đầu:**
+- Không có trang `/dat-tour/thanh-cong`: gửi xong hiện lời cảm ơn ngay tại form (không mất nội dung trang, không cần tải lại). Lời cảm ơn sửa trong "Cài đặt chung → Đặt tour" và trong khối "Đăng ký nhận ưu đãi".
+- Gợi ý tìm kiếm nằm ở `/next/search` thay vì `/api/search` vì `/api/*` thuộc Payload.
+- Tìm kiếm khớp theo đầu từ: mỗi tour có trường ẩn `searchText` dạng `|tour|hong|kong|`, tự tính khi lưu. "phu quoc" không khớp nhầm "phục vụ … Trung Quốc"; từ cuối khớp phần đầu để gợi ý ngay khi đang gõ.
+
+**Việc cần làm khi triển khai:** tạo `RESEND_API_KEY` ở resend.com → API Keys, thêm vào `.env.local` và Vercel (Settings → Environment Variables), rồi nhập "Email nhận thông báo" trong Cài đặt chung. Chưa có key thì yêu cầu vẫn lưu vào admin, chỉ không gửi email.
+
+**Xong khi:** gửi form trên preview → có bản ghi trạng thái "mới" trong admin + email về hộp thư sales. Đã kiểm tra trên DB QA: bản ghi đúng tour, ngày, số người, nguồn; gửi trùng không tạo bản ghi thứ hai. Phần email chờ có `RESEND_API_KEY`.
 
 ### Giai đoạn 5 · SEO, hiệu năng, đo lường
 - [ ] Metadata, Open Graph, canonical

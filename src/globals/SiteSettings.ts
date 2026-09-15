@@ -102,6 +102,16 @@ export const SiteSettings: GlobalConfig = {
               admin: { description: 'Mỗi yêu cầu mới sẽ gửi email tới các địa chỉ này.' },
               fields: [{ name: 'email', type: 'email', label: 'Email', required: true }],
             },
+            {
+              name: 'bookingSuccessMessage',
+              type: 'textarea',
+              label: 'Lời cảm ơn sau khi khách gửi yêu cầu',
+              localized: true,
+              admin: {
+                description:
+                  'Để trống sẽ dùng: "Cảm ơn bạn! Nhân viên Rosa Travel sẽ liên hệ trong giờ làm việc. Cần gấp, hãy gọi hotline."',
+              },
+            },
           ],
         },
         {

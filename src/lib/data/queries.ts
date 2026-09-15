@@ -3,6 +3,7 @@ import type { TypedLocale, Where } from 'payload'
 
 import { tags } from '@/lib/cache-tags'
 import { getPayloadClient } from '@/lib/payload'
+import { searchFragments } from '@/lib/search'
 import { SORT_OPTIONS, tourFilterWhere, type TourFilters } from '@/lib/tour-filters'
 import type { Post, Tour, TourCarouselBlock } from '@/payload-types'
 import type { TourSummary } from '@/types/content'
@@ -215,6 +216,45 @@ export function getDepartureCities(scope: TourScope, locale: string): Promise<st
       })
       const cities = new Set(docs.map((doc) => doc.departureFrom?.trim()).filter(Boolean))
       return [...cities].sort((a, b) => a.localeCompare(b, 'vi'))
+    },
+  )
+}
+
+/* ---------- Tìm kiếm ---------- */
+
+export const SEARCH_PER_PAGE = 12
+
+/** Tìm tour theo từ khóa đã chuẩn hóa (không dấu). Tour phải chứa đủ mọi từ. */
+export function searchTours(
+  query: string,
+  options: { page?: number; limit?: number },
+  locale: string,
+): Promise<ToursPage> {
+  const page = options.page ?? 1
+  const limit = options.limit ?? SEARCH_PER_PAGE
+  return cached(
+    { key: ['search', query, String(page), String(limit), locale], tags: [tags.tours], revalidate: 3600 },
+    async (draft) => {
+      const result = await (await getPayloadClient()).find({
+        collection: 'tours',
+        // Mỗi từ phải khớp từ đầu một từ trong tên/mô tả (xem searchFragments).
+        where: all([
+          ...searchFragments(query).map((fragment): Where => ({ searchText: { contains: fragment } })),
+          ...publishedOnly(draft),
+        ]),
+        sort: '-updatedAt',
+        page,
+        limit,
+        depth: 1,
+        locale: asLocale(locale),
+        draft,
+      })
+      return {
+        tours: toTourSummaries(result.docs, draft),
+        totalDocs: result.totalDocs,
+        totalPages: result.totalPages,
+        page: result.page ?? page,
+      }
     },
   )
 }

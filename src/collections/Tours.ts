@@ -3,6 +3,7 @@ import type { CollectionConfig, NumberFieldSingleValidation } from 'payload'
 import { contentEditors, publishedOrEditor } from '../access/roles'
 import { tourBlocks } from '../blocks/content'
 import { seoField } from '../fields/common'
+import { searchTextField } from '../fields/searchText'
 import { viSlugField } from '../fields/slug'
 import { revalidateCollection } from '../hooks/revalidate'
 import { tags } from '../lib/cache-tags'
@@ -276,6 +277,7 @@ export const Tours: CollectionConfig = {
         ],
       },
     },
+    searchTextField,
     viSlugField('title'),
   ],
 }

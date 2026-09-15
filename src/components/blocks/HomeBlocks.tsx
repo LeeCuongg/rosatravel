@@ -3,11 +3,14 @@ import Image from 'next/image'
 import { draftMode } from 'next/headers'
 
 import { HeroSlider, type HeroSlide } from '@/components/blocks/HeroSlider'
+import { SearchBar } from '@/components/search/SearchBar'
 import { ImageTile } from '@/components/cards/ImageTile'
+import { NewsletterForm } from '@/components/forms/NewsletterForm'
 import { PostCard } from '@/components/cards/PostCard'
 import { ReviewCard } from '@/components/cards/ReviewCard'
 import { TourCard } from '@/components/tour/TourCard'
 import { Carousel } from '@/components/ui/Carousel'
+import { containerClassName } from '@/components/ui/Container'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
@@ -18,6 +21,7 @@ import type {
   ClientsBlock,
   DestinationGridBlock,
   HeroBannersBlock,
+  NewsletterBlock,
   PostsBlock,
   PromoBannersBlock,
   ReviewsBlock,
@@ -31,16 +35,26 @@ function viewAll(link?: { label?: string | null; href?: string | null } | null) 
   return link?.href ? { href: link.href, label: link.label } : null
 }
 
-export async function HeroBanners({ locale }: { block: HeroBannersBlock; locale: string }) {
+export async function HeroBanners({ block, locale }: { block: HeroBannersBlock; locale: string }) {
   const banners = await getActiveBanners('hero', locale)
   const slides = banners.flatMap((banner): HeroSlide[] => {
     const desktop = toImage(banner.image, 'hero')
     if (!desktop) return []
     return [{ id: banner.id, href: banner.href, desktop, mobile: toImage(banner.mobileImage, 'card') ?? desktop }]
   })
-  if (!slides.length) return null
-  // showSearch: ô tìm kiếm hiện ở giai đoạn 4, khi đã có trang /tim-kiem.
-  return <HeroSlider slides={slides} />
+  const showSearch = block.showSearch ?? true
+  if (!slides.length && !showSearch) return null
+
+  return (
+    <div>
+      {slides.length ? <HeroSlider slides={slides} /> : null}
+      {showSearch ? (
+        <div className={cn(containerClassName, slides.length ? 'mt-5 lg:mt-6' : 'pt-8')}>
+          <SearchBar variant="hero" placeholder={block.searchPlaceholder} className="mx-auto max-w-3xl" />
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 const uspIcons = {
@@ -252,6 +266,18 @@ export async function Clients({ block, locale }: { block: ClientsBlock; locale: 
           )
         })}
       </ul>
+    </div>
+  )
+}
+
+export function Newsletter({ block }: { block: NewsletterBlock }) {
+  return (
+    <div className="grid gap-6 rounded-md bg-canvas-soft p-6 md:p-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center">
+      <div className="space-y-2">
+        <h2 className="font-display text-display-sub-sm font-semibold text-balance text-ink md:text-display-md">{block.title}</h2>
+        {block.description ? <p className="text-body-md text-body">{block.description}</p> : null}
+      </div>
+      <NewsletterForm buttonLabel={block.buttonLabel} successMessage={block.successMessage} />
     </div>
   )
 }

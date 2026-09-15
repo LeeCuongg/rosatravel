@@ -20,6 +20,7 @@ import {
   Clients,
   DestinationGrid,
   HeroBanners,
+  Newsletter,
   Posts,
   PromoBanners,
   Reviews,
@@ -74,8 +75,7 @@ function renderBlock(block: AnyBlock, locale: string): ReactNode {
     case 'posts':
       return <Posts block={block} locale={locale} />
     case 'newsletter':
-      // Form đăng ký cần Server Action + chống spam — hiện ở giai đoạn 4.
-      return null
+      return <Newsletter block={block} />
     default:
       return null
   }

@@ -80,6 +80,62 @@
       "ngan-ngay": "Ít ngày trước"
     }
   },
+  "Search": {
+    "title": "Tìm tour",
+    "label": "Tìm tour theo tên, điểm đến",
+    "placeholder": "Bạn muốn đi đâu? Ví dụ: Hồng Kông, Phú Quốc",
+    "submit": "Tìm",
+    "suggestions": "Gợi ý tour",
+    "noSuggestions": "Chưa thấy tour phù hợp với từ khóa này.",
+    "viewAll": "Xem tất cả {count} tour",
+    "resultsTitle": "Kết quả tìm kiếm “{query}”",
+    "hint": "Nhập tên tour, điểm đến hoặc điểm khởi hành. Không cần gõ dấu.",
+    "noResults": "Không tìm thấy tour nào cho “{query}”. Thử từ khóa khác, hoặc để Rosa Travel tư vấn cho bạn."
+  },
+  "BookingForm": {
+    "bookingTitle": "Gửi yêu cầu đặt tour",
+    "bookingDescription": "Điền thông tin, nhân viên Rosa Travel sẽ gọi lại xác nhận chỗ và báo giá chính xác. Bạn chưa cần thanh toán.",
+    "consultationTitle": "Để lại thông tin, chúng tôi gọi lại tư vấn",
+    "consultationDescription": "Cho chúng tôi biết bạn muốn đi đâu, khi nào và đi mấy người.",
+    "fullName": "Họ và tên",
+    "phone": "Số điện thoại / Zalo",
+    "phonePlaceholder": "Ví dụ: 0912 345 678",
+    "email": "Email",
+    "optional": "(không bắt buộc)",
+    "departureDate": "Ngày khởi hành",
+    "otherDate": "Ngày khác / cần tư vấn",
+    "adults": "Người lớn",
+    "children": "Trẻ em (dưới 12 tuổi)",
+    "message": "Lời nhắn",
+    "messagePlaceholderBooking": "Yêu cầu thêm: phòng đơn, ăn chay, đón tiễn sân bay…",
+    "messagePlaceholderConsultation": "Ví dụ: Gia đình 4 người muốn đi Phú Quốc cuối tháng 10, ngân sách khoảng 20 triệu.",
+    "submit": "Gửi yêu cầu",
+    "submitting": "Đang gửi…",
+    "privacy": "Thông tin chỉ dùng để Rosa Travel liên hệ với bạn.",
+    "successTitle": "Đã nhận yêu cầu của bạn",
+    "successMessage": "Cảm ơn bạn! Nhân viên Rosa Travel sẽ liên hệ trong giờ làm việc. Cần gấp, hãy gọi hotline.",
+    "sendAnother": "Gửi yêu cầu khác",
+    "errors": {
+      "invalid": "Vui lòng kiểm tra lại các ô được đánh dấu.",
+      "rateLimited": "Bạn đã gửi nhiều yêu cầu liên tiếp. Vui lòng thử lại sau ít phút hoặc gọi hotline.",
+      "server": "Chưa gửi được yêu cầu. Vui lòng thử lại hoặc gọi hotline.",
+      "type": "Loại yêu cầu không hợp lệ, vui lòng tải lại trang.",
+      "tour": "Tour không hợp lệ, vui lòng tải lại trang.",
+      "fullName": "Nhập họ tên (ít nhất 2 ký tự).",
+      "phone": "Số điện thoại chưa đúng, ví dụ 0912 345 678.",
+      "email": "Email chưa đúng định dạng.",
+      "departureDate": "Ngày khởi hành không hợp lệ.",
+      "adults": "Số người lớn từ 1 đến 99.",
+      "children": "Số trẻ em từ 0 đến 99.",
+      "message": "Lời nhắn tối đa 2000 ký tự."
+    }
+  },
+  "Newsletter": {
+    "fullName": "Họ tên",
+    "phone": "Số điện thoại / Zalo",
+    "submit": "Đăng ký",
+    "success": "Đăng ký thành công! Rosa Travel sẽ gửi ưu đãi mới nhất cho bạn."
+  },
   "Pagination": {
     "label": "Phân trang",
     "previous": "Trang trước",

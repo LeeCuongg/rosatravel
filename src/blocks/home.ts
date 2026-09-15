@@ -20,6 +20,16 @@ export const HeroBannersBlock: Block = {
         description: 'Ảnh lấy từ mục Banner (vị trí "Đầu trang chủ") đang trong thời gian hiển thị.',
       },
     },
+    {
+      name: 'searchPlaceholder',
+      type: 'text',
+      label: 'Chữ gợi ý trong ô tìm kiếm',
+      localized: true,
+      admin: {
+        condition: (_, siblingData) => Boolean(siblingData?.showSearch),
+        description: 'Để trống sẽ dùng: "Bạn muốn đi đâu? Ví dụ: Hồng Kông, Phú Quốc".',
+      },
+    },
   ],
 }
 
@@ -221,6 +231,13 @@ export const NewsletterBlock: Block = {
       label: 'Chữ trên nút',
       localized: true,
       admin: { placeholder: 'Đăng ký' },
+    },
+    {
+      name: 'successMessage',
+      type: 'textarea',
+      label: 'Lời cảm ơn sau khi đăng ký',
+      localized: true,
+      admin: { description: 'Để trống sẽ dùng: "Đăng ký thành công! Rosa Travel sẽ gửi ưu đãi mới nhất cho bạn."' },
     },
   ],
 }

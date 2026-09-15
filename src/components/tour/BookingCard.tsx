@@ -29,7 +29,8 @@ export async function BookingCard({ tour, bookingHref, contact }: BookingCardPro
   const [t, format] = await Promise.all([getTranslations('Tour'), getFormatter()])
   const departures = upcomingDepartures(tour.departures).slice(0, 5)
   const tel = hotlineHref(contact)
-  const href = `${bookingHref}${bookingHref.includes('?') ? '&' : '?'}tour=${encodeURIComponent(tour.slug)}`
+  const [bookingPath, hash] = bookingHref.split('#')
+  const href = `${bookingPath}${bookingPath.includes('?') ? '&' : '?'}tour=${encodeURIComponent(tour.slug)}#${hash || 'gui-yeu-cau'}`
 
   return (
     <aside className="space-y-5 rounded-md border border-mute/60 bg-canvas p-5 lg:sticky lg:top-24">

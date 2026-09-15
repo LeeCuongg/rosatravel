@@ -238,6 +238,7 @@ export interface Tour {
     image?: (string | null) | Media;
   };
   departureMonths?: string[] | null;
+  searchText?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -797,6 +798,10 @@ export interface NewsletterBlock {
   title: string;
   description?: string | null;
   buttonLabel?: string | null;
+  /**
+   * Để trống sẽ dùng: "Đăng ký thành công! Rosa Travel sẽ gửi ưu đãi mới nhất cho bạn."
+   */
+  successMessage?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'newsletter';
@@ -1054,6 +1059,7 @@ export interface ToursSelect<T extends boolean = true> {
         image?: T;
       };
   departureMonths?: T;
+  searchText?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -1356,6 +1362,7 @@ export interface NewsletterBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   buttonLabel?: T;
+  successMessage?: T;
   id?: T;
   blockName?: T;
 }
@@ -1567,6 +1574,10 @@ export interface HeroBannersBlock {
    * Ảnh lấy từ mục Banner (vị trí "Đầu trang chủ") đang trong thời gian hiển thị.
    */
   showSearch?: boolean | null;
+  /**
+   * Để trống sẽ dùng: "Bạn muốn đi đâu? Ví dụ: Hồng Kông, Phú Quốc".
+   */
+  searchPlaceholder?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'heroBanners';
@@ -1804,6 +1815,10 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Để trống sẽ dùng: "Cảm ơn bạn! Nhân viên Rosa Travel sẽ liên hệ trong giờ làm việc. Cần gấp, hãy gọi hotline."
+   */
+  bookingSuccessMessage?: string | null;
   companyName?: string | null;
   about?: string | null;
   /**
@@ -1857,6 +1872,7 @@ export interface HomeSelect<T extends boolean = true> {
  */
 export interface HeroBannersBlockSelect<T extends boolean = true> {
   showSearch?: T;
+  searchPlaceholder?: T;
   id?: T;
   blockName?: T;
 }
@@ -2040,6 +2056,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         id?: T;
       };
+  bookingSuccessMessage?: T;
   companyName?: T;
   about?: T;
   legalLines?:

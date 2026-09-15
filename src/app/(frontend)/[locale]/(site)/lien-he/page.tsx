@@ -1,15 +1,18 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import type { Metadata } from 'next'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { RenderBlocks } from '@/components/blocks/RenderBlocks'
+import { BookingForm, type DepartureOption } from '@/components/forms/BookingForm'
 import { PageHero } from '@/components/layout/PageHero'
 import { TourCard } from '@/components/tour/TourCard'
 import { BrandIcon } from '@/components/ui/BrandIcon'
 import { Container } from '@/components/ui/Container'
 import { buildChannelLinks, hotlineHref } from '@/lib/contact'
-import { toContactSettings, toTourSummary } from '@/lib/data/mappers'
+import { todayInVietnam } from '@/lib/booking/schema'
+import { toContactSettings, toTourSummary, upcomingDepartures } from '@/lib/data/mappers'
 import { getPageBySlug, getSiteSettings, getTourBySlug } from '@/lib/data/queries'
+import { formatVnd } from '@/lib/format'
 import { firstParam } from '@/lib/url'
 
 type Props = {
@@ -38,11 +41,13 @@ export default async function ContactPage({ params, searchParams }: Props) {
   setRequestLocale(locale)
 
   const tourSlug = firstParam(query.tour)
-  const [page, settings, t, tChannels, interestedTour] = await Promise.all([
+  const [page, settings, t, tForm, tChannels, format, interestedTour] = await Promise.all([
     getPageBySlug(CONTENT_SLUG, locale),
     getSiteSettings(locale),
     getTranslations('ContactPage'),
+    getTranslations('BookingForm'),
     getTranslations('Contact'),
+    getFormatter(),
     tourSlug && /^[a-z0-9-]{1,120}$/.test(tourSlug) ? getTourBySlug(tourSlug, locale) : Promise.resolve(null),
   ])
 
@@ -50,6 +55,18 @@ export default async function ContactPage({ params, searchParams }: Props) {
   const tel = hotlineHref(contact)
   const channels = buildChannelLinks(contact)
   const tourSummary = interestedTour ? toTourSummary(interestedTour) : null
+
+  // Chỉ cho chọn ngày còn nhận khách; "Ngày khác" luôn có sẵn trong form.
+  const today = todayInVietnam()
+  const departureOptions: DepartureOption[] = interestedTour
+    ? upcomingDepartures(interestedTour.departures)
+        .filter((departure) => departure.status === 'available' || departure.status === 'limited')
+        .map((departure) => ({
+          value: departure.date.slice(0, 10),
+          label: `${format.dateTime(new Date(departure.date), { day: '2-digit', month: '2-digit', year: 'numeric' })} – ${formatVnd(departure.price || interestedTour.price)}`,
+        }))
+        .filter((option) => option.value >= today)
+    : []
 
   return (
     <>
@@ -64,6 +81,23 @@ export default async function ContactPage({ params, searchParams }: Props) {
               </div>
             </section>
           ) : null}
+
+          <section id="gui-yeu-cau" className="scroll-mt-24 space-y-6 rounded-md border border-mute/60 p-5 sm:p-8">
+            <div className="space-y-2">
+              <h2 className="font-display text-display-sub-sm font-semibold text-balance text-ink">
+                {tourSummary ? tForm('bookingTitle') : tForm('consultationTitle')}
+              </h2>
+              <p className="text-body-md text-body">
+                {tourSummary ? tForm('bookingDescription') : tForm('consultationDescription')}
+              </p>
+            </div>
+            <BookingForm
+              type={tourSummary ? 'booking' : 'consultation'}
+              tourId={tourSummary ? interestedTour?.id : undefined}
+              departures={departureOptions}
+              successMessage={settings.bookingSuccessMessage}
+            />
+          </section>
           {page ? <RenderBlocks blocks={page.layout} locale={locale} variant="stack" /> : null}
         </div>
 

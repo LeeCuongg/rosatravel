@@ -24,6 +24,9 @@ next-env.d.ts
 # payload (upload local khi không dùng Blob)
 /media
 
+# tài liệu chương trình tour gốc (Word, nặng, nội dung kinh doanh) — không đưa lên git
+/docs/tours/
+
 # testing
 coverage/
 playwright-report/
