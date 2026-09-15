@@ -323,6 +323,8 @@ Mỗi giai đoạn kết thúc bằng một bản deploy preview chạy được
 - [x] Form đặt tour ở `/lien-he?tour=…` (chọn ngày khởi hành còn nhận khách), form tư vấn ở `/lien-he`, khối "Đăng ký nhận ưu đãi" → Server Action → `booking-requests` (trạng thái "Mới", lưu trang gửi + UTM) → email báo sales qua Resend
 - [x] Chống spam: ô bẫy, chặn gửi quá nhanh, giới hạn 5 lần / 10 phút mỗi IP, bỏ yêu cầu trùng số điện thoại trong 2 phút
 - [x] Script `pnpm payload run src/scripts/reindex-tours.ts`: tính lại trường tự động (tìm kiếm, tháng khởi hành) cho tour đã có
+- [x] Làm mới cache sau khi sửa dữ liệu bằng script (script chạy ngoài Next nên hook không làm mới được): `pnpm exec tsx src/scripts/revalidate-site.ts https://rosatravel.vercel.app` (bỏ URL = localhost). Route `POST /next/revalidate` xác thực bằng token tạo từ `PAYLOAD_SECRET`
+- [x] Nhập 4 tour từ file Word vào DB thật, xuất bản cùng điểm đến; dựng trang chủ, menu, chân trang, banner. Tour Nam Ninh chưa có ngày khởi hành (file gốc không ghi)
 - [ ] Email xác nhận gửi khách: chờ xác minh tên miền trên Resend (hiện chỉ gửi được tới email của chính tài khoản Resend)
 
 **Thay đổi so với plan ban đầu:**
