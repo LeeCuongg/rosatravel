@@ -108,6 +108,8 @@ try {
 }
 const payload = await getPayload({ config })
 // Script chạy ngoài Next nên không có cache trang nào để làm mới.
+// Mỗi lệnh phải nhận một bản sao `{ ...context }`: plugin Vercel Blob ghi trạng thái file vào
+// req.context, dùng chung một object thì từ ảnh thứ hai trở đi file không lên Blob.
 const context = { disableRevalidate: true }
 
 const PNG_TO_JPEG_OVER_BYTES = 500 * 1024
@@ -122,14 +124,14 @@ async function uploadImage(relativePath: string, alt: string): Promise<string> {
     const jpeg = await sharp(absolute).flatten({ background: '#ffffff' }).jpeg({ quality: 84, mozjpeg: true }).toBuffer()
     const media = await payload.create({
       collection: 'media',
-      context,
+      context: { ...context },
       data: { alt },
       file: { data: jpeg, mimetype: 'image/jpeg', name: `${baseName}.jpg`, size: jpeg.length },
     })
     return media.id
   }
 
-  const media = await payload.create({ collection: 'media', context, data: { alt }, filePath: absolute })
+  const media = await payload.create({ collection: 'media', context: { ...context }, data: { alt }, filePath: absolute })
   return media.id
 }
 
@@ -153,7 +155,7 @@ for (const destination of data.destinations) {
   const created = await payload.create({
     collection: 'destinations',
     draft: !publish,
-    context,
+    context: { ...context },
     data: {
       ...destination,
       _status: publish ? 'published' : 'draft',
@@ -176,7 +178,7 @@ for (const category of data.categories) {
     categoryIds.set(category.slug, docs[0].id)
     continue
   }
-  const created = await payload.create({ collection: 'tour-categories', context, data: { ...category, order: 10 } })
+  const created = await payload.create({ collection: 'tour-categories', context: { ...context }, data: { ...category, order: 10 } })
   categoryIds.set(category.slug, created.id)
   payload.logger.info(`+ danh mục: ${category.name}`)
 }
@@ -237,7 +239,7 @@ for (const tour of data.tours) {
   await payload.create({
     collection: 'tours',
     draft: !shouldPublish,
-    context,
+    context: { ...context },
     data: {
       _status: shouldPublish ? 'published' : 'draft',
       title: tour.title,
